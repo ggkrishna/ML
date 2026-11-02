@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 04: Model Training and Evaluation in Healthcare – ML Notes</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- KaTeX CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+    <!-- Google Fonts Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            navy: '#0B2D48',
+                            teal: '#205A70',
+                            softTeal: '#56A0A9',
+                            amber: '#F9A03F',
+                            lightBg: '#F8FAFC',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .bg-grid-pattern {
+            background-image: radial-gradient(rgba(32, 90, 112, 0.08) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 380px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 400px;
+            }
+        }
+        .card-hover {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .card-hover:hover {
+            box-shadow: 0 14px 28px -6px rgba(11, 45, 72, 0.08);
+        }
+        .code-snippet {
+            background-color: #0F172A;
+            color: #F8FAFC;
+            border-left: 4px solid #F9A03F;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            border-radius: 0 0.75rem 0.75rem 0;
+            line-height: 1.6;
+        }
+        .code-keyword { color: #F9A03F; font-weight: 600; }
+        .code-comment { color: #64748B; font-style: italic; }
+        .code-string { color: #38BDF8; }
+        .code-function { color: #A78BFA; }
+        input[type=range] { accent-color: #205A70; }
+        .katex-display { margin: 0.5em 0 !important; }
+    </style>
+</head>
+<body class="bg-[#F8F9FA] text-[#0B2D48] min-h-screen flex flex-col antialiased selection:bg-[#56A0A9]/20 selection:text-[#0B2D48]">
+
+    <!-- Main Navigation Bar -->
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#0B2D48] to-[#205A70] flex items-center justify-center text-white shadow-md shadow-[#205A70]/20 group-hover:scale-105 transition-transform">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-lg font-bold tracking-tight text-[#0B2D48]">ML Notes</span>
+                    <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-xs font-semibold bg-[#205A70]/10 text-[#205A70] rounded-full border border-[#205A70]/20">Healthcare Edition</span>
+                </div>
+            </a>
+            
+            <div class="flex items-center gap-2 sm:gap-3">
+                <a href="index.html" class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-[#205A70] transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    <span>All Modules</span>
+                </a>
+                <a href="exercises.html" class="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-lg transition-colors">
+                    <span>Exercises</span>
+                </a>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#205A70]/10 text-[#205A70] border border-[#205A70]/20">
+                    Module 04
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- In-Page Sub-Navigation Bar -->
+    <nav class="sticky top-16 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs py-2.5 px-4 sm:px-6">
+        <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center space-x-1 sm:space-x-2 overflow-x-auto whitespace-nowrap py-1 text-xs sm:text-sm font-medium text-slate-600">
+                <a href="#section1" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">1. Train/Test Split</a>
+                <a href="#section2" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">2. Training</a>
+                <a href="#section3" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">3. Prediction</a>
+                <a href="#section4" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">4. Regression Metrics</a>
+                <a href="#section5" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">5. Classification Metrics</a>
+                <a href="#section6" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">6. Cross-Validation</a>
+            </div>
+            <div class="hidden sm:flex items-center gap-2 shrink-0 text-xs">
+                <a href="python.html" class="inline-flex items-center gap-1 font-semibold text-slate-500 hover:text-slate-800 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition-colors">
+                    ← Prev: Python
+                </a>
+                <a href="math.html" class="inline-flex items-center gap-1 font-semibold text-[#205A70] bg-[#205A70]/10 hover:bg-[#205A70]/20 px-3 py-1.5 rounded-lg transition-colors">
+                    Next: Math →
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero / Header Section -->
+    <section class="relative bg-gradient-to-b from-white via-[#F8FAFC] to-[#F1F5F9] border-b border-slate-200/60 bg-grid-pattern py-12 sm:py-16">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl">
+                <!-- Breadcrumb badge -->
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-[#205A70]/10 text-[#205A70] border border-[#205A70]/20 mb-4">
+                    <a href="index.html" class="hover:underline">Home</a>
+                    <span class="text-slate-400">/</span>
+                    <span class="font-semibold">Module 04</span>
+                </div>
+
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#0B2D48] mb-4">
+                    Model Training &amp; <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#205A70] via-[#357a94] to-[#56A0A9]">Clinical Evaluation</span>
+                </h1>
+
+                <p class="text-base sm:text-lg text-slate-600 leading-relaxed font-normal mb-6">
+                    A clinical-first guide on validating diagnostic models in healthcare. Master why hospital accuracy is deceptive, how to balance Sensitivity vs. Specificity, and how to prevent patient-record data leakage across cross-validation folds.
+                </p>
+
+                <!-- Value Badges -->
+                <div class="flex flex-wrap items-center gap-2.5 text-xs">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200/80 shadow-xs font-medium text-slate-700">
+                        <span class="w-2 h-2 rounded-full bg-teal-500"></span>
+                        Sensitivity, Specificity &amp; PPV
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200/80 shadow-xs font-medium text-slate-700">
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                        Interactive Confusion Matrix Simulator
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200/80 shadow-xs font-medium text-slate-700">
+                        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                        The Clinical Accuracy Trap
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200/80 shadow-xs font-medium text-slate-700">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        Patient-Level GroupKFold
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Container -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-16">
+
+        <!-- ========================================================= -->
+        <!-- SECTION 1: TRAIN / TEST SPLIT & CLINICAL PARTITIONING     -->
+        <!-- ========================================================= -->
+        <section id="section1" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-violet-50 text-violet-700 border border-violet-200">Section 01</span>
+                <span class="text-xs font-medium text-slate-400">• Data Partitioning</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">1. The Core Concept: Train / Test Split</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                The golden rule of medical artificial intelligence: <strong class="text-rose-700">never test a clinical model on the patients it learned from</strong>. If you do, the algorithm simply memorizes hospital chart numbers (overfitting). It appears 99% accurate on historical charts, but fails dangerously on incoming emergency patients.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div class="card-hover bg-white rounded-2xl border-l-4 border-l-[#56A0A9] border border-slate-200/90 shadow-sm p-6">
+                    <h4 class="text-base font-bold text-[#0B2D48] mb-2 flex items-center gap-2">
+                        <span>📚</span>
+                        <span>Training Cohort (80% of Past Encounters)</span>
+                    </h4>
+                    <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                        The study cohort. The algorithm reviews patient vitals (<code class="text-xs font-mono">X_train</code>) alongside confirmed gold-standard pathology or discharge outcomes (<code class="text-xs font-mono">y_train</code>) to calibrate its internal decision weights.
+                    </p>
+                </div>
+
+                <div class="card-hover bg-white rounded-2xl border-l-4 border-l-[#F9A03F] border border-slate-200/90 shadow-sm p-6">
+                    <h4 class="text-base font-bold text-[#0B2D48] mb-2 flex items-center gap-2">
+                        <span>🧪</span>
+                        <span>Holdout Test Cohort (20% Vault Partition)</span>
+                    </h4>
+                    <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                        The clinical board exam. Locked in an air-gapped vault during development. The model never glimpses this cohort until final evaluation, ensuring completely objective performance validation.
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                <h3 class="text-xl font-bold text-[#0B2D48] mb-2">Stratified Hospital Splitting in Python</h3>
+                <p class="text-slate-600 text-xs sm:text-sm mb-3">
+                    Using <code class="text-xs font-mono bg-slate-100 text-[#205A70] px-1.5 py-0.5 rounded">stratify=y</code> guarantees that rare clinical conditions (e.g., 3% in-hospital cardiac arrest prevalence) are balanced identically across both train and test splits, preventing sampling distortion.
+                </p>
+                <div class="code-snippet"><pre><code><span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> train_test_split
+
+<span class="code-comment"># stratify=y preserves exact disease prevalence ratio</span>
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.20,
+    random_state=42,
+    stratify=y
+)</code></pre></div>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 2 & 3: TRAINING AND INFERENCE                     -->
+        <!-- ========================================================= -->
+        <section id="section2" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">Section 02</span>
+                <span class="text-xs font-medium text-slate-400">• Training</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">2. Model Training: The <code>.fit()</code> Method</h2>
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                Calling <code class="text-xs font-mono bg-slate-100 text-[#205A70] px-1.5 py-0.5 rounded">.fit(X_train, y_train)</code> executes parameter optimization—minimizing loss via gradient descent, coordinate descent, or recursive decision tree splits.
+            </p>
+        </section>
+
+        <section id="section3" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">Section 03</span>
+                <span class="text-xs font-medium text-slate-400">• Inference</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">3. Clinical Inference: <code>.predict()</code> vs. <code>.predict_proba()</code></h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                In healthcare decision support, a discrete "0" or "1" label is rarely sufficient. A doctor needs a <strong>calibrated probability score</strong> (e.g. 78% Sepsis Risk) to determine bed placement and medication urgency.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+                <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-950">
+                    <span class="font-bold block text-sm mb-1">P(Disease) ≥ 0.70</span>
+                    <span class="text-xs">🚨 High Risk: Immediate ICU Bedside Escalation &amp; Blood Cultures</span>
+                </div>
+                <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-950">
+                    <span class="font-bold block text-sm mb-1">0.30 ≤ P(Disease) &lt; 0.70</span>
+                    <span class="text-xs">⚠️ Moderate Risk: Order Secondary Lab Panel &amp; Continuous Telemetry</span>
+                </div>
+                <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950">
+                    <span class="font-bold block text-sm mb-1">P(Disease) &lt; 0.30</span>
+                    <span class="text-xs">✅ Low Risk: Standard Ward Routine Monitoring Pathway</span>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 4: REGRESSION METRICS                             -->
+        <!-- ========================================================= -->
+        <section id="section4" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">Section 04</span>
+                <span class="text-xs font-medium text-slate-400">• Continuous Targets</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">4. Regression Metrics (Continuous Targets)</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                When models predict continuous medical measurements (post-operative length of stay in days, arterial blood pressure in mmHg, insulin units), we evaluate prediction errors using MAE, RMSE, and $R^2$.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-xl font-bold text-[#0B2D48]">Predicted vs. Actual Scatter</h3>
+                        <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-blue-50 text-blue-700">y = x Diagonal</span>
+                    </div>
+                    <p class="text-slate-500 text-xs sm:text-sm mb-4">Points tightly clustered along the 45° dashed diagonal indicate superior clinical calibration.</p>
+                    <div class="chart-container">
+                        <canvas id="regressionChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold text-[#0B2D48] mb-3">Which Metric Should Clinicians Report?</h3>
+                        <ul class="space-y-3 text-xs sm:text-sm text-slate-600">
+                            <li>
+                                <strong class="text-[#0B2D48] block mb-0.5">Mean Absolute Error (MAE):</strong>
+                                Average error in original clinical units (e.g. ±3.4 mmHg blood pressure). Highly intuitive for doctors and robust against outliers.
+                            </li>
+                            <li>
+                                <strong class="text-[#0B2D48] block mb-0.5">Root Mean Squared Error (RMSE):</strong>
+                                Penalizes massive clinical errors heavily due to squaring. Critical when missing by 20 days is 100x worse than missing by 2 days.
+                            </li>
+                            <li>
+                                <strong class="text-[#0B2D48] block mb-0.5">R-Squared ($R^2$ Variance Explained):</strong>
+                                Percentage of total patient physiological variability explained by the model (e.g. $R^2 = 0.85$ means 85% of variance captured).
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 5: CLASSIFICATION METRICS (CONFUSION MATRIX)      -->
+        <!-- ========================================================= -->
+        <section id="section5" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">Section 05</span>
+                <span class="text-xs font-medium text-slate-400">• Diagnostic Metrics</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">5. Classification Metrics (Sensitivity, Specificity &amp; The Accuracy Trap)</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                In retail data science, accuracy is king. In healthcare, <strong>raw accuracy is a dangerous trap</strong>. A screening algorithm with 98% accuracy can be utterly worthless if it achieves that accuracy by marking 100% of patients as "Healthy"—resulting in a 100% death rate for the 2% of patients with acute myocardial infarction.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Confusion Matrix Breakdown -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                    <h3 class="text-xl font-bold text-[#0B2D48] mb-4">The Clinical Confusion Matrix Anatomy</h3>
+                    <div class="grid grid-cols-2 gap-3 text-center text-xs">
+                        <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200">
+                            <span class="font-extrabold text-emerald-800 block text-sm">True Positive (TP)</span>
+                            <span class="text-slate-600 mt-1 block">Sick patient correctly flagged. Life-saving early treatment initiated!</span>
+                        </div>
+                        <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200">
+                            <span class="font-extrabold text-amber-800 block text-sm">False Positive (FP)</span>
+                            <span class="text-slate-600 mt-1 block">Healthy patient alarmed. Causes unnecessary biopsy / alarm fatigue.</span>
+                        </div>
+                        <div class="p-3.5 rounded-xl bg-rose-50 border border-rose-200">
+                            <span class="font-extrabold text-rose-800 block text-sm">False Negative (FN)</span>
+                            <span class="text-slate-600 mt-1 block">Sick patient sent home. Catastrophic delayed diagnosis or death!</span>
+                        </div>
+                        <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200">
+                            <span class="font-extrabold text-emerald-800 block text-sm">True Negative (TN)</span>
+                            <span class="text-slate-600 mt-1 block">Healthy patient cleared. Avoids hospital bed congestion.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Classification Chart -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                    <h3 class="text-xl font-bold text-[#0B2D48] mb-2">Precision, Recall &amp; F1-Score</h3>
+                    <p class="text-slate-500 text-xs sm:text-sm mb-4">Balancing sensitivity (catching every sick patient) vs. precision (minimizing alarm fatigue).</p>
+                    <div class="chart-container" style="height: 280px;">
+                        <canvas id="classificationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================================= -->
+            <!-- INTERACTIVE DEMO 1: CONFUSION MATRIX & THRESHOLD EXPLORER -->
+            <!-- ========================================================= -->
+            <div class="bg-gradient-to-br from-slate-900 via-[#0B2D48] to-[#205A70] rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-12">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#F9A03F] text-slate-900 mb-1">
+                            Interactive Bedside Demonstration 01
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                            Clinical Confusion Matrix &amp; Diagnostic Threshold Explorer
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            Cohort of 1,000 Emergency Patients (100 True Cardiac Events, 900 Non-Cardiac). Move the decision cutoff slider to observe how sensitivity and specificity trade off in real time.
+                        </p>
+                    </div>
+                    <!-- Threshold Presets -->
+                    <div class="flex items-center gap-2">
+                        <button id="btn-cut-screen" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white/20 hover:bg-white/30 text-white transition-colors">
+                            🔍 Screening (0.20)
+                        </button>
+                        <button id="btn-cut-balanced" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-sm transition-colors">
+                            ⚖️ Balanced (0.50)
+                        </button>
+                        <button id="btn-cut-strict" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white/20 hover:bg-white/30 text-white transition-colors">
+                            🛡️ High Specificity (0.80)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    <!-- Slider & 2x2 Matrix -->
+                    <div class="lg:col-span-6 space-y-4">
+                        <div class="bg-white/10 p-4 rounded-xl border border-white/15">
+                            <div class="flex justify-between items-center text-xs font-medium mb-1">
+                                <span class="text-slate-200">Clinical Alert Threshold (Cutoff):</span>
+                                <span id="cut-slider-val" class="font-bold text-slate-900 bg-[#F9A03F] px-2 py-0.5 rounded">0.50 (50%)</span>
+                            </div>
+                            <input id="cut-slider" type="range" min="0.10" max="0.90" step="0.05" value="0.50" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                                <span>0.10 (Catch All Sick)</span>
+                                <span>0.50 (Standard)</span>
+                                <span>0.90 (Zero False Alarms)</span>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic 2x2 Table -->
+                        <div class="bg-white rounded-xl p-4 text-slate-800 shadow-md">
+                            <span class="text-xs font-bold uppercase tracking-wider text-[#205A70] block mb-2">Live 2x2 Contingency Matrix</span>
+                            <div class="grid grid-cols-2 gap-2 text-center text-xs">
+                                <div class="p-3 rounded-lg bg-emerald-50 border border-emerald-300">
+                                    <span class="text-slate-500 block text-[10px] font-bold">TRUE POSITIVES (TP)</span>
+                                    <span id="cm-tp" class="text-2xl font-extrabold text-emerald-700">85</span>
+                                    <span class="text-[10px] text-emerald-800 block">Saved Patients</span>
+                                </div>
+                                <div class="p-3 rounded-lg bg-amber-50 border border-amber-300">
+                                    <span class="text-slate-500 block text-[10px] font-bold">FALSE POSITIVES (FP)</span>
+                                    <span id="cm-fp" class="text-2xl font-extrabold text-amber-700">60</span>
+                                    <span class="text-[10px] text-amber-800 block">False Alarms</span>
+                                </div>
+                                <div class="p-3 rounded-lg bg-rose-50 border border-rose-300">
+                                    <span class="text-slate-500 block text-[10px] font-bold">FALSE NEGATIVES (FN)</span>
+                                    <span id="cm-fn" class="text-2xl font-extrabold text-rose-700">15</span>
+                                    <span class="text-[10px] text-rose-800 block">Missed Cardiac Events</span>
+                                </div>
+                                <div class="p-3 rounded-lg bg-slate-50 border border-slate-300">
+                                    <span class="text-slate-500 block text-[10px] font-bold">TRUE NEGATIVES (TN)</span>
+                                    <span id="cm-tn" class="text-2xl font-extrabold text-slate-700">840</span>
+                                    <span class="text-[10px] text-slate-600 block">Cleared Outpatients</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calculated Diagnostic Metrics -->
+                    <div class="lg:col-span-6 bg-white rounded-xl p-5 text-slate-800 shadow-md space-y-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-[#205A70] block border-b border-slate-100 pb-2">
+                            Calculated Diagnostic Indicators
+                        </span>
+
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between items-center p-2 rounded bg-slate-50">
+                                <div>
+                                    <strong class="text-[#0B2D48]">Sensitivity (Recall):</strong>
+                                    <span class="text-slate-500 text-[10px] block">TP / (TP + FN) • Fraction of true cardiac events caught</span>
+                                </div>
+                                <span id="metric-sens" class="text-base font-extrabold text-emerald-700">85.0%</span>
+                            </div>
+
+                            <div class="flex justify-between items-center p-2 rounded bg-slate-50">
+                                <div>
+                                    <strong class="text-[#0B2D48]">Specificity (True Negative Rate):</strong>
+                                    <span class="text-slate-500 text-[10px] block">TN / (TN + FP) • Fraction of healthy correctly cleared</span>
+                                </div>
+                                <span id="metric-spec" class="text-base font-extrabold text-blue-700">93.3%</span>
+                            </div>
+
+                            <div class="flex justify-between items-center p-2 rounded bg-slate-50">
+                                <div>
+                                    <strong class="text-[#0B2D48]">Positive Predictive Value (PPV):</strong>
+                                    <span class="text-slate-500 text-[10px] block">TP / (TP + FP) • If alarm rings, chance patient is sick</span>
+                                </div>
+                                <span id="metric-ppv" class="text-base font-extrabold text-amber-700">58.6%</span>
+                            </div>
+
+                            <div class="flex justify-between items-center p-2 rounded bg-slate-50">
+                                <div>
+                                    <strong class="text-[#0B2D48]">Raw Accuracy:</strong>
+                                    <span class="text-slate-500 text-[10px] block">(TP + TN) / Total Patients</span>
+                                </div>
+                                <span id="metric-acc" class="text-base font-extrabold text-slate-700">92.5%</span>
+                            </div>
+                        </div>
+
+                        <div id="metric-clinical-advice" class="mt-3 p-3 rounded-lg bg-teal-50 border border-teal-200 text-[11px] text-teal-900 leading-relaxed">
+                            <strong>Clinical Assessment:</strong> At threshold 0.50, the model catches 85% of heart attacks while maintaining 93% specificity.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 6: CROSS-VALIDATION & DATA LEAKAGE PREVENTION     -->
+        <!-- ========================================================= -->
+        <section id="section6" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-teal-50 text-teal-700 border border-teal-200">Section 06</span>
+                <span class="text-xs font-medium text-slate-400">• Robust Generalization</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">6. Cross-Validation &amp; Patient-Level Leakage Prevention</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                A single random train/test split can be lucky or unlucky. <strong>K-Fold Cross-Validation</strong> cycles through 5 or 10 distinct partitions to establish true statistical confidence intervals. However, healthcare informatics requires a crucial architectural safeguard: <strong>GroupKFold</strong>.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Data Leakage Warning Box -->
+                <div class="bg-rose-50 border-2 border-rose-300 rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-2xl">🚨</span>
+                            <h3 class="text-lg font-bold text-rose-950">The Number One Medical AI Blunder: Patient Contamination</h3>
+                        </div>
+                        <p class="text-xs sm:text-sm text-rose-900 leading-relaxed mb-3">
+                            Suppose Patient #42 stays in the ICU for 3 days and has 12 Chest X-rays taken. If you use standard random K-Fold, 10 scans of Patient #42 end up in the training set and 2 scans end up in the test set.
+                        </p>
+                        <p class="text-xs sm:text-sm text-rose-900 leading-relaxed">
+                            The neural network achieves <strong>99.4% accuracy</strong>—not because it diagnosed pneumonia, but because it recognized Patient #42's pacemaker, spinal curvature, and unique rib cage! When deployed on new patients in another ward, accuracy crashes completely!
+                        </p>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-white rounded-xl border border-rose-200 text-xs text-rose-800 font-bold">
+                        Rule: All records of the same patient MUST remain strictly on one side of the split using GroupKFold!
+                    </div>
+                </div>
+
+                <!-- CV Chart -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                    <h3 class="text-xl font-bold text-[#0B2D48] mb-2">Cross-Validation Stability per Fold</h3>
+                    <p class="text-slate-500 text-xs sm:text-sm mb-4">Low variance across folds demonstrates algorithm stability across different clinical sub-cohorts.</p>
+                    <div class="chart-container">
+                        <canvas id="cvChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                <h3 class="text-xl font-bold text-[#0B2D48] mb-2">Patient-Grouped Cross-Validation Implementation</h3>
+                <div class="code-snippet"><pre><code><span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> GroupKFold, cross_val_score
+<span class="code-keyword">from</span> sklearn.ensemble <span class="code-keyword">import</span> RandomForestClassifier
+
+<span class="code-comment"># patient_id array ensures all scans of a patient stay in ONE fold</span>
+gkf = GroupKFold(n_splits=5)
+model = RandomForestClassifier(random_state=42)
+
+scores = cross_val_score(model, X, y, groups=patient_ids, cv=gkf, scoring=<span class="code-string">'roc_auc'</span>)
+<span class="code-function">print</span>(f<span class="code-string">"Leak-Free Mean ROC-AUC: {scores.mean():.3f} ± {scores.std():.3f}"</span>)</code></pre></div>
+            </div>
+        </section>
+
+        <!-- Course Module Navigation Bottom Card -->
+        <div class="bg-gradient-to-r from-[#0B2D48] to-[#205A70] rounded-2xl p-6 sm:p-8 text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div class="text-center sm:text-left">
+                <div class="text-xs font-semibold text-[#56A0A9] uppercase tracking-wider mb-1">Learning Journey</div>
+                <h4 class="text-xl font-bold">Finished Module 04: Model Training &amp; Evaluation</h4>
+                <p class="text-sm text-slate-300 mt-1">Ready to explore vector geometry, gradient landscapes, and Bayes theorem?</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="python.html" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition-colors border border-white/20">
+                    ← Prev: Module 03
+                </a>
+                <a href="math.html" class="px-5 py-2.5 rounded-xl bg-[#F9A03F] hover:bg-[#f89528] text-slate-900 text-sm font-bold shadow-md transition-colors flex items-center gap-2">
+                    <span>Module 05: Math</span>
+                    <span>→</span>
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200/80 py-10 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="flex items-center justify-center gap-2 mb-3">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#56A0A9]"></span>
+                <span class="font-bold text-[#0B2D48] tracking-tight">ML Notes for Healthcare</span>
+            </div>
+            <p class="text-slate-500 text-sm max-w-lg mx-auto mb-2">
+                Department of Bio-Medical Sciences, The Apollo University, Chittoor.
+            </p>
+            <div class="text-xs text-slate-400">
+                Designed for healthcare professionals, students, and machine learning researchers.
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Chart.js & Interactive Evaluation Simulators Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // KaTeX Auto-Render Initializer
+            if (typeof renderMathInElement === 'function') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
+            }
+
+            const colorPrimary = '#205A70';
+            const colorSecondary = '#56A0A9';
+            const colorAccent = '#F9A03F';
+            const colorLight = '#C2C2C2';
+            const colorRiskHigh = '#F9A03F';
+            const colorRiskLow = '#205A70';
+
+            const defaultChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { font: { family: 'Inter', size: 12 }, color: '#0B2D48', boxWidth: 12, padding: 12 }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: '#64748B', font: { family: 'Inter' } } },
+                    y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748B', font: { family: 'Inter' } } }
+                }
+            };
+
+            // 1. Regression Scatter Chart
+            if (document.getElementById('regressionChart')) {
+                const ctxReg = document.getElementById('regressionChart').getContext('2d');
+                new Chart(ctxReg, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'Patients (Actual vs Predicted)',
+                                data: [{x: 120, y: 122}, {x: 130, y: 128}, {x: 140, y: 142}, {x: 150, y: 147}, {x: 160, y: 164}, {x: 135, y: 133}],
+                                backgroundColor: colorSecondary,
+                                pointRadius: 6
+                            },
+                            {
+                                label: 'Ideal Calibration Line (y = x)',
+                                data: [{x: 115, y: 115}, {x: 170, y: 170}],
+                                borderColor: colorRiskHigh,
+                                type: 'line',
+                                fill: false,
+                                borderWidth: 2,
+                                borderDash: [4, 4],
+                                pointRadius: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            x: { title: { display: true, text: 'Actual Systolic BP (mmHg)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { display: false } },
+                            y: { title: { display: true, text: 'Model Predicted Systolic BP (mmHg)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { color: '#f1f5f9' } }
+                        }
+                    }
+                });
+            }
+
+            // 2. Classification Metrics Chart
+            if (document.getElementById('classificationChart')) {
+                const ctxClf = document.getElementById('classificationChart').getContext('2d');
+                new Chart(ctxClf, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Sensitivity (Recall)', 'Specificity', 'Precision (PPV)', 'F1-Score'],
+                        datasets: [{
+                            label: 'Clinical Diagnostic Metrics',
+                            data: [85, 93, 58, 69],
+                            backgroundColor: [colorPrimary, colorSecondary, colorAccent, colorLight],
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: { beginAtZero: true, max: 100, title: { display: true, text: 'Score Percentage (%)' } }
+                        }
+                    }
+                });
+            }
+
+            // 3. Cross-Validation Chart
+            if (document.getElementById('cvChart')) {
+                const ctxCv = document.getElementById('cvChart').getContext('2d');
+                new Chart(ctxCv, {
+                    type: 'line',
+                    data: {
+                        labels: ['Fold 1', 'Fold 2', 'Fold 3', 'Fold 4', 'Fold 5'],
+                        datasets: [{
+                            label: 'GroupKFold ROC-AUC Score',
+                            data: [0.88, 0.91, 0.89, 0.87, 0.90],
+                            borderColor: colorPrimary,
+                            backgroundColor: 'rgba(32, 90, 112, 0.1)',
+                            fill: true,
+                            borderWidth: 3,
+                            pointRadius: 6,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: { min: 0.80, max: 1.0, title: { display: true, text: 'ROC-AUC Performance' } }
+                        }
+                    }
+                });
+            }
+
+            // =========================================================
+            // INTERACTIVE DEMO 1: CONFUSION MATRIX & THRESHOLD EXPLORER
+            // =========================================================
+            const cutSlider = document.getElementById('cut-slider');
+            const cutSliderVal = document.getElementById('cut-slider-val');
+
+            const cmTp = document.getElementById('cm-tp');
+            const cmFp = document.getElementById('cm-fp');
+            const cmFn = document.getElementById('cm-fn');
+            const cmTn = document.getElementById('cm-tn');
+
+            const metricSens = document.getElementById('metric-sens');
+            const metricSpec = document.getElementById('metric-spec');
+            const metricPpv = document.getElementById('metric-ppv');
+            const metricAcc = document.getElementById('metric-acc');
+            const metricClinicalAdvice = document.getElementById('metric-clinical-advice');
+
+            const btnCutScreen = document.getElementById('btn-cut-screen');
+            const btnCutBalanced = document.getElementById('btn-cut-balanced');
+            const btnCutStrict = document.getElementById('btn-cut-strict');
+
+            function updateConfusionMatrixDemo() {
+                if (!cutSlider || !cutSliderVal) return;
+
+                const cutoff = parseFloat(cutSlider.value);
+                cutSliderVal.textContent = `${cutoff.toFixed(2)} (${Math.round(cutoff * 100)}%)`;
+
+                // 1000 patients: 100 sick (positive), 900 healthy (negative)
+                // Mathematical response to cutoff:
+                // Lower cutoff -> higher sensitivity (more caught), higher FP
+                // Higher cutoff -> higher specificity, higher FN
+                let tp = Math.round(100 * (1 - Math.pow(cutoff, 1.6)));
+                tp = Math.max(Math.min(tp, 100), 10);
+                const fn = 100 - tp;
+
+                let fp = Math.round(900 * Math.pow(1 - cutoff, 2.2));
+                fp = Math.max(Math.min(fp, 900), 5);
+                const tn = 900 - fp;
+
+                cmTp.textContent = tp;
+                cmFp.textContent = fp;
+                cmFn.textContent = fn;
+                cmTn.textContent = tn;
+
+                const sens = (tp / (tp + fn)) * 100;
+                const spec = (tn / (tn + fp)) * 100;
+                const ppv = (tp / (tp + fp)) * 100;
+                const acc = ((tp + tn) / 1000) * 100;
+
+                metricSens.textContent = `${sens.toFixed(1)}%`;
+                metricSpec.textContent = `${spec.toFixed(1)}%`;
+                metricPpv.textContent = `${ppv.toFixed(1)}%`;
+                metricAcc.textContent = `${acc.toFixed(1)}%`;
+
+                if (cutoff <= 0.25) {
+                    metricClinicalAdvice.className = 'mt-3 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px] text-emerald-950 leading-relaxed';
+                    metricClinicalAdvice.innerHTML = `<strong>🔍 Screening Mode Active (High Sensitivity):</strong> Catching <strong>${sens.toFixed(0)}%</strong> of cardiac events with only <strong>${fn}</strong> missed cases. Best for Emergency Triage where missing a sick patient is fatal, even though nurses must tolerate ${fp} false alarms.`;
+                } else if (cutoff >= 0.70) {
+                    metricClinicalAdvice.className = 'mt-3 p-3 rounded-lg bg-rose-50 border border-rose-200 text-[11px] text-rose-950 leading-relaxed';
+                    metricClinicalAdvice.innerHTML = `<strong>⚠️ Dangerously High Cutoff (The Accuracy Trap!):</strong> Accuracy is high (<strong>${acc.toFixed(1)}%</strong>), but the hospital missed <strong>${fn} heart attacks (${fn} avoidable deaths!)</strong>. Never optimize raw accuracy in clinical screening!`;
+                } else {
+                    metricClinicalAdvice.className = 'mt-3 p-3 rounded-lg bg-teal-50 border border-teal-200 text-[11px] text-teal-950 leading-relaxed';
+                    metricClinicalAdvice.innerHTML = `<strong>⚖️ Balanced Hospital Mode:</strong> Balanced sensitivity (<strong>${sens.toFixed(0)}%</strong>) and specificity (<strong>${spec.toFixed(0)}%</strong>). Standard benchmark cutoff for general inpatient floors.`;
+                }
+            }
+
+            if (cutSlider) cutSlider.addEventListener('input', updateConfusionMatrixDemo);
+
+            if (btnCutScreen) {
+                btnCutScreen.addEventListener('click', () => { cutSlider.value = 0.20; updateConfusionMatrixDemo(); });
+            }
+            if (btnCutBalanced) {
+                btnCutBalanced.addEventListener('click', () => { cutSlider.value = 0.50; updateConfusionMatrixDemo(); });
+            }
+            if (btnCutStrict) {
+                btnCutStrict.addEventListener('click', () => { cutSlider.value = 0.80; updateConfusionMatrixDemo(); });
+            }
+
+            updateConfusionMatrixDemo();
+
+        });
+    </script>
+</body>
+</html>

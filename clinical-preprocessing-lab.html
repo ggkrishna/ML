@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Data Preprocessing Lab: Real-World EHR Problems &amp; Interactive Visualizations</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- KaTeX for Mathematics -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            navy: '#0B2D48',
+                            teal: '#205A70',
+                            softTeal: '#56A0A9',
+                            amber: '#F9A03F',
+                            bg: '#F8F9FA',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .bg-grid-pattern {
+            background-image: radial-gradient(rgba(32, 90, 112, 0.08) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 330px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 360px;
+                max-height: 420px;
+            }
+        }
+        .card-hover {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .card-hover:hover {
+            box-shadow: 0 12px 24px -6px rgba(11, 45, 72, 0.08);
+        }
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-[#F8F9FA] text-[#0B2D48] min-h-screen flex flex-col antialiased selection:bg-[#56A0A9]/20 selection:text-[#0B2D48]">
+
+    <!-- Main Navigation Bar -->
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#0B2D48] to-[#205A70] flex items-center justify-center text-white shadow-md shadow-[#205A70]/20 group-hover:scale-105 transition-transform">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-lg font-bold tracking-tight text-[#0B2D48]">ML Notes</span>
+                    <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-xs font-semibold bg-[#205A70]/10 text-[#205A70] rounded-full border border-[#205A70]/20">Healthcare Edition</span>
+                </div>
+            </a>
+            
+            <div class="flex items-center gap-2 sm:gap-3">
+                <a href="data-preprocessing.html" class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-[#205A70] transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    <span>Module 02 Theory</span>
+                </a>
+                <a href="exercises.html" class="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-lg transition-colors">
+                    <span>Exercises</span>
+                </a>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                    Preprocessing Lab
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- In-Page Sub-Navigation Bar -->
+    <nav class="sticky top-16 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs py-2.5 px-4 sm:px-6">
+        <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center space-x-1 sm:space-x-2 overflow-x-auto whitespace-nowrap py-1 text-xs sm:text-sm font-medium text-slate-600">
+                <a href="#lab-missingness" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">1. EHR Missingness (MNAR)</a>
+                <a href="#lab-scaling-sim" class="px-2.5 py-1 rounded-lg text-amber-700 font-semibold bg-amber-50 hover:bg-amber-100 transition-colors">2. Interactive Scaling Sim</a>
+                <a href="#lab-skewness" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">3. Skewed Labs &amp; Log Transform</a>
+                <a href="#lab-temporal" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">4. Temporal Vitals &amp; Shock Index</a>
+                <a href="#lab-high-dim" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">5. ICD-10 High-Cardinality</a>
+            </div>
+            <div class="hidden lg:flex items-center gap-2 shrink-0">
+                <a href="case-studies.html" class="inline-flex items-center gap-1 text-xs font-semibold text-[#205A70] bg-[#205A70]/10 hover:bg-[#205A70]/20 px-3 py-1.5 rounded-lg border border-[#205A70]/20 transition-colors">
+                    <span>Clinical Case Studies →</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative bg-gradient-to-b from-white via-[#F8FAFC] to-[#F1F5F9] border-b border-slate-200/60 bg-grid-pattern py-12 sm:py-16">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 mb-4">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                    </svg>
+                    <span>Hands-On Engineering • EHR Realities • Interactive Simulators</span>
+                </div>
+
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#0B2D48] mb-4">
+                    Clinical Data Preprocessing <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-[#F9A03F] to-[#205A70]">Advanced Lab</span>
+                </h1>
+
+                <p class="text-base sm:text-lg text-slate-600 leading-relaxed font-normal mb-6">
+                    In textbook machine learning, datasets are clean and stationary. In real healthcare, <strong>80% of modeling time</strong> is spent wrestling with irregular time-series, missing labs that convey diagnostic intent, skewed biomarkers, sensor disconnection artifacts, and high-cardinality billing codes.
+                </p>
+
+                <div class="flex flex-wrap items-center gap-3 text-xs sm:text-sm">
+                    <span class="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-xs">
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                        Live Interactive Scaling Simulator
+                    </span>
+                    <span class="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-xs">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        Log &amp; Power Law Distributions
+                    </span>
+                    <span class="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-xs">
+                        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                        Physiologic Dynamic Shock Index
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-16">
+
+        <!-- ========================================== -->
+        <!-- LAB 1: EHR MISSINGNESS IN CLINICAL PRACTICE -->
+        <!-- ========================================== -->
+        <section id="lab-missingness" class="pt-12 -mt-12">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">Problem 01</span>
+                    <span class="text-xs font-medium text-slate-400">• The Clinical Informatics Reality</span>
+                </div>
+                <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">Missing Not At Random (MNAR)</span>
+            </div>
+
+            <h2 class="text-2xl sm:text-3xl font-bold text-[#0B2D48] mb-4">
+                Informed Missingness: The Lab That Was Never Ordered
+            </h2>
+            <p class="text-slate-600 text-sm sm:text-base leading-relaxed mb-6">
+                In traditional data science, missing values are assumed to be random flaws to be patched. In medical informatics, <strong>the act of ordering a test is itself an informative diagnostic feature</strong>. Sicker patients receive frequent arterial punctures and electrolyte panels; healthy patients have vast swathes of empty fields.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- MCAR -->
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 card-hover">
+                    <span class="px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700">Type 1</span>
+                    <h3 class="text-base font-bold text-[#0B2D48] mt-2 mb-1">MCAR (Completely at Random)</h3>
+                    <p class="text-slate-500 text-xs mb-3">Rare in medicine.</p>
+                    <p class="text-slate-600 text-xs leading-relaxed">
+                        A blood tube accidentally drops and shatters on the floor, or a courier van gets a flat tire. The probability of missingness is entirely independent of the patient's condition.
+                    </p>
+                    <div class="mt-3 p-2 bg-slate-50 rounded text-xs text-slate-500 font-mono">
+                        Safe for: Complete Case Analysis
+                    </div>
+                </div>
+
+                <!-- MAR -->
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 card-hover">
+                    <span class="px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700">Type 2</span>
+                    <h3 class="text-base font-bold text-[#0B2D48] mt-2 mb-1">MAR (Missing at Random)</h3>
+                    <p class="text-slate-500 text-xs mb-3">Conditionally explainable.</p>
+                    <p class="text-slate-600 text-xs leading-relaxed">
+                        Elderly patients (&gt; 80 yrs) receive echocardiograms far more frequently than young adults. Once we condition on the recorded feature <code>Age</code>, the missingness is explained.
+                    </p>
+                    <div class="mt-3 p-2 bg-blue-50 rounded text-xs text-blue-700 font-mono">
+                        Safe for: MICE &amp; KNN Imputation
+                    </div>
+                </div>
+
+                <!-- MNAR -->
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 card-hover">
+                    <span class="px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-rose-50 text-rose-700">Type 3</span>
+                    <h3 class="text-base font-bold text-[#0B2D48] mt-2 mb-1">MNAR (Not at Random)</h3>
+                    <p class="text-slate-500 text-xs mb-3">The dominant EHR pattern.</p>
+                    <p class="text-slate-600 text-xs leading-relaxed">
+                        A patient in diabetic ketoacidosis (DKA) has blood glucose measured every 30 minutes. A post-op orthopedic knee patient has it checked once. The missing values depend directly on the unmeasured physiological severity!
+                    </p>
+                    <div class="mt-3 p-2 bg-rose-50 rounded text-xs text-rose-700 font-mono">
+                        Required: Missing Indicator Columns
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clinical Solution & Code Snippet -->
+            <div class="bg-slate-900 text-slate-100 rounded-2xl overflow-hidden border border-slate-700/80 shadow-xl">
+                <div class="bg-[#1E293B] px-4 py-3 flex items-center justify-between border-b border-slate-700/60 select-none">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
+                        <span class="w-3 h-3 rounded-full bg-amber-400 inline-block"></span>
+                        <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+                        <span class="ml-2 font-mono text-xs font-semibold text-slate-300">informed_missingness_handler.py</span>
+                    </div>
+                    <button onclick="copyCode('code-missing-handler', this)" class="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded-md border border-slate-700 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                        <span>Copy Code</span>
+                    </button>
+                </div>
+                <pre class="p-5 overflow-x-auto font-mono text-xs sm:text-sm text-slate-100 leading-relaxed bg-[#0F172A]"><code id="code-missing-handler"><span class="text-purple-400 font-semibold">import</span> <span class="text-slate-200">pandas</span> <span class="text-purple-400 font-semibold">as</span> <span class="text-slate-200">pd</span>
+<span class="text-purple-400 font-semibold">from</span> <span class="text-slate-200">sklearn.impute</span> <span class="text-purple-400 font-semibold">import</span> <span class="text-sky-300">MissingIndicator</span>, <span class="text-sky-300">SimpleImputer</span>
+<span class="text-purple-400 font-semibold">from</span> <span class="text-slate-200">sklearn.pipeline</span> <span class="text-purple-400 font-semibold">import</span> <span class="text-sky-300">FeatureUnion</span>
+
+<span class="text-slate-400 italic"># Clinical Solution: Retain the clinical intent by pairing imputed value with an indicator flag</span>
+<span class="text-slate-200">impute_and_flag</span> = <span class="text-sky-300">FeatureUnion</span>([
+    (<span class="text-amber-300">'imputed_values'</span>, <span class="text-sky-300">SimpleImputer</span>(strategy=<span class="text-amber-300">'median'</span>)),
+    (<span class="text-amber-300">'missing_indicator'</span>, <span class="text-sky-300">MissingIndicator</span>(features=<span class="text-amber-300">'missing-only'</span>))
+])
+
+<span class="text-slate-400 italic"># When evaluated, the tree model can learn:</span>
+<span class="text-slate-400 italic"># "IF troponin_missing == 1 -&gt; patient did not present with acute coronary syndrome"</span></code></pre>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- LAB 2: INTERACTIVE SCALING & OUTLIER SIMULATOR -->
+        <!-- ========================================== -->
+        <section id="lab-scaling-sim" class="pt-12 -mt-12">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">Interactive Lab 02</span>
+                    <span class="text-xs font-medium text-slate-400">• Outlier Resilience Simulator</span>
+                </div>
+                <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md">Live Interactive Canvas</span>
+            </div>
+
+            <h2 class="text-2xl sm:text-3xl font-bold text-[#0B2D48] mb-4">
+                Outliers in Healthcare: Why Standard Scaler Fails
+            </h2>
+            <p class="text-slate-600 text-sm sm:text-base leading-relaxed mb-6">
+                In acute medicine, extreme values (e.g., Acute Kidney Injury patient with Serum Creatinine = $16.0\text{ mg/dL}$ vs normal $0.8 - 1.2$) are not recording errors; they are true critical crises. 
+                Use the interactive controls below to see how different scalers behave on 40 cardiac patients with 3 severe acute renal failure outliers.
+            </p>
+
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-md p-6 sm:p-8">
+                <!-- Simulator Controls -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-200">
+                    <div>
+                        <div class="text-sm font-bold text-[#0B2D48]">Active Transformation:</div>
+                        <div class="text-xs text-slate-500" id="scaler-description">Currently viewing unscaled raw clinical patient vitals.</div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="updateScalingSim('raw')" id="btn-raw" class="px-3.5 py-1.5 rounded-xl font-semibold text-xs bg-[#205A70] text-white shadow-xs transition-all">
+                            1. Raw Clinical Values
+                        </button>
+                        <button onclick="updateScalingSim('standard')" id="btn-standard" class="px-3.5 py-1.5 rounded-xl font-semibold text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all">
+                            2. Standard Scaler (\(Z\)-Score)
+                        </button>
+                        <button onclick="updateScalingSim('robust')" id="btn-robust" class="px-3.5 py-1.5 rounded-xl font-semibold text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all">
+                            3. Robust Scaler (Median &amp; IQR)
+                        </button>
+                        <button onclick="updateScalingSim('minmax')" id="btn-minmax" class="px-3.5 py-1.5 rounded-xl font-semibold text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all">
+                            4. Min-Max Scaler \([0, 1]\)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Canvas -->
+                <div class="my-6">
+                    <div class="chart-container">
+                        <canvas id="interactiveScalingChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Dynamic Insight Callout -->
+                <div id="scaling-insight-box" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                    <strong class="text-[#0B2D48]">Clinical Observation:</strong> Notice how raw Systolic BP ($100 - 180\text{ mmHg}$) completely overwhelms Serum Creatinine ($0.6 - 16.0\text{ mg/dL}$) in magnitude. Distance-based algorithms (KNN, K-Means) would calculate patient distance almost purely on Blood Pressure!
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- LAB 3: SKEWED LABS & NON-LINEAR TRANSFORMS -->
+        <!-- ========================================== -->
+        <section id="lab-skewness" class="pt-12 -mt-12">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">Problem 03</span>
+                    <span class="text-xs font-medium text-slate-400">• Power-Law Clinical Chemistry</span>
+                </div>
+                <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">Log &amp; Box-Cox Transforms</span>
+            </div>
+
+            <h2 class="text-2xl sm:text-3xl font-bold text-[#0B2D48] mb-4">
+                Handling Extreme Positive Skew in Inflammatory Markers
+            </h2>
+            <p class="text-slate-600 text-sm sm:text-base leading-relaxed mb-6">
+                Laboratory biomarkers such as C-Reactive Protein (CRP), D-Dimer, and Serum Ferritin follow a severe log-normal distribution. 90% of patients have baseline values under $5\text{ mg/L}$, but severe sepsis or COVID-19 cytokine storms drive values into the hundreds ($300+\text{ mg/L}$).
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-8">
+                <!-- Dual Distribution Chart -->
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 card-hover">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-bold text-[#0B2D48]">Serum CRP Distribution Transformation</h3>
+                        <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">Raw vs. \(\log(x + 1)\)</span>
+                    </div>
+                    <p class="text-slate-500 text-xs mb-4">
+                        Comparing raw long-tailed clinical distribution against Gaussian normalized log transform.
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="skewnessTransformChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Mathematical Mechanics & Code -->
+                <div class="space-y-4">
+                    <div class="p-5 bg-white rounded-2xl border border-slate-200/90 shadow-sm text-sm text-slate-700 space-y-2">
+                        <h4 class="font-bold text-[#0B2D48] text-base">Why Linear Models Collapse on Raw Labs</h4>
+                        <p class="text-xs leading-relaxed text-slate-600">
+                            When fitting Linear or Logistic Regression, high-leverage extreme outliers dominate the loss gradient \(\nabla L\). The model overfits to the few extreme cases while losing predictive fidelity across the 95% baseline population.
+                        </p>
+                        <div class="p-3 bg-slate-50 rounded-xl font-mono text-xs text-[#205A70]">
+                            \(y_{\text{transformed}} = \ln(x + 1) \quad \text{or} \quad y^{(\lambda)} = \frac{x^\lambda - 1}{\lambda}\)
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl overflow-hidden border border-slate-700/80 bg-[#0F172A] shadow-md">
+                        <div class="bg-[#1E293B] px-3.5 py-2 flex items-center justify-between border-b border-slate-700/60 select-none">
+                            <span class="font-mono text-xs font-semibold text-blue-400">power_transform_pipeline.py</span>
+                            <span class="text-[10px] font-mono uppercase text-slate-400 bg-slate-800 px-2 py-0.5 rounded">Python</span>
+                        </div>
+                        <pre class="p-4 overflow-x-auto font-mono text-xs text-slate-100 leading-relaxed bg-[#0F172A]"><code><span class="text-purple-400 font-semibold">from</span> <span class="text-slate-200">sklearn.preprocessing</span> <span class="text-purple-400 font-semibold">import</span> <span class="text-sky-300">PowerTransformer</span>
+
+<span class="text-slate-400 italic"># Yeo-Johnson supports zero and negative clinical values:</span>
+<span class="text-slate-200">pt</span> = <span class="text-sky-300">PowerTransformer</span>(method=<span class="text-amber-300">'yeo-johnson'</span>, standardize=<span class="text-purple-400 font-semibold">True</span>)
+<span class="text-slate-200">X_gaussian</span> = <span class="text-slate-200">pt</span>.<span class="text-sky-300">fit_transform</span>(<span class="text-slate-200">X_crp_biomarkers</span>)</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- LAB 4: TEMPORAL VITALS & SHOCK INDEX -->
+        <!-- ========================================== -->
+        <section id="lab-temporal" class="pt-12 -mt-12">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">Problem 04</span>
+                    <span class="text-xs font-medium text-slate-400">• Dynamic Feature Engineering</span>
+                </div>
+                <span class="text-xs font-semibold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-md">Critical Care Feature Extraction</span>
+            </div>
+
+            <h2 class="text-2xl sm:text-3xl font-bold text-[#0B2D48] mb-4">
+                Temporal Feature Synthesis: Deriving the Shock Index
+            </h2>
+            <p class="text-slate-600 text-sm sm:text-base leading-relaxed mb-6">
+                Static vital sign snapshots fail to capture acute occult hypovolemia. By engineering the <strong>Shock Index (SI)</strong>—the physiological ratio of Heart Rate to Systolic Blood Pressure—clinicians and ML models can identify circulatory shock hours before arterial hypotension develops.
+            </p>
+
+            <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 card-hover mb-8">
+                <div class="flex items-center justify-between mb-2">
+                    <div>
+                        <h3 class="text-lg font-bold text-[#0B2D48]">24-Hour Patient Hemodynamic Deterioration &amp; Shock Index</h3>
+                        <p class="text-xs text-slate-500">Notice that while BP remains nominally acceptable (&gt; 95 mmHg), the Shock Index spikes above critical threshold 0.9 at Hour 10!</p>
+                    </div>
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-md bg-rose-100 text-rose-800">Shock Index &gt; 0.9 = Occult Shock</span>
+                </div>
+
+                <div class="chart-container my-4">
+                    <canvas id="temporalShockChart"></canvas>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-slate-100 text-xs">
+                    <div class="p-3 bg-slate-50 rounded-xl">
+                        <strong class="text-slate-800 block">Normal SI (0.5 – 0.7):</strong>
+                        Stable hemodynamics. Normal left ventricular stroke volume.
+                    </div>
+                    <div class="p-3 bg-amber-50 rounded-xl text-amber-900 border border-amber-200">
+                        <strong class="block">Elevated SI (0.7 – 0.9):</strong>
+                        Compensated tachycardia; early fluid resuscitation indicated.
+                    </div>
+                    <div class="p-3 bg-rose-50 rounded-xl text-rose-900 border border-rose-200">
+                        <strong class="block">Severe SI (&gt; 0.9):</strong>
+                        Impending decompensation, massive transfusion protocol or ICU admission required.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- LAB 5: HIGH-CARDINALITY ICD-10 CODES -->
+        <!-- ========================================== -->
+        <section id="lab-high-dim" class="pt-12 -mt-12">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">Problem 05</span>
+                    <span class="text-xs font-medium text-slate-400">• High-Cardinality Categoricals</span>
+                </div>
+                <span class="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-md">70,000+ Billing Codes</span>
+            </div>
+
+            <h2 class="text-2xl sm:text-3xl font-bold text-[#0B2D48] mb-4">
+                The Dimensionality Trap: Preprocessing ICD-10 Diagnostic Codes
+            </h2>
+            <p class="text-slate-600 text-sm sm:text-base leading-relaxed mb-6">
+                Applying One-Hot Encoding to ICD-10 diagnosis codes generates over <strong>70,000 sparse binary columns</strong>, causing catastrophic overfitting and out-of-memory errors. Here are the three industry-standard clinical compression strategies:
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 card-hover">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 font-bold flex items-center justify-center text-sm mb-3">1</div>
+                    <h3 class="text-base font-bold text-[#0B2D48] mb-1">Hierarchical Tree Roll-Up</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Truncate sub-codes (e.g. <code>I21.09</code> ST-elevation myocardial infarction) to 3-digit categories (<code>I21</code> Acute MI) or 22 major WHO chapters (<code>I00-I99</code> Circulatory diseases).
+                    </p>
+                    <div class="mt-3 text-xs font-mono text-emerald-700 bg-emerald-50 p-2 rounded">
+                        Reduces 70k &rarr; 22 features
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 card-hover">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 font-bold flex items-center justify-center text-sm mb-3">2</div>
+                    <h3 class="text-base font-bold text-[#0B2D48] mb-1">Charlson Comorbidity Index</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Map ICD codes into 17 weighted clinical condition scores (e.g., Congestive Heart Failure = 1, Metastatic Solid Tumor = 6) based on 10-year mortality risk.
+                    </p>
+                    <div class="mt-3 text-xs font-mono text-blue-700 bg-blue-50 p-2 rounded">
+                        Clinically validated summary score
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 card-hover">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 font-bold flex items-center justify-center text-sm mb-3">3</div>
+                    <h3 class="text-base font-bold text-[#0B2D48] mb-1">Bayesian Target Encoding</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Replace each diagnosis with the empirical probability of the target outcome (e.g., in-hospital mortality), smoothed with an empirical Bayesian prior for rare diseases.
+                    </p>
+                    <div class="mt-3 text-xs font-mono text-purple-700 bg-purple-50 p-2 rounded">
+                        Zero sparse matrix overhead
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Bar at Bottom -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6">
+            <a href="data-preprocessing.html" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs card-hover flex items-center justify-between group">
+                <div>
+                    <span class="text-xs font-bold text-amber-700 uppercase tracking-wider block mb-1">Theory Foundation</span>
+                    <span class="text-lg font-bold text-[#0B2D48] group-hover:text-amber-700 transition-colors">Module 02: Data Preprocessing</span>
+                </div>
+                <span class="text-2xl text-amber-600 group-hover:translate-x-1 transition-transform">←</span>
+            </a>
+            <a href="case-studies.html" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs card-hover flex items-center justify-between group">
+                <div>
+                    <span class="text-xs font-bold text-[#205A70] uppercase tracking-wider block mb-1">Next Step</span>
+                    <span class="text-lg font-bold text-[#0B2D48] group-hover:text-[#205A70] transition-colors">End-to-End Clinical Case Studies</span>
+                </div>
+                <span class="text-2xl text-[#205A70] group-hover:translate-x-1 transition-transform">→</span>
+            </a>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer bg-white border-t border-slate-200/80 py-10 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="flex items-center justify-center gap-2 mb-3">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#56A0A9]"></span>
+                <span class="font-bold text-[#0B2D48] tracking-tight">ML Notes for Healthcare</span>
+            </div>
+            <p class="text-slate-500 text-sm max-w-lg mx-auto mb-2">
+                Department of Bio-Medical Sciences, The Apollo University, Chittoor.
+            </p>
+            <p class="text-slate-400 text-xs max-w-md mx-auto mb-3">
+                <em>Enjoy exploring ML Notes for Healthcare and happy learning!</em>
+            </p>
+            <div class="text-xs text-slate-400">
+                Designed for healthcare professionals, students, and machine learning researchers.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive Charts & Simulator Script -->
+    <script>
+        // Copy Code Helper
+        function copyCode(elementId, btn) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const text = el.innerText || el.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const origHtml = btn.innerHTML;
+                btn.innerHTML = `<svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span class="text-emerald-400 font-semibold">Copied!</span>`;
+                setTimeout(() => { btn.innerHTML = origHtml; }, 2000);
+            });
+        }
+
+        let scalingChartInstance = null;
+
+        // Raw clinical patient vitals (Systolic BP vs Serum Creatinine) with 3 acute renal failure outliers
+        const baseCohort = [
+            {x: 120, y: 0.9}, {x: 125, y: 1.0}, {x: 118, y: 0.8}, {x: 130, y: 1.1}, {x: 122, y: 0.95},
+            {x: 135, y: 1.2}, {x: 115, y: 0.75}, {x: 128, y: 1.05}, {x: 140, y: 1.3}, {x: 110, y: 0.85},
+            {x: 145, y: 1.25}, {x: 124, y: 0.9}, {x: 132, y: 1.15}, {x: 138, y: 1.2}, {x: 119, y: 0.88},
+            {x: 126, y: 1.02}, {x: 142, y: 1.35}, {x: 112, y: 0.78}, {x: 134, y: 1.1}, {x: 129, y: 0.98},
+            {x: 150, y: 1.4}, {x: 121, y: 0.92}, {x: 136, y: 1.18}, {x: 127, y: 1.04}, {x: 144, y: 1.32},
+            {x: 116, y: 0.82}, {x: 131, y: 1.08}, {x: 123, y: 0.94}, {x: 139, y: 1.22}, {x: 117, y: 0.86}
+        ];
+        const renalOutliers = [
+            {x: 165, y: 12.5}, {x: 175, y: 15.8}, {x: 180, y: 14.2}
+        ];
+
+        // Safe Tooltip Title Callback
+        const tooltipTitleCallback = (items) => {
+            if (!items || !items.length) return '';
+            return items[0].dataset?.label || '';
+        };
+
+        const defaultChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: { boxWidth: 12, font: { family: 'Inter', size: 12 } }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(11, 45, 72, 0.95)',
+                    titleFont: { family: 'Inter', size: 13, weight: 'bold' },
+                    bodyFont: { family: 'Inter', size: 12 },
+                    padding: 10,
+                    cornerRadius: 8,
+                    callbacks: {
+                        title: tooltipTitleCallback,
+                        label: (ctx) => ` (x: ${ctx.parsed.x.toFixed(2)}, y: ${ctx.parsed.y.toFixed(2)})`
+                    }
+                }
+            }
+        };
+
+        function updateScalingSim(mode) {
+            const allPatients = [...baseCohort, ...renalOutliers];
+            const xs = allPatients.map(p => p.x);
+            const ys = allPatients.map(p => p.y);
+
+            let transformedBase = [];
+            let transformedOutliers = [];
+            let xLabel = '';
+            let yLabel = '';
+            let insight = '';
+            let desc = '';
+
+            const btnIds = ['btn-raw', 'btn-standard', 'btn-robust', 'btn-minmax'];
+            btnIds.forEach(id => {
+                const b = document.getElementById(id);
+                if (b) {
+                    b.className = 'px-3.5 py-1.5 rounded-xl font-semibold text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all';
+                }
+            });
+
+            if (mode === 'raw') {
+                document.getElementById('btn-raw').className = 'px-3.5 py-1.5 rounded-xl font-semibold text-xs bg-[#205A70] text-white shadow-xs transition-all';
+                transformedBase = baseCohort.map(p => ({x: p.x, y: p.y}));
+                transformedOutliers = renalOutliers.map(p => ({x: p.x, y: p.y}));
+                xLabel = 'Systolic BP (mmHg) [100 - 180]';
+                yLabel = 'Serum Creatinine (mg/dL) [0.5 - 16.0]';
+                desc = 'Raw unscaled clinical units. Blood pressure variance completely dominates Creatinine.';
+                insight = '<strong class="text-[#0B2D48]">Raw Data Scale Disparity:</strong> Notice that Systolic Blood Pressure ranges from 100 to 180, while Creatinine ranges from 0.7 to 16.0. Without scaling, gradient-based optimization and Euclidean distances are 100x more sensitive to Blood Pressure variations than life-threatening kidney failure!';
+            } else if (mode === 'standard') {
+                document.getElementById('btn-standard').className = 'px-3.5 py-1.5 rounded-xl font-semibold text-xs bg-[#205A70] text-white shadow-xs transition-all';
+                const meanX = xs.reduce((a, b) => a + b, 0) / xs.length;
+                const stdX = Math.sqrt(xs.reduce((a, b) => a + Math.pow(b - meanX, 2), 0) / xs.length);
+                const meanY = ys.reduce((a, b) => a + b, 0) / ys.length;
+                const stdY = Math.sqrt(ys.reduce((a, b) => a + Math.pow(b - meanY, 2), 0) / ys.length);
+
+                transformedBase = baseCohort.map(p => ({x: (p.x - meanX) / stdX, y: (p.y - meanY) / stdY}));
+                transformedOutliers = renalOutliers.map(p => ({x: (p.x - meanX) / stdX, y: (p.y - meanY) / stdY}));
+                xLabel = 'Systolic BP (Standardized Z-Score)';
+                yLabel = 'Serum Creatinine (Standardized Z-Score)';
+                desc = 'StandardScaler (Z-Score): Mean = 0, Std = 1. Extreme outliers pull the mean and inflate standard deviation.';
+                insight = '<strong class="text-rose-700">The StandardScaler Flaw:</strong> Because the 3 renal failure patients have creatinine of 14-16 mg/dL, they inflate the standard deviation (\\(\\sigma = 3.65\\)) and pull the mean up to 2.4 mg/dL. As a result, <strong>all 30 normal baseline patients (0.8 - 1.3 mg/dL) are crushed into an indistinguishable clump between -0.4 and -0.3!</strong>';
+            } else if (mode === 'robust') {
+                document.getElementById('btn-robust').className = 'px-3.5 py-1.5 rounded-xl font-semibold text-xs bg-[#205A70] text-white shadow-xs transition-all';
+                // Median and IQR
+                const sortedX = [...xs].sort((a, b) => a - b);
+                const sortedY = [...ys].sort((a, b) => a - b);
+                const medX = sortedX[Math.floor(sortedX.length / 2)];
+                const medY = sortedY[Math.floor(sortedY.length / 2)];
+                const q1X = sortedX[Math.floor(sortedX.length * 0.25)];
+                const q3X = sortedX[Math.floor(sortedX.length * 0.75)];
+                const iqrX = q3X - q1X || 1;
+                const q1Y = sortedY[Math.floor(sortedY.length * 0.25)];
+                const q3Y = sortedY[Math.floor(sortedY.length * 0.75)];
+                const iqrY = q3Y - q1Y || 1;
+
+                transformedBase = baseCohort.map(p => ({x: (p.x - medX) / iqrX, y: (p.y - medY) / iqrY}));
+                transformedOutliers = renalOutliers.map(p => ({x: (p.x - medX) / iqrX, y: (p.y - medY) / iqrY}));
+                xLabel = 'Systolic BP (Robust Scaled: (x - Median) / IQR)';
+                yLabel = 'Serum Creatinine (Robust Scaled: (y - Median) / IQR)';
+                desc = 'RobustScaler: Centered on Median, scaled by Interquartile Range (IQR). Outlier-resistant!';
+                insight = '<strong class="text-emerald-700">The RobustScaler Triumph:</strong> By using the Median (1.05) and IQR (0.35) instead of Mean and Variance, the 3 renal outliers <strong>do not affect the scaling of the healthy cohort at all</strong>! Normal patient variance is fully preserved while outliers remain appropriately flagged in the high range.';
+            } else if (mode === 'minmax') {
+                document.getElementById('btn-minmax').className = 'px-3.5 py-1.5 rounded-xl font-semibold text-xs bg-[#205A70] text-white shadow-xs transition-all';
+                const minX = Math.min(...xs);
+                const maxX = Math.max(...xs);
+                const minY = Math.min(...ys);
+                const maxY = Math.max(...ys);
+
+                transformedBase = baseCohort.map(p => ({x: (p.x - minX) / (maxX - minX), y: (p.y - minY) / (maxY - minY)}));
+                transformedOutliers = renalOutliers.map(p => ({x: (p.x - minX) / (maxX - minX), y: (p.y - minY) / (maxY - minY)}));
+                xLabel = 'Systolic BP (Min-Max Scaled [0.0 - 1.0])';
+                yLabel = 'Serum Creatinine (Min-Max Scaled [0.0 - 1.0])';
+                desc = 'MinMaxScaler: Bounded strictly between 0 and 1. Highly sensitive to extreme boundary points.';
+                insight = '<strong class="text-amber-700">The MinMaxScaler Risk:</strong> Because the single highest creatinine is 15.8 mg/dL, all healthy patients (0.7 - 1.3 mg/dL) are compressed into the tiny range <strong>[0.01, 0.05]</strong>! An entire 95% of the feature space is consumed by empty distance to 3 outliers.';
+            }
+
+            document.getElementById('scaler-description').textContent = desc;
+            document.getElementById('scaling-insight-box').innerHTML = insight;
+
+            if (scalingChartInstance) {
+                scalingChartInstance.data.datasets[0].data = transformedBase;
+                scalingChartInstance.data.datasets[1].data = transformedOutliers;
+                scalingChartInstance.options.scales.x.title.text = xLabel;
+                scalingChartInstance.options.scales.y.title.text = yLabel;
+                scalingChartInstance.update();
+            }
+
+            if (window.renderMathInElement) {
+                renderMathInElement(document.getElementById('scaling-insight-box'), {
+                    delimiters: [
+                        {left: "$$", right: "$$", display: true},
+                        {left: "\\(", right: "\\)", display: false}
+                    ],
+                    throwOnError: false
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Initialize KaTeX
+            if (typeof renderMathInElement === 'function') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: "$$", right: "$$", display: true},
+                        {left: "\\(", right: "\\)", display: false}
+                    ],
+                    throwOnError: false
+                });
+            }
+
+            // 1. Interactive Scaling Simulator Canvas
+            if (document.getElementById('interactiveScalingChart')) {
+                const ctx = document.getElementById('interactiveScalingChart').getContext('2d');
+                scalingChartInstance = new Chart(ctx, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'Baseline Cohort Patients (N=30)',
+                                data: baseCohort,
+                                backgroundColor: '#205A70',
+                                borderColor: '#0B2D48',
+                                pointRadius: 5,
+                                pointHoverRadius: 7
+                            },
+                            {
+                                label: 'Acute Renal Failure Outliers (N=3)',
+                                data: renalOutliers,
+                                backgroundColor: '#E11D48',
+                                borderColor: '#9F1239',
+                                pointRadius: 7,
+                                pointHoverRadius: 9,
+                                pointStyle: 'triangle'
+                            }
+                        ]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            x: {
+                                title: { display: true, text: 'Systolic BP (mmHg) [100 - 180]', font: { family: 'Inter', weight: 600 } },
+                                grid: { color: '#f1f5f9' }
+                            },
+                            y: {
+                                title: { display: true, text: 'Serum Creatinine (mg/dL) [0.5 - 16.0]', font: { family: 'Inter', weight: 600 } },
+                                grid: { color: '#f1f5f9' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 2. Skewness Log Transform Chart
+            if (document.getElementById('skewnessTransformChart')) {
+                const ctx = document.getElementById('skewnessTransformChart').getContext('2d');
+                
+                // Histogram bins for raw vs log transformed
+                const bins = ['0-2', '2-5', '5-10', '10-25', '25-50', '50-100', '100-250', '250+'];
+                const rawFreq = [450, 220, 110, 55, 25, 12, 5, 2];
+                const logTransformedFreq = [35, 120, 280, 260, 110, 45, 20, 9];
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: bins,
+                        datasets: [
+                            {
+                                label: 'Raw Serum CRP (Severely Skewed)',
+                                data: rawFreq,
+                                backgroundColor: 'rgba(225, 29, 72, 0.7)',
+                                borderRadius: 4
+                            },
+                            {
+                                label: 'Log Transformed ln(CRP + 1) (Gaussian Bell)',
+                                data: logTransformedFreq,
+                                backgroundColor: 'rgba(32, 90, 112, 0.7)',
+                                borderRadius: 4
+                            }
+                        ]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            y: {
+                                title: { display: true, text: 'Patient Frequency (Count)', font: { family: 'Inter', weight: 600 } },
+                                grid: { color: '#f1f5f9' }
+                            },
+                            x: {
+                                title: { display: true, text: 'Biomarker Level Range (mg/L)', font: { family: 'Inter', weight: 600 } },
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 3. Temporal Shock Index Deterioration Chart
+            if (document.getElementById('temporalShockChart')) {
+                const ctx = document.getElementById('temporalShockChart').getContext('2d');
+                const hours = Array.from({length: 24}, (_, i) => `${i + 1}h`);
+                
+                // Patient vitals: BP drops slowly, Heart Rate climbs fast
+                const heartRate = [78, 80, 82, 85, 88, 92, 98, 104, 110, 115, 122, 126, 130, 128, 125, 120, 118, 115, 110, 105, 100, 96, 92, 88];
+                const systolicBp = [135, 132, 130, 128, 125, 122, 118, 115, 112, 108, 102, 98, 94, 92, 95, 98, 102, 106, 110, 114, 118, 122, 125, 128];
+                const shockIndex = heartRate.map((hr, i) => hr / systolicBp[i]);
+                const alertThreshold = Array(24).fill(0.9);
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: hours,
+                        datasets: [
+                            {
+                                label: 'Heart Rate (bpm)',
+                                data: heartRate,
+                                borderColor: '#E11D48',
+                                borderWidth: 2,
+                                yAxisID: 'yVitals',
+                                pointRadius: 2
+                            },
+                            {
+                                label: 'Systolic BP (mmHg)',
+                                data: systolicBp,
+                                borderColor: '#205A70',
+                                borderWidth: 2,
+                                yAxisID: 'yVitals',
+                                pointRadius: 2
+                            },
+                            {
+                                label: 'Shock Index (HR / SBP Ratio)',
+                                data: shockIndex,
+                                borderColor: '#F9A03F',
+                                backgroundColor: 'rgba(249, 160, 63, 0.15)',
+                                fill: true,
+                                borderWidth: 3,
+                                yAxisID: 'ySI',
+                                pointRadius: hours.map((_, i) => i === 9 ? 6 : 2),
+                                pointBackgroundColor: hours.map((_, i) => i === 9 ? '#E11D48' : '#F9A03F')
+                            },
+                            {
+                                label: 'Occult Shock Cutoff (0.9)',
+                                data: alertThreshold,
+                                borderColor: '#9F1239',
+                                borderWidth: 2,
+                                borderDash: [5, 4],
+                                yAxisID: 'ySI',
+                                pointRadius: 0,
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            x: {
+                                grid: { display: false }
+                            },
+                            yVitals: {
+                                type: 'linear',
+                                position: 'left',
+                                title: { display: true, text: 'Vital Signs (bpm / mmHg)', font: { family: 'Inter', weight: 600 } },
+                                min: 70,
+                                max: 150,
+                                grid: { color: '#f1f5f9' }
+                            },
+                            ySI: {
+                                type: 'linear',
+                                position: 'right',
+                                title: { display: true, text: 'Shock Index Ratio (HR / SBP)', font: { family: 'Inter', weight: 600 } },
+                                min: 0.4,
+                                max: 1.5,
+                                grid: { drawOnChartArea: false }
+                            }
+                        }
+                    }
+                });
+            }
+
+        });
+    </script>
+</body>
+</html>

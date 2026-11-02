@@ -1,0 +1,2571 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 01: Introduction to Machine Learning in Healthcare – ML Notes</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- KaTeX CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            navy: '#0B2D48',
+                            teal: '#205A70',
+                            softTeal: '#56A0A9',
+                            amber: '#F9A03F',
+                            lightBg: '#F8FAFC',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .bg-grid-pattern {
+            background-image: radial-gradient(rgba(32, 90, 112, 0.08) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 380px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 400px;
+            }
+        }
+        .flow-box {
+            border: 2px solid #205A70;
+            background-color: rgba(86, 160, 169, 0.1);
+            color: #0B2D48;
+        }
+        .flow-arrow {
+            color: #205A70;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+        .neuron-layer {
+            background-color: rgba(86, 160, 169, 0.12);
+            border-radius: 0.75rem;
+            padding: 1.25rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: center;
+            min-width: 68px;
+            border: 1px solid rgba(86, 160, 169, 0.25);
+        }
+        .neuron {
+            background: linear-gradient(135deg, #205A70, #0B2D48);
+            width: 22px;
+            height: 22px;
+            border-radius: 9999px;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(32, 90, 112, 0.35);
+        }
+        .card-hover {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .card-hover:hover {
+            box-shadow: 0 14px 28px -6px rgba(11, 45, 72, 0.08);
+        }
+        /* Custom styled range slider */
+        input[type=range] {
+            accent-color: #205A70;
+        }
+        .tree-node-active {
+            border-color: #205A70 !important;
+            background-color: #EBF5F7 !important;
+            color: #0B2D48 !important;
+            box-shadow: 0 0 0 3px rgba(32, 90, 112, 0.25) !important;
+            transform: scale(1.02);
+            transition: all 0.25s ease-in-out;
+        }
+        .katex-display {
+            margin: 0.5em 0 !important;
+        }
+    </style>
+</head>
+<body class="bg-[#F8F9FA] text-[#0B2D48] min-h-screen flex flex-col antialiased selection:bg-[#56A0A9]/20 selection:text-[#0B2D48]">
+
+    <!-- Main Navigation Bar -->
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#0B2D48] to-[#205A70] flex items-center justify-center text-white shadow-md shadow-[#205A70]/20 group-hover:scale-105 transition-transform">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-lg font-bold tracking-tight text-[#0B2D48]">ML Notes</span>
+                    <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-xs font-semibold bg-[#205A70]/10 text-[#205A70] rounded-full border border-[#205A70]/20">Healthcare Edition</span>
+                </div>
+            </a>
+            
+            <div class="flex items-center gap-2 sm:gap-3">
+                <a href="index.html" class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-[#205A70] transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    <span>All Modules</span>
+                </a>
+                <a href="exercises.html" class="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-lg transition-colors">
+                    <span>Exercises</span>
+                </a>
+                <a href="case-studies.html" class="hidden md:inline-flex items-center gap-1 text-xs font-semibold text-[#205A70] bg-[#205A70]/10 hover:bg-[#205A70]/20 border border-[#205A70]/20 px-2.5 py-1 rounded-lg transition-colors">
+                    <span>Case Studies</span>
+                </a>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#205A70]/10 text-[#205A70] border border-[#205A70]/20">
+                    Module 01
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- In-Page Sub-Navigation Bar -->
+    <nav class="sticky top-16 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs py-2.5 px-4 sm:px-6">
+        <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center space-x-1 sm:space-x-2 overflow-x-auto whitespace-nowrap py-1 text-xs sm:text-sm font-medium text-slate-600">
+                <a href="#section1" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">1. What is ML?</a>
+                <a href="#section2" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">2. Regression</a>
+                <a href="#section3" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">3. KNN</a>
+                <a href="#section4" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">4. Decision Trees</a>
+                <a href="#section5" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">5. Deep Learning</a>
+                <a href="#section6" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">6. Other Models</a>
+                <a href="#section7" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">7. Ethics</a>
+            </div>
+            <div class="hidden lg:flex items-center gap-2 shrink-0">
+                <a href="data-preprocessing.html" class="inline-flex items-center gap-1 text-xs font-semibold text-[#205A70] bg-[#205A70]/10 hover:bg-[#205A70]/20 px-3 py-1.5 rounded-lg transition-colors">
+                    <span>Next: Preprocessing</span>
+                    <span>→</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero / Header Section -->
+    <section class="relative bg-gradient-to-b from-white via-[#F8FAFC] to-[#F1F5F9] border-b border-slate-200/60 bg-grid-pattern py-12 sm:py-16">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl">
+                <!-- Breadcrumb badge -->
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-[#205A70]/10 text-[#205A70] border border-[#205A70]/20 mb-4">
+                    <a href="index.html" class="hover:underline">Home</a>
+                    <span class="text-slate-400">/</span>
+                    <span class="font-semibold">Module 01</span>
+                </div>
+
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#0B2D48] mb-4">
+                    Introduction to <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#205A70] via-[#357a94] to-[#56A0A9]">Machine Learning in Healthcare</span>
+                </h1>
+
+                <p class="text-base sm:text-lg text-slate-600 leading-relaxed font-normal mb-6">
+                    A comprehensive, intuition-first foundation crafted specifically for <strong>Health Informatics, Nursing, Biomedical Sciences, and Clinical students</strong>. Master how healthcare algorithms transition from brittle rules to data-driven diagnostic support—with plain-English analogies, zero mathematical intimidation, and five hands-on interactive bedside simulators.
+                </p>
+
+                <!-- Value Proposition Badges -->
+                <div class="flex flex-wrap items-center gap-2.5 text-xs">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200/80 shadow-xs font-medium text-slate-700">
+                        <span class="w-2 h-2 rounded-full bg-teal-500"></span>
+                        No Math Prerequisites Required
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200/80 shadow-xs font-medium text-slate-700">
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                        5 Live Bedside Simulators
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200/80 shadow-xs font-medium text-slate-700">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        EHR &amp; Clinical Decision Support
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200/80 shadow-xs font-medium text-slate-700">
+                        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                        HIPAA, Fairness &amp; Governance
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Container -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-16">
+
+        <!-- ========================================================= -->
+        <!-- SECTION 1: WHAT IS MACHINE LEARNING?                      -->
+        <!-- ========================================================= -->
+        <section id="section1" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-[#205A70]/10 text-[#205A70] border border-[#205A70]/20">Section 01</span>
+                <span class="text-xs font-medium text-slate-400">• Fundamentals for Healthcare</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">1. What is Machine Learning?</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                In modern hospitals, a single patient in the Intensive Care Unit (ICU) generates over <strong>2,000 data points per hour</strong>—continuous electrocardiograms, pulse oximetry, arterial pressure waveforms, mechanical ventilator parameters, and frequent lab panels. Human physicians and nurses face severe cognitive overload, while traditional hospital monitoring systems trigger high rates of non-actionable alarms (causing clinical "alarm fatigue").
+            </p>
+
+            <p class="text-slate-600 text-sm sm:text-base leading-relaxed max-w-4xl mb-8">
+                <strong>Machine Learning (ML)</strong> is the branch of artificial intelligence where computer algorithms learn patterns directly from vast clinical datasets and patient outcomes, rather than relying exclusively on pre-programmed static rules written by human programmers. Instead of telling the computer <em>how</em> to diagnose a condition, we show it thousands of past patient encounters and let it discover subtle physiological trajectories that precede clinical decompensation.
+            </p>
+
+            <!-- Comparison Cards: Rule-Based vs Data-Driven -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                
+                <!-- Rule-Based Card -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Traditional Rule-Based Systems</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-amber-50 text-amber-800 border border-amber-200">Expert Logic</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-600 mb-4">
+                            How early clinical decision support (CDS) was engineered: human medical panels wrote fixed "IF-THEN" statements based on consensus guidelines (e.g. SIRS criteria).
+                        </p>
+                        
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 my-4 text-center">
+                            <div class="flow-box p-2.5 rounded-lg text-xs font-semibold shadow-xs">Input: Vitals (HR, Temp, RR)</div>
+                            <div class="flow-arrow my-1.5 text-[#205A70]">↓</div>
+                            <div class="flow-box p-3 rounded-lg text-xs font-medium bg-amber-50/90 border-amber-300 text-amber-900 shadow-xs text-left">
+                                <span class="font-bold">Static Expert Rules:</span><br>
+                                • IF Heart Rate &gt; 90 bpm<br>
+                                • AND Body Temp &gt; 100.4°F<br>
+                                • AND Resp Rate &gt; 20 bpm<br>
+                                • THEN Trigger Sepsis Code
+                            </div>
+                            <div class="flow-arrow my-1.5 text-[#205A70]">↓</div>
+                            <div class="flow-box p-2.5 rounded-lg text-xs font-bold bg-rose-50 border-rose-300 text-rose-800 shadow-xs">
+                                Binary Alert (Yes or No)
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 text-xs text-slate-600 mt-4">
+                            <div class="flex items-start gap-2">
+                                <span class="text-rose-500 font-bold">✕</span>
+                                <span><strong>Brittle Thresholds:</strong> A patient with HR 89 bpm and Temp 100.2°F triggers zero alert, even if their organs are silently failing!</span>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="text-rose-500 font-bold">✕</span>
+                                <span><strong>Severe False Alarms:</strong> An anxious patient with tachycardia and tachypnea triggers emergency codes unnecessarily.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 p-3.5 rounded-xl bg-amber-50/60 border border-amber-200 text-xs text-amber-900 leading-relaxed">
+                        <strong>Clinical Reality:</strong> Over 85% to 99% of hospital telemetry alarms are clinically non-actionable, desensitizing staff and risking missed emergencies.
+                    </div>
+                </div>
+
+                <!-- Machine Learning Data-Driven Card -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Machine Learning (Data-Driven)</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-teal-50 text-teal-800 border border-teal-200">Adaptive Intelligence</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-600 mb-4">
+                            The algorithm reviews 100,000+ past electronic medical records, learning how subtle vital combinations evolve 4 to 6 hours before septic shock.
+                        </p>
+                        
+                        <div class="bg-[#205A70]/5 p-4 rounded-xl border border-[#205A70]/20 my-4 text-center">
+                            <div class="flow-box p-2.5 rounded-lg text-xs font-semibold shadow-xs">Input: 40+ Vitals, Labs &amp; Medication Trends</div>
+                            <div class="flow-arrow my-1.5 text-[#205A70]">↓</div>
+                            <div class="flow-box p-3 rounded-lg text-xs font-medium bg-teal-50 border-teal-300 text-teal-900 shadow-xs text-left">
+                                <span class="font-bold">Multivariate Pattern Recognition:</span><br>
+                                • Evaluates non-linear interactions<br>
+                                • Considers trajectory &amp; rate-of-change<br>
+                                • Weights borderline biomarkers simultaneously
+                            </div>
+                            <div class="flow-arrow my-1.5 text-[#205A70]">↓</div>
+                            <div class="flow-box p-2.5 rounded-lg text-xs font-bold bg-emerald-50 border-emerald-300 text-emerald-800 shadow-xs">
+                                Calibrated Risk Score: 84% Sepsis Risk (High)
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 text-xs text-slate-600 mt-4">
+                            <div class="flex items-start gap-2">
+                                <span class="text-emerald-600 font-bold">✓</span>
+                                <span><strong>Nuanced Risk Probability:</strong> Outputs smooth 0% to 100% scores rather than crude yes/no switches.</span>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="text-emerald-600 font-bold">✓</span>
+                                <span><strong>Early Detection:</strong> Identifies deterioration hours earlier, allowing timely IV fluids and antibiotics.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 p-3.5 rounded-xl bg-teal-50/60 border border-teal-200 text-xs text-teal-900 leading-relaxed">
+                        <strong>Clinical Advantage:</strong> Machine learning detects the combined physiological signature of disease, even when individual vitals appear borderline normal.
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ========================================================= -->
+            <!-- INTERACTIVE DEMO 1: SEPSIS CLINICAL COMPARATOR SIMULATOR  -->
+            <!-- ========================================================= -->
+            <div class="bg-gradient-to-br from-slate-900 via-[#0B2D48] to-[#205A70] rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-12">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#F9A03F] text-slate-900 mb-1">
+                            Interactive Bedside Demonstration 01
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                            Rule-Based vs. Machine Learning Clinical Simulator
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            Adjust a patient's vital signs below or load preset clinical archetypes to observe how rigid rules fail where machine learning excels.
+                        </p>
+                    </div>
+                    <!-- Quick Presets -->
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                        <button id="btn-preset-borderline" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/15 hover:bg-white/25 text-white transition-colors border border-white/20">
+                            🚨 Borderline Hidden Sepsis
+                        </button>
+                        <button id="btn-preset-tachy" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/15 hover:bg-white/25 text-white transition-colors border border-white/20">
+                            😰 Anxious Tachycardia
+                        </button>
+                        <button id="btn-preset-severe" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/15 hover:bg-white/25 text-white transition-colors border border-white/20">
+                            ⚡ Severe Septic Shock
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    <!-- Sliders Column -->
+                    <div class="lg:col-span-5 space-y-5 bg-white/10 p-5 sm:p-6 rounded-xl backdrop-blur-md border border-white/15">
+                        <div class="text-xs font-bold uppercase tracking-wider text-[#56A0A9]">Patient Electronic Health Record (Bed 12)</div>
+
+                        <!-- Heart Rate Slider -->
+                        <div>
+                            <div class="flex justify-between items-center text-xs font-medium mb-1.5">
+                                <span class="text-slate-200">Heart Rate (HR):</span>
+                                <span id="sepsis-hr-val" class="font-bold text-amber-300 bg-black/30 px-2 py-0.5 rounded">96 bpm</span>
+                            </div>
+                            <input id="sepsis-hr" type="range" min="60" max="140" value="96" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                                <span>60 bpm (Normal)</span>
+                                <span class="text-amber-200">Rule Threshold: &gt;90</span>
+                                <span>140 bpm</span>
+                            </div>
+                        </div>
+
+                        <!-- Temperature Slider -->
+                        <div>
+                            <div class="flex justify-between items-center text-xs font-medium mb-1.5">
+                                <span class="text-slate-200">Body Temperature:</span>
+                                <span id="sepsis-temp-val" class="font-bold text-amber-300 bg-black/30 px-2 py-0.5 rounded">100.2 °F</span>
+                            </div>
+                            <input id="sepsis-temp" type="range" min="96.5" max="103.5" step="0.1" value="100.2" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                                <span>97.0°F</span>
+                                <span class="text-amber-200">Rule Threshold: &gt;100.4°F</span>
+                                <span>103.5°F</span>
+                            </div>
+                        </div>
+
+                        <!-- WBC Slider -->
+                        <div>
+                            <div class="flex justify-between items-center text-xs font-medium mb-1.5">
+                                <span class="text-slate-200">White Blood Cell Count (WBC):</span>
+                                <span id="sepsis-wbc-val" class="font-bold text-amber-300 bg-black/30 px-2 py-0.5 rounded">14.2 ×10³/µL</span>
+                            </div>
+                            <input id="sepsis-wbc" type="range" min="4.0" max="24.0" step="0.2" value="14.2" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                                <span>4.0 (Normal)</span>
+                                <span class="text-amber-200">Rule Threshold: &gt;12.0</span>
+                                <span>24.0 k/µL</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-black/20 rounded-lg text-[11px] text-slate-300 leading-relaxed border border-white/10">
+                            💡 <strong>Tip for Informaticians:</strong> In borderline cases, human physiology does not adhere to sharp digital cutoffs. Notice how a 0.2°F temperature difference flips the rule-based alert completely off!
+                        </div>
+                    </div>
+
+                    <!-- Comparison Results Column -->
+                    <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        
+                        <!-- Rule Based Result Card -->
+                        <div class="bg-white rounded-xl p-5 text-slate-800 shadow-md flex flex-col justify-between border-2 border-slate-200">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Traditional Rule Engine</span>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">Rigid Logic</span>
+                                </div>
+                                <div class="space-y-2 text-xs mb-4">
+                                    <div class="flex items-center justify-between p-2 rounded bg-slate-50">
+                                        <span>HR &gt; 90 bpm:</span>
+                                        <span id="rule-hr-status" class="font-bold text-emerald-600">✓ Met (96)</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-2 rounded bg-slate-50">
+                                        <span>Temp &gt; 100.4 °F:</span>
+                                        <span id="rule-temp-status" class="font-bold text-rose-600">✕ Failed (100.2)</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-2 rounded bg-slate-50">
+                                        <span>WBC &gt; 12.0 k/µL:</span>
+                                        <span id="rule-wbc-status" class="font-bold text-emerald-600">✓ Met (14.2)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-2 pt-3 border-t border-slate-100">
+                                <span class="text-[11px] font-semibold text-slate-500">Alert Engine Status:</span>
+                                <div id="rule-final-alert" class="mt-1 p-3 rounded-lg text-center font-bold text-xs bg-slate-100 text-slate-600 border border-slate-300">
+                                    ❌ NO ALERT TRIGGERED<br>
+                                    <span class="text-[10px] font-normal text-slate-500">(All 3 criteria must be strictly satisfied)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Machine Learning Result Card -->
+                        <div class="bg-white rounded-xl p-5 text-slate-800 shadow-md flex flex-col justify-between border-2 border-[#205A70]">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-xs font-bold uppercase tracking-wider text-[#205A70]">Clinical ML Risk Engine</span>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-teal-50 text-teal-800 border border-teal-200">Probability Model</span>
+                                </div>
+
+                                <div class="text-center my-3">
+                                    <div class="text-[11px] text-slate-500 font-semibold mb-1">Predicted Sepsis Probability:</div>
+                                    <div id="ml-risk-score" class="text-3xl font-extrabold text-[#0B2D48]">
+                                        82%
+                                    </div>
+                                    <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden mt-2">
+                                        <div id="ml-risk-bar" class="bg-gradient-to-r from-amber-500 to-rose-600 h-full rounded-full transition-all duration-300" style="width: 82%;"></div>
+                                    </div>
+                                </div>
+
+                                <div id="ml-risk-badge" class="p-2.5 rounded-lg text-center font-bold text-xs bg-rose-50 text-rose-800 border border-rose-200 mb-2">
+                                    🚨 HIGH CLINICAL RISK DETECTED
+                                </div>
+                            </div>
+
+                            <div class="mt-2 pt-3 border-t border-slate-100">
+                                <p id="ml-risk-explanation" class="text-[11px] text-slate-600 leading-relaxed">
+                                    <strong>AI Insight:</strong> Even though temperature is 0.2°F below the rigid threshold, the simultaneous combination of tachycardia and marked leukocytosis indicates severe systemic inflammation.
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- The Three Core Paradigms of Machine Learning -->
+            <div class="mb-8">
+                <h3 class="text-xl font-bold text-[#0B2D48] mb-2">The Three Core Learning Paradigms in Medicine</h3>
+                <p class="text-slate-600 text-sm sm:text-base leading-relaxed mb-6">
+                    Every algorithm you will encounter in clinical informatics falls into one of three core paradigms, distinguished by whether they learn with a human clinical instructor ("labels"), without labels, or through direct clinical actions.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    <!-- Supervised Learning -->
+                    <div class="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-sm flex flex-col justify-between card-hover">
+                        <div>
+                            <div class="w-12 h-12 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center text-2xl mb-4 border border-teal-100">
+                                🏷️
+                            </div>
+                            <span class="text-xs font-bold text-[#205A70] uppercase tracking-wider">Paradigm 01</span>
+                            <h4 class="text-lg font-bold text-[#0B2D48] mt-1 mb-2">Supervised Learning</h4>
+                            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
+                                The algorithm learns from <strong>labeled patient records</strong> with a known "ground truth" answer key provided by medical doctors (e.g. pathology biopsy reports, discharge summaries).
+                            </p>
+                            
+                            <div class="space-y-2 text-xs">
+                                <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+                                    <strong class="text-[#0B2D48]">1. Classification (Categories):</strong>
+                                    <p class="text-slate-500 mt-0.5">Predicting discrete classes: Will patient be readmitted? (Yes/No); Diabetic Retinopathy stage (None, Mild, Moderate, Severe).</p>
+                                </div>
+                                <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+                                    <strong class="text-[#0B2D48]">2. Regression (Continuous Numbers):</strong>
+                                    <p class="text-slate-500 mt-0.5">Predicting continuous quantities: Expected ICU length of stay (4.5 days); Blood glucose level (mg/dL).</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-teal-800 font-semibold">
+                            Analogy: A medical resident studying past case files where the attending's final diagnosis is written on the back of each page.
+                        </div>
+                    </div>
+
+                    <!-- Unsupervised Learning -->
+                    <div class="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-sm flex flex-col justify-between card-hover">
+                        <div>
+                            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center text-2xl mb-4 border border-blue-100">
+                                🔍
+                            </div>
+                            <span class="text-xs font-bold text-blue-700 uppercase tracking-wider">Paradigm 02</span>
+                            <h4 class="text-lg font-bold text-[#0B2D48] mt-1 mb-2">Unsupervised Learning</h4>
+                            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
+                                The algorithm explores <strong>unlabeled clinical data</strong> to discover hidden groupings, natural clusters, or novel disease subphenotypes without any pre-existing human labels.
+                            </p>
+                            
+                            <div class="space-y-2 text-xs">
+                                <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+                                    <strong class="text-[#0B2D48]">Patient Clustering:</strong>
+                                    <p class="text-slate-500 mt-0.5">Partitioning 10,000 heart failure patients into 3 distinct biological subtypes that respond differently to beta-blockers.</p>
+                                </div>
+                                <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+                                    <strong class="text-[#0B2D48]">Dimensionality Reduction:</strong>
+                                    <p class="text-slate-500 mt-0.5">Compressing 20,000 genetic expression markers into 2 or 3 principal axes for visual clinical interpretation.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-blue-800 font-semibold">
+                            Analogy: A researcher organizing 1,000 unknown medical journal papers into stacks based on topic similarity without reading the titles.
+                        </div>
+                    </div>
+
+                    <!-- Reinforcement Learning -->
+                    <div class="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-sm flex flex-col justify-between card-hover">
+                        <div>
+                            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center text-2xl mb-4 border border-amber-100">
+                                🎯
+                            </div>
+                            <span class="text-xs font-bold text-amber-700 uppercase tracking-wider">Paradigm 03</span>
+                            <h4 class="text-lg font-bold text-[#0B2D48] mt-1 mb-2">Reinforcement Learning (RL)</h4>
+                            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
+                                An autonomous computational agent learns sequential decision-making through <strong>trial, error, and clinical reward signals</strong> in dynamic environments.
+                            </p>
+                            
+                            <div class="space-y-2 text-xs">
+                                <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+                                    <strong class="text-[#0B2D48]">Dynamic Sepsis Resuscitation:</strong>
+                                    <p class="text-slate-500 mt-0.5">The AI agent learns when to titrate norepinephrine vs. infuse IV crystalloids by receiving rewards for stabilizing Mean Arterial Pressure (MAP).</p>
+                                </div>
+                                <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+                                    <strong class="text-[#0B2D48]">Mechanical Ventilator Weaning:</strong>
+                                    <p class="text-slate-500 mt-0.5">Determining the optimal hour to reduce positive end-expiratory pressure (PEEP) to avoid lung injury.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-amber-800 font-semibold">
+                            Analogy: An ICU fellow learning optimal titration through continuous bedside feedback and physiological response over weeks of clinical rounds.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Health Informatics Plain-English Glossary -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 shadow-sm">
+                <h3 class="text-xl font-bold text-[#0B2D48] mb-2">Health Informatics Translation Guide: Plain-English Glossary</h3>
+                <p class="text-slate-600 text-xs sm:text-sm mb-6">
+                    Computer science papers use abstract terminology. Here is how machine learning concepts map directly into everyday hospital healthcare terminology:
+                </p>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs sm:text-sm border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-200 text-[#0B2D48] bg-slate-50/70">
+                                <th class="py-3 px-4 font-bold">Machine Learning Term</th>
+                                <th class="py-3 px-4 font-bold text-[#205A70]">Healthcare / EHR Equivalent</th>
+                                <th class="py-3 px-4 font-bold">Concrete Clinical Example</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-600">
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="py-3 px-4 font-mono font-bold text-slate-800">Feature (x)</td>
+                                <td class="py-3 px-4 text-[#205A70] font-semibold">Predictor / Patient Covariate / Biomarker</td>
+                                <td class="py-3 px-4">Serum Creatinine, Age, Systolic Blood Pressure, Oxygen Saturation</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="py-3 px-4 font-mono font-bold text-slate-800">Label / Target (y)</td>
+                                <td class="py-3 px-4 text-[#205A70] font-semibold">Clinical Outcome / Gold-Standard Diagnosis</td>
+                                <td class="py-3 px-4">30-day all-cause hospital readmission (Yes/No), Biopsy-confirmed Malignancy</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="py-3 px-4 font-mono font-bold text-slate-800">Training Set</td>
+                                <td class="py-3 px-4 text-[#205A70] font-semibold">Historical Patient Encounter Cohort</td>
+                                <td class="py-3 px-4">50,000 anonymized ICU admissions from 2018 to 2022 used to teach the model</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="py-3 px-4 font-mono font-bold text-slate-800">Test / Validation Set</td>
+                                <td class="py-3 px-4 text-[#205A70] font-semibold">Prospective or Unseen Validation Cohort</td>
+                                <td class="py-3 px-4">10,000 new admissions from 2023 used to verify the model has not merely memorized past data</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="py-3 px-4 font-mono font-bold text-slate-800">Overfitting</td>
+                                <td class="py-3 px-4 text-[#205A70] font-semibold">Hospital-Specific Memorization / Lack of Generalizability</td>
+                                <td class="py-3 px-4">A model that scores 98% accuracy in an academic center but fails in a rural community hospital</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="py-3 px-4 font-mono font-bold text-slate-800">Inference</td>
+                                <td class="py-3 px-4 text-[#205A70] font-semibold">Live Bedside Risk Scoring</td>
+                                <td class="py-3 px-4">Running a newly admitted ER patient's vitals through the model to display an alert in Epic or Cerner</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 2: REGRESSION MODELS                              -->
+        <!-- ========================================================= -->
+        <section id="section2" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">Section 02</span>
+                <span class="text-xs font-medium text-slate-400">• Supervised Predictive Models</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">2. Core Predictive Models: Regression</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                To non-mathematicians, the word <em>"regression"</em> can sound intimidating. In healthcare analytics, regression simply means <strong>finding the best trendline or relationship</strong> between clinical risk factors and a medical outcome. Depending on whether that outcome is a continuous measurement (like blood pressure) or a binary diagnostic event (has diabetes vs. healthy), we use <strong>Linear</strong> or <strong>Logistic</strong> regression.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                
+                <!-- Linear Regression -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Linear Regression</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200">Continuous Targets</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-500 mb-4">
+                            Predicting continuous medical numbers (e.g. Systolic Blood Pressure from Patient Age).
+                        </p>
+                        
+                        <div class="chart-container">
+                            <canvas id="linearRegressionChart"></canvas>
+                        </div>
+
+                        <div class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200/60 text-xs sm:text-sm text-slate-600 space-y-2">
+                            <div>
+                                <strong class="text-slate-800">The Intuitive Equation:</strong>
+                                <p class="font-mono text-xs text-[#205A70] mt-0.5">$$\text{Predicted BP} = \text{Baseline Intercept} + (\text{Age Slope} \times \text{Age})$$</p>
+                            </div>
+                            <p>
+                                <strong>Clinical Meaning:</strong> In our dataset, each dot is a patient. The red line represents the population average. If the baseline intercept is 110 mmHg and the slope is $+0.5\text{ mmHg/year}$, an 80-year-old is predicted to have $110 + (0.5 \times 80) = 150\text{ mmHg}$.
+                            </p>
+                            <p class="text-[11px] text-amber-800">
+                                ⚠️ <strong>Healthcare Limitation:</strong> Human physiology is rarely a straight line forever! A straight line cannot capture U-shaped physiological risk (e.g., both severe hypothermia &lt;95°F and severe fever &gt;104°F are dangerous).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logistic Regression -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Logistic Regression</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 border border-amber-200">Binary Classification</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-500 mb-4">
+                            Mapping laboratory biomarkers (Fasting Glucose) to a calibrated 0% to 100% Disease Risk Probability.
+                        </p>
+                        
+                        <div class="chart-container">
+                            <canvas id="logisticRegressionChart"></canvas>
+                        </div>
+
+                        <div class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200/60 text-xs sm:text-sm text-slate-600 space-y-2">
+                            <div>
+                                <strong class="text-slate-800">Why Not a Straight Line?</strong>
+                                <p class="text-xs text-slate-600 mt-0.5">
+                                    A straight line would produce nonsensical probabilities like $-25\%$ or $+140\%$. The <strong>Sigmoid S-curve</strong> smoothly squashes all inputs into valid probabilities between $0.0$ (0%) and $1.0$ (100%).
+                                </p>
+                            </div>
+                            <p>
+                                <strong>The Diagnostic Threshold:</strong> The dashed horizontal line at $0.5$ (50%) is the standard cutoff. Patients above $0.5$ are classified as High Risk; patients below are classified as Low Risk.
+                            </p>
+                            <p class="text-[11px] text-teal-800">
+                                💡 <strong>Health Informatics Tip:</strong> In real clinical workflows, hospitals often adjust this threshold (e.g. lowering to $0.20$ for cancer screening so zero sick patients slip through undetected).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ========================================================= -->
+            <!-- INTERACTIVE DEMO 2: RISK CALCULATOR & THRESHOLD EXPLORER  -->
+            <!-- ========================================================= -->
+            <div class="bg-gradient-to-br from-slate-900 via-[#0B2D48] to-[#205A70] rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-12">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#F9A03F] text-slate-900 mb-1">
+                            Interactive Bedside Demonstration 02
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                            Diagnostic Risk Calculator &amp; Decision Threshold Explorer
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            See how logistic regression calculates disease probability and discover why adjusting the decision threshold is the most important clinical policy decision in health informatics.
+                        </p>
+                    </div>
+                    <!-- Presets -->
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                        <button id="btn-thresh-screen" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/15 hover:bg-white/25 text-white transition-colors border border-white/20">
+                            🔍 Prescreening Mode (0.25)
+                        </button>
+                        <button id="btn-thresh-standard" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/15 hover:bg-white/25 text-white transition-colors border border-white/20">
+                            ⚖️ Standard Mode (0.50)
+                        </button>
+                        <button id="btn-thresh-strict" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/15 hover:bg-white/25 text-white transition-colors border border-white/20">
+                            🛡️ Confirmatory Mode (0.75)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    <!-- Controls -->
+                    <div class="lg:col-span-6 space-y-5 bg-white/10 p-5 sm:p-6 rounded-xl backdrop-blur-md border border-white/15">
+                        <div class="text-xs font-bold uppercase tracking-wider text-[#56A0A9]">Patient Biomarkers &amp; Policy Slider</div>
+
+                        <!-- Glucose Slider -->
+                        <div>
+                            <div class="flex justify-between items-center text-xs font-medium mb-1.5">
+                                <span class="text-slate-200">Fasting Plasma Glucose (FPG):</span>
+                                <span id="calc-glucose-val" class="font-bold text-amber-300 bg-black/30 px-2 py-0.5 rounded">124 mg/dL</span>
+                            </div>
+                            <input id="calc-glucose" type="range" min="70" max="220" value="124" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                                <span>70 mg/dL (Normal)</span>
+                                <span>126 mg/dL (ADA Cutoff)</span>
+                                <span>220 mg/dL</span>
+                            </div>
+                        </div>
+
+                        <!-- Age Slider -->
+                        <div>
+                            <div class="flex justify-between items-center text-xs font-medium mb-1.5">
+                                <span class="text-slate-200">Patient Age:</span>
+                                <span id="calc-age-val" class="font-bold text-amber-300 bg-black/30 px-2 py-0.5 rounded">54 Years</span>
+                            </div>
+                            <input id="calc-age" type="range" min="20" max="85" value="54" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                                <span>20 Years</span>
+                                <span>50 Years</span>
+                                <span>85 Years</span>
+                            </div>
+                        </div>
+
+                        <!-- Threshold Slider -->
+                        <div class="pt-3 border-t border-white/15">
+                            <div class="flex justify-between items-center text-xs font-medium mb-1.5">
+                                <span class="text-amber-200 font-bold">Clinical Action Threshold (Policy):</span>
+                                <span id="calc-threshold-val" class="font-bold text-slate-900 bg-[#F9A03F] px-2 py-0.5 rounded">0.50 (50%)</span>
+                            </div>
+                            <input id="calc-threshold" type="range" min="0.10" max="0.90" step="0.05" value="0.50" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                                <span>0.10 (High Sensitivity)</span>
+                                <span>0.50 (Default)</span>
+                                <span>0.90 (High Specificity)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Calculation Card -->
+                    <div class="lg:col-span-6 bg-white rounded-xl p-6 text-slate-800 shadow-md flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-xs font-bold uppercase tracking-wider text-[#205A70]">Calculated Risk vs. Decision Rule</span>
+                                <span class="text-xs font-bold text-slate-500">Logistic Sigmoid</span>
+                            </div>
+
+                            <div class="text-center my-4">
+                                <div class="text-xs text-slate-500 font-semibold mb-1">Calculated Probability P(Diabetes):</div>
+                                <div id="calc-prob-text" class="text-4xl font-extrabold text-[#0B2D48]">
+                                    58.4%
+                                </div>
+                                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden mt-3 relative border border-slate-200">
+                                    <div id="calc-prob-bar" class="bg-gradient-to-r from-teal-500 via-amber-500 to-rose-600 h-full rounded-full transition-all duration-300" style="width: 58.4%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-center space-y-1">
+                                <div class="flex justify-around items-center font-semibold">
+                                    <span>Model Risk: <strong id="disp-calc-risk" class="text-[#205A70]">58.4%</strong></span>
+                                    <span>vs.</span>
+                                    <span>Hospital Cutoff: <strong id="disp-calc-thresh" class="text-amber-700">50.0%</strong></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-4 border-t border-slate-200">
+                            <div id="calc-decision-badge" class="p-3 rounded-xl text-center font-bold text-xs bg-rose-50 text-rose-800 border border-rose-300 mb-2">
+                                🚨 POSITIVE DIAGNOSTIC CLASSIFICATION (Score ≥ Threshold)
+                            </div>
+                            <p id="calc-decision-rationale" class="text-[11px] text-slate-600 leading-relaxed">
+                                Because the patient's predicted probability (58.4%) meets or exceeds the active clinical decision threshold (50.0%), the system triggers an alert recommending endocrinology referral.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 3: K-NEAREST NEIGHBORS (KNN)                      -->
+        <!-- ========================================================= -->
+        <section id="section3" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">Section 03</span>
+                <span class="text-xs font-medium text-slate-400">• Instance-Based Similarity</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">3. Learning by Similarity: K-Nearest Neighbors (KNN)</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                When experienced physicians encounter a complicated, atypical patient in the hospital, they instinctively use case-based reasoning: <em>"What happened to the 3 or 5 most similar patients I managed in the past who had almost these exact vitals and lab numbers?"</em>
+            </p>
+
+            <p class="text-slate-600 text-sm sm:text-base leading-relaxed max-w-4xl mb-8">
+                <strong>K-Nearest Neighbors (KNN)</strong> formalizes this human clinical memory into an algorithm. It does not try to build a complex mathematical equation during training. Instead, when a new patient arrives, it simply calculates the straight-line distance to every past patient in the hospital database, finds the <em>K</em> most similar individuals, and takes a <strong>majority vote</strong>.
+            </p>
+
+            <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 mb-10">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-[#0B2D48]">Classifying a New Patient in Biomarker Feature Space</h3>
+                        <p class="text-sm text-slate-500">Biomarker 1 (Cardiac Troponin) vs. Biomarker 2 (D-Dimer) with neighborhood circle.</p>
+                    </div>
+                    <span class="self-start sm:self-auto text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        Distance-Based Decision
+                    </span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="knnChart"></canvas>
+                </div>
+                <div class="mt-6 p-4 rounded-xl bg-slate-50 border border-slate-200/60 text-xs sm:text-sm text-slate-600 leading-relaxed space-y-2">
+                    <p>
+                        <strong class="text-slate-800">Clinical Interpretation:</strong> In this biomarker plane, our new unknown patient (yellow diamond) is compared to its historical neighbors. With $K = 3$, two of the three closest past subjects belonged to Class B (Acute Disease) and one belonged to Class A (Healthy). By majority vote (2 vs. 1), the algorithm classifies the patient as High Risk.
+                    </p>
+                    <p class="text-amber-800 text-xs">
+                        ⚠️ <strong>The Normalization Mandate (Module 02 Sneak Peek):</strong> If Patient Age is measured in tens (20 to 80 years) while Cardiac Troponin is measured in decimals (0.01 to 1.5 ng/mL), age differences will completely overpower the biomarker distance! In healthcare informatics, feature scaling is mandatory so lab tests are not drowned out by demographic numbers.
+                    </p>
+                </div>
+            </div>
+
+            <!-- ========================================================= -->
+            <!-- INTERACTIVE DEMO 3: PATIENTS LIKE MINE COHORT RETRIEVAL   -->
+            <!-- ========================================================= -->
+            <div class="bg-gradient-to-br from-slate-900 via-[#0B2D48] to-[#205A70] rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-12">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#F9A03F] text-slate-900 mb-1">
+                            Interactive Bedside Demonstration 03
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                            "Patients Like Mine": Interactive KNN Cohort Matcher
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            Input a newly admitted patient's age and cardiac biomarker, choose neighbor count K, and watch the system retrieve and vote across historical cases.
+                        </p>
+                    </div>
+                    <!-- K Selector Buttons -->
+                    <div class="flex items-center gap-1.5 bg-white/10 p-1.5 rounded-xl border border-white/15">
+                        <span class="text-xs font-semibold text-slate-300 px-2">Set K:</span>
+                        <button id="btn-k1" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-white/20 hover:bg-white/30 text-white transition-colors">K=1</button>
+                        <button id="btn-k3" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-xs transition-colors">K=3</button>
+                        <button id="btn-k5" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-white/20 hover:bg-white/30 text-white transition-colors">K=5</button>
+                        <button id="btn-k7" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-white/20 hover:bg-white/30 text-white transition-colors">K=7</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    <!-- Query Patient Inputs -->
+                    <div class="lg:col-span-5 space-y-4 bg-white/10 p-5 rounded-xl backdrop-blur-md border border-white/15">
+                        <div class="text-xs font-bold uppercase tracking-wider text-[#56A0A9]">New Emergency Patient (Bed 04)</div>
+
+                        <div>
+                            <div class="flex justify-between items-center text-xs font-medium mb-1">
+                                <span class="text-slate-200">Patient Age:</span>
+                                <span id="knn-patient-age-val" class="font-bold text-amber-300 bg-black/30 px-2 py-0.5 rounded">62 Years</span>
+                            </div>
+                            <input id="knn-patient-age" type="range" min="30" max="85" value="62" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center text-xs font-medium mb-1">
+                                <span class="text-slate-200">Cardiac Troponin I (Biomarker):</span>
+                                <span id="knn-patient-trop-val" class="font-bold text-amber-300 bg-black/30 px-2 py-0.5 rounded">0.45 ng/mL</span>
+                            </div>
+                            <input id="knn-patient-trop" type="range" min="0.02" max="1.80" step="0.02" value="0.45" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                                <span>0.02 (Normal)</span>
+                                <span>0.40 (Myocardial Injury)</span>
+                                <span>1.80 ng/mL</span>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-t border-white/15">
+                            <div class="text-xs font-semibold text-slate-300 mb-2">KNN Consensus Diagnostic:</div>
+                            <div id="knn-prediction-badge" class="p-3 rounded-xl text-center font-bold text-xs bg-rose-50 text-rose-800 border border-rose-300">
+                                🚨 High Risk: Acute Myocardial Infarction (AMI)
+                            </div>
+                            <div id="knn-vote-summary" class="mt-2 text-center text-xs text-amber-200 font-medium">
+                                Voting tally: 2 AMI vs. 1 Non-Cardiac (66.7% confidence)
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Retrieved Cohort Table -->
+                    <div class="lg:col-span-7 bg-white rounded-xl p-5 text-slate-800 shadow-md">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider text-[#205A70]">Historical Patient Database (Ranked by Similarity)</span>
+                            <span class="text-[11px] text-slate-500">Green = Top K Matches</span>
+                        </div>
+
+                        <div class="overflow-x-auto max-h-72 overflow-y-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200 text-slate-500 bg-slate-50">
+                                        <th class="py-2 px-2.5 font-bold">Match</th>
+                                        <th class="py-2 px-2.5 font-bold">Age</th>
+                                        <th class="py-2 px-2.5 font-bold">Troponin</th>
+                                        <th class="py-2 px-2.5 font-bold">Historical Outcome</th>
+                                        <th class="py-2 px-2.5 font-bold text-right">Distance</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="knn-cohort-list" class="divide-y divide-slate-100 text-slate-700 font-medium">
+                                    <!-- Populated via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="mt-3 p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-[11px] text-slate-600">
+                            💡 <strong>Why Clinicians Trust KNN:</strong> In audits, the attending physician can inspect the exact medical record numbers of the <em>K</em> patients the algorithm referenced to verify biological plausibility.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 4: DECISION TREES & RANDOM FORESTS                -->
+        <!-- ========================================================= -->
+        <section id="section4" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-[#F9A03F]/15 text-amber-800 border border-amber-200">Section 04</span>
+                <span class="text-xs font-medium text-slate-400">• Interpretable &amp; Ensemble Models</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">4. Interpretable Decisions: Trees and Forests</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                In clinical medicine, "black-box" models that cannot explain their reasoning often face legal, ethical, and clinical rejection. <strong>Decision Trees</strong> are beloved by health informaticians because they directly mimic clinical flowchart guidelines, such as Emergency Severity Index (ESI) triage and Advanced Cardiac Life Support (ACLS) protocols.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                
+                <!-- Decision Tree Card -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Emergency Triage Decision Tree</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-100 text-slate-600">Flowchart Logic</span>
+                        </div>
+                        
+                        <!-- Decision Tree Structure -->
+                        <div class="flex flex-col items-center my-6">
+                            <!-- Root Node -->
+                            <div class="px-5 py-2.5 rounded-xl bg-white border-2 border-[#205A70] text-[#0B2D48] font-bold text-xs sm:text-sm shadow-xs text-center">
+                                Acute Chest Pain?
+                            </div>
+                            <div class="w-0.5 h-4 bg-[#56A0A9]"></div>
+                            
+                            <!-- Top Split Bar -->
+                            <div class="w-64 sm:w-72 border-t-2 border-[#56A0A9] relative flex justify-between">
+                                <!-- Left Branch (Yes) -->
+                                <div class="flex flex-col items-center -mt-0.5 -ml-1">
+                                    <div class="w-0.5 h-3 bg-[#56A0A9]"></div>
+                                    <span class="text-[11px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200 mb-1">Yes</span>
+                                    <div class="w-0.5 h-3 bg-[#56A0A9]"></div>
+                                    <div class="px-3.5 py-2 rounded-xl bg-rose-600 text-white font-bold text-xs shadow-md text-center">
+                                        🚨 High Priority: Cath Lab
+                                    </div>
+                                </div>
+                                
+                                <!-- Right Branch (No) -->
+                                <div class="flex flex-col items-center -mt-0.5 -mr-1">
+                                    <div class="w-0.5 h-3 bg-[#56A0A9]"></div>
+                                    <span class="text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 mb-1">No</span>
+                                    <div class="w-0.5 h-3 bg-[#56A0A9]"></div>
+                                    
+                                    <!-- Child Decision Node -->
+                                    <div class="px-3.5 py-2 rounded-xl bg-white border-2 border-[#205A70] text-[#0B2D48] font-bold text-xs shadow-xs text-center">
+                                        Fever &gt; 101°F?
+                                    </div>
+                                    
+                                    <div class="w-0.5 h-3 bg-[#56A0A9]"></div>
+                                    
+                                    <!-- Sub Split Bar -->
+                                    <div class="w-44 sm:w-48 border-t-2 border-[#56A0A9] relative flex justify-between">
+                                        <!-- Sub Left (Yes) -->
+                                        <div class="flex flex-col items-center -mt-0.5 -ml-1">
+                                            <div class="w-0.5 h-2.5 bg-[#56A0A9]"></div>
+                                            <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 mb-1">Yes</span>
+                                            <div class="w-0.5 h-2.5 bg-[#56A0A9]"></div>
+                                            <div class="px-2.5 py-1.5 rounded-lg bg-[#56A0A9] text-white font-bold text-xs shadow-xs text-center">
+                                                ⚠️ Medium: Sepsis Workup
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Sub Right (No) -->
+                                        <div class="flex flex-col items-center -mt-0.5 -mr-1">
+                                            <div class="w-0.5 h-2.5 bg-[#56A0A9]"></div>
+                                            <span class="text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 mb-1">No</span>
+                                            <div class="w-0.5 h-2.5 bg-[#56A0A9]"></div>
+                                            <div class="px-2.5 py-1.5 rounded-lg bg-slate-200 text-slate-800 font-bold text-xs shadow-xs text-center">
+                                                ✅ Low: Routine Triage
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200/60 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        <strong class="text-slate-800">Why Clinicians Love It:</strong> 100% auditable. Clinicians can defend their decision in court by pointing to the exact branch traversed. However, single trees are prone to <em>overfitting</em> (memorizing quirks of a single hospital ward).
+                    </div>
+                </div>
+
+                <!-- Random Forest Card -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Random Forest: The "Tumor Board"</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">Ensemble Consensus</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-600 mb-3">
+                            In cancer medicine, life-and-death decisions are not made by one doctor. A <strong>Multidisciplinary Tumor Board</strong> of 15 specialists convenes—surgical oncologists, radiologists, and pathologists. Each evaluates the patient from their perspective, and collective voting eliminates individual errors.
+                        </p>
+
+                        <div class="flex flex-col items-center text-center my-4">
+                            <div class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 mb-2">
+                                Electronic Health Record Patient Cohort
+                            </div>
+                            <div class="flow-arrow -my-1 text-[#205A70]">↓</div>
+                            <div class="grid grid-cols-3 gap-2 sm:gap-3 my-3 w-full">
+                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col items-center shadow-xs">
+                                    <span class="text-2xl mb-1">🌲</span>
+                                    <span class="font-bold text-xs text-slate-800">Tree 01</span>
+                                    <span class="text-xs text-rose-600 font-semibold mt-1">Vote: High Risk</span>
+                                </div>
+                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col items-center shadow-xs">
+                                    <span class="text-2xl mb-1">🌲</span>
+                                    <span class="font-bold text-xs text-slate-800">Tree 02</span>
+                                    <span class="text-xs text-amber-600 font-semibold mt-1">Vote: Medium</span>
+                                </div>
+                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col items-center shadow-xs">
+                                    <span class="text-2xl mb-1">🌲</span>
+                                    <span class="font-bold text-xs text-slate-800">Tree 03</span>
+                                    <span class="text-xs text-rose-600 font-semibold mt-1">Vote: High Risk</span>
+                                </div>
+                            </div>
+                            <div class="flow-arrow -my-1 text-[#205A70]">↓</div>
+                            <div class="p-3 rounded-xl font-semibold text-xs sm:text-sm bg-gradient-to-r from-[#205A70] to-[#0B2D48] text-white shadow-md mt-1 w-full text-center">
+                                Final Consensus: High Risk Priority (2 vs. 1 Majority)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200/60 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        <strong class="text-slate-800">Ensemble Wisdom:</strong> By building 100 to 500 diverse decision trees (each trained on random patient subsets and random features), Random Forests achieve state-of-the-art predictive power on tabular EHR records.
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ========================================================= -->
+            <!-- INTERACTIVE DEMO 4: TRIAGE TREE & TUMOR BOARD SIMULATOR   -->
+            <!-- ========================================================= -->
+            <div class="bg-gradient-to-br from-slate-900 via-[#0B2D48] to-[#205A70] rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-12">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#F9A03F] text-slate-900 mb-1">
+                            Interactive Bedside Demonstration 04
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                            Interactive Triage Decision Tree &amp; Ensemble Simulator
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            Select clinical presentation options to see how the single decision tree lights up its path, then test the 5-doctor ensemble consensus button.
+                        </p>
+                    </div>
+                    <button id="btn-simulate-ensemble" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-[#F9A03F] hover:bg-[#f89528] text-slate-900 shadow-md transition-colors flex items-center gap-1.5">
+                        <span>🩺 Simulate 5-Doctor Tumor Board</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    <!-- Clinical Choice Inputs -->
+                    <div class="lg:col-span-5 space-y-4 bg-white/10 p-5 rounded-xl backdrop-blur-md border border-white/15">
+                        <div class="text-xs font-bold uppercase tracking-wider text-[#56A0A9]">Step-by-Step Clinical Triage Protocol</div>
+
+                        <!-- Step 1: Chest Pain -->
+                        <div>
+                            <span class="text-xs font-semibold text-slate-200 block mb-1.5">Step 1: Patient Presenting with Acute Chest Pain?</span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button id="btn-triage-chest-yes" class="px-3 py-2 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 transition-colors">Yes (Chest Pain)</button>
+                                <button id="btn-triage-chest-no" class="px-3 py-2 rounded-lg text-xs font-bold bg-white/20 text-white hover:bg-white/30 transition-colors">No Chest Pain</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Diagnostic Split -->
+                        <div id="triage-step2-container">
+                            <span id="triage-step2-title" class="text-xs font-semibold text-slate-200 block mb-1.5">Step 2: 12-Lead ECG Shows ST-Elevation?</span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button id="btn-triage-test-yes" class="px-3 py-2 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 transition-colors">Yes (ST-Elevation)</button>
+                                <button id="btn-triage-test-no" class="px-3 py-2 rounded-lg text-xs font-bold bg-white/20 text-white hover:bg-white/30 transition-colors">No (Normal/Non-ST)</button>
+                            </div>
+                        </div>
+
+                        <!-- Disposition Display -->
+                        <div class="pt-3 border-t border-white/15">
+                            <span class="text-xs text-slate-300 font-semibold block mb-1">Decision Tree Triage Disposition:</span>
+                            <div id="triage-disposition-card" class="p-3.5 rounded-xl text-center font-bold text-xs bg-rose-600 text-white shadow-md">
+                                🚨 Code STEMI: Immediate Cardiac Catheterization Lab (&lt;90 Min Door-to-Balloon)
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Flow & Ensemble Container -->
+                    <div class="lg:col-span-7 space-y-4">
+                        
+                        <!-- Visual Pathway Box -->
+                        <div class="bg-white rounded-xl p-5 text-slate-800 shadow-md">
+                            <div class="text-xs font-bold uppercase tracking-wider text-[#205A70] mb-3">Live Active Decision Pathway</div>
+                            
+                            <div class="flex flex-col items-center space-y-2 text-xs">
+                                <div id="path-node-1" class="w-full text-center p-2 rounded-lg border-2 border-[#205A70] bg-[#EBF5F7] font-bold text-[#0B2D48]">
+                                    Root: Patient Evaluation (Chest Pain = YES)
+                                </div>
+                                <div class="text-[#205A70] font-bold">↓</div>
+                                <div id="path-node-2" class="w-full text-center p-2 rounded-lg border-2 border-[#205A70] bg-[#EBF5F7] font-bold text-[#0B2D48]">
+                                    Diagnostic Node: ECG ST-Elevation (YES)
+                                </div>
+                                <div class="text-[#205A70] font-bold">↓</div>
+                                <div id="path-node-3" class="w-full text-center p-2.5 rounded-lg border-2 border-rose-600 bg-rose-50 font-bold text-rose-800">
+                                    Leaf Node: Emergency Interventional Cardiology Cath Activation
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ensemble Consensus Simulation Box -->
+                        <div id="ensemble-votes-container" class="bg-white/10 p-4 rounded-xl border border-white/15 hidden">
+                            <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2">Simulated 5-Specialist Tumor Board Votes</div>
+                            <div class="grid grid-cols-5 gap-2 text-center text-xs">
+                                <div class="p-2 rounded bg-white text-slate-800 font-bold">
+                                    <span class="block text-slate-400 text-[10px]">Doc 1</span>
+                                    <span class="text-rose-600">STEMI</span>
+                                </div>
+                                <div class="p-2 rounded bg-white text-slate-800 font-bold">
+                                    <span class="block text-slate-400 text-[10px]">Doc 2</span>
+                                    <span class="text-rose-600">STEMI</span>
+                                </div>
+                                <div class="p-2 rounded bg-white text-slate-800 font-bold">
+                                    <span class="block text-slate-400 text-[10px]">Doc 3</span>
+                                    <span class="text-rose-600">STEMI</span>
+                                </div>
+                                <div class="p-2 rounded bg-white text-slate-800 font-bold">
+                                    <span class="block text-slate-400 text-[10px]">Doc 4</span>
+                                    <span class="text-amber-600">Observe</span>
+                                </div>
+                                <div class="p-2 rounded bg-white text-slate-800 font-bold">
+                                    <span class="block text-slate-400 text-[10px]">Doc 5</span>
+                                    <span class="text-rose-600">STEMI</span>
+                                </div>
+                            </div>
+                            <div class="mt-2 text-center text-xs text-emerald-300 font-semibold">
+                                Ensemble Consensus: 4 vs. 1 Majority Vote confirmed High Risk STEMI!
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 5: DEEP LEARNING IN HEALTHCARE                    -->
+        <!-- ========================================================= -->
+        <section id="section5" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-violet-50 text-violet-700 border border-violet-200">Section 05</span>
+                <span class="text-xs font-medium text-slate-400">• Advanced AI Architecture</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">5. Introduction to Deep Learning</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                While traditional machine learning (like Random Forests) performs extraordinarily well on structured tabular data (lab results and vitals), it fails completely when applied to raw medical images, digital pathology biopsies, or continuous ECG waveforms.
+            </p>
+
+            <p class="text-slate-600 text-sm sm:text-base leading-relaxed max-w-4xl mb-8">
+                Consider a standard digital Chest X-ray: it is a grid of $2048 \times 2048$ pixels, representing over <strong>4.1 million numbers</strong>. A human cannot write IF-THEN rules for 4 million pixels. <strong>Deep Learning</strong> solves this through layered artificial neural networks inspired by the human visual cortex, automatically extracting hierarchical medical features directly from raw image pixels without manual human engineering.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                
+                <!-- Anatomy of a Neural Network -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Anatomy of a Clinical Neural Network</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-violet-50 text-violet-700 border border-violet-200">Hierarchical Learning</span>
+                        </div>
+                        
+                        <div class="flex justify-around items-center text-center py-6">
+                            <!-- Input Layer -->
+                            <div class="flex flex-col items-center">
+                                <span class="font-bold text-[11px] uppercase tracking-wider text-slate-500 mb-2">Input Layer</span>
+                                <div class="neuron-layer">
+                                    <div class="neuron"></div>
+                                    <div class="neuron"></div>
+                                    <div class="neuron"></div>
+                                </div>
+                                <span class="text-xs mt-2 text-slate-600 font-medium">Raw Pixels</span>
+                            </div>
+                            
+                            <div class="text-2xl font-bold text-[#56A0A9] -mt-6">→</div>
+                            
+                            <!-- Hidden Layers -->
+                            <div class="flex flex-col items-center">
+                                <span class="font-bold text-[11px] uppercase tracking-wider text-[#205A70] mb-2">Hidden Layers</span>
+                                <div class="neuron-layer bg-[#205A70]/10 border-[#205A70]/20">
+                                    <div class="neuron"></div>
+                                    <div class="neuron"></div>
+                                    <div class="neuron"></div>
+                                    <div class="neuron"></div>
+                                </div>
+                                <span class="text-xs mt-2 text-slate-600 font-medium">Edge &amp; Tissue Filters</span>
+                            </div>
+                            
+                            <div class="text-2xl font-bold text-[#56A0A9] -mt-6">→</div>
+                            
+                            <!-- Output Layer -->
+                            <div class="flex flex-col items-center">
+                                <span class="font-bold text-[11px] uppercase tracking-wider text-slate-500 mb-2">Output Layer</span>
+                                <div class="neuron-layer">
+                                    <div class="neuron bg-[#F9A03F]"></div>
+                                </div>
+                                <span class="text-xs mt-2 text-slate-600 font-medium">Pneumonia Prob</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-4">
+                            <div class="p-2 rounded bg-slate-50">
+                                <strong>Layer 1 (Low-level):</strong> Detects basic contrast edges, dark-to-light bone densities, and diagonal ribs.
+                            </div>
+                            <div class="p-2 rounded bg-slate-50">
+                                <strong>Layer 2 (Mid-level):</strong> Combines edges into anatomical boundaries (cardiac silhouette, lung bases).
+                            </div>
+                            <div class="p-2 rounded bg-slate-50">
+                                <strong>Layer 3 (High-level):</strong> Identifies pathological patterns (lobar consolidation, pleural effusions, infiltrates).
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deep Learning Applications Chart -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Clinical Adoption &amp; Impact</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-[#205A70]/10 text-[#205A70] border border-[#205A70]/20">Hospital Impact</span>
+                        </div>
+                        <p class="text-sm text-slate-500 mb-4">Relative impact and clinical adoption across healthcare disciplines.</p>
+                        
+                        <div class="chart-container">
+                            <canvas id="dlApplicationsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200/60 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        <strong class="text-slate-800">The "Black Box" Problem:</strong> While deep networks achieve superhuman accuracy at detecting diabetic retinopathy and lung nodules, they cannot easily tell the clinician <em>why</em>. This has spurred the field of <strong>Explainable AI (XAI)</strong>, such as Grad-CAM heatmaps that highlight which lung zone triggered the alert.
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 6: OTHER POWERFUL MODELS (K-MEANS & SVM)          -->
+        <!-- ========================================================= -->
+        <section id="section6" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">Section 06</span>
+                <span class="text-xs font-medium text-slate-400">• Precision Medicine &amp; Classification</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">6. Beyond the Basics: Other Powerful Models</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                In addition to standard regression and decision trees, health informatics relies heavily on two specialized architectures: <strong>K-Means Clustering</strong> for discovering patient subtypes in precision medicine, and <strong>Support Vector Machines (SVM)</strong> for high-dimensional biomarker diagnosis.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                
+                <!-- K-Means Card -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">K-Means: Patient Phenotyping</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-teal-50 text-teal-700 border border-teal-200">Unsupervised</span>
+                        </div>
+                        <p class="text-sm text-slate-500 mb-4">
+                            Partitioning patients into 3 distinct biological cohorts based on Biomarkers A &amp; B without any prior disease labels.
+                        </p>
+                        
+                        <div class="chart-container">
+                            <canvas id="kmeansChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200/60 text-xs sm:text-sm text-slate-600 leading-relaxed space-y-2">
+                        <p>
+                            <strong class="text-slate-800">Precision Medicine Case:</strong> In 2018, Scandinavian researchers clustered 15,000 diabetic patients on age, BMI, and autoantibodies. Instead of one blanket disease ("Type 2 Diabetes"), K-Means revealed <strong>5 distinct subtypes</strong> (e.g. Severe Insulin-Deficient vs. Severe Insulin-Resistant), each requiring radically different medications!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- SVM Card -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Support Vector Machines (SVM)</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">Maximal Margin</span>
+                        </div>
+                        <p class="text-sm text-slate-500 mb-4">
+                            Finding the optimal separating hyperplane and maximum safety margins between Benign and Malignant tumors.
+                        </p>
+                        
+                        <div class="chart-container">
+                            <canvas id="svmChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200/60 text-xs sm:text-sm text-slate-600 leading-relaxed space-y-2">
+                        <p>
+                            <strong class="text-slate-800">The "Maximum Safety Buffer" Intuition:</strong> Many lines could separate benign from malignant biopsies. SVM finds the one line that leaves the <em>widest possible empty margin</em> (safety buffer) between classes. In healthcare, this maximal clearance offers maximum protection against lab measurement noise!
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ========================================================= -->
+            <!-- INTERACTIVE DEMO 5: PRECISION PHENOTYPING SANDBOX         -->
+            <!-- ========================================================= -->
+            <div class="bg-gradient-to-br from-slate-900 via-[#0B2D48] to-[#205A70] rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-12">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#F9A03F] text-slate-900 mb-1">
+                            Interactive Bedside Demonstration 05
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                            Precision Medicine Sandbox: Unsupervised Patient Subtyping
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            Click through the three unsupervised clusters discovered by K-Means to inspect how precision informatics tailors clinical protocols.
+                        </p>
+                    </div>
+                    <!-- Cluster Tabs -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button id="tab-pheno-1" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-sm transition-colors">
+                            Cohort 1: Acute Cardiorenal
+                        </button>
+                        <button id="tab-pheno-2" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white/20 text-white hover:bg-white/30 transition-colors">
+                            Cohort 2: Metabolic Sepsis
+                        </button>
+                        <button id="tab-pheno-3" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white/20 text-white hover:bg-white/30 transition-colors">
+                            Cohort 3: Baseline Stable
+                        </button>
+                    </div>
+                </div>
+
+                <div id="pheno-detail-content" class="bg-white rounded-xl p-6 text-slate-800 shadow-md">
+                    <!-- Populated via JavaScript -->
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-rose-600 bg-rose-50 px-2 py-0.5 rounded">High Mortality Risk (32%)</span>
+                            <h4 class="text-lg font-bold text-[#0B2D48] mt-1">Cluster 1: Cardiorenal Syndrome Subphenotype</h4>
+                        </div>
+                        <span class="text-xs font-semibold text-slate-500">K-Means Cluster 01</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                        <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                            <span class="font-bold text-slate-700 block mb-1">Dominant Biomarkers:</span>
+                            <p class="text-slate-600">Elevated B-type Natriuretic Peptide (BNP), Serum Creatinine &gt; 2.4 mg/dL, low eGFR.</p>
+                        </div>
+                        <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                            <span class="font-bold text-slate-700 block mb-1">Clinical Vulnerability:</span>
+                            <p class="text-slate-600">Poor response to standard loop diuretics; high risk of acute kidney injury during fluid resuscitation.</p>
+                        </div>
+                        <div class="p-3 rounded-lg bg-teal-50 border border-teal-200 text-teal-900">
+                            <span class="font-bold block mb-1">Targeted Precision Pathway:</span>
+                            <p>Immediate nephrology consult, continuous veno-venous hemofiltration (CVVH) readiness, restrictive fluid protocol.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 7: ETHICS, GOVERNANCE & RESPONSIBLE AI            -->
+        <!-- ========================================================= -->
+        <section id="section7" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">Section 07</span>
+                <span class="text-xs font-medium text-slate-400">• Governance, Ethics &amp; Regulation</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">7. Ethical, Practical, and Governance Considerations</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                In entertainment algorithms (like Netflix or Spotify), an incorrect recommendation means the user skips a movie. In clinical healthcare, an algorithmic error can lead to delayed antibiotic therapy in septic shock, missed malignant melanomas on dark skin, or fatal drug overdoses.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                
+                <!-- Algorithmic Bias -->
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 card-hover flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 rounded-xl bg-amber-100/70 text-amber-700 flex items-center justify-center text-2xl">
+                                ⚖️
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-[#0B2D48]">Algorithmic Bias &amp; Health Disparities</h3>
+                                <span class="text-xs font-semibold text-amber-700">Health Equity Risk</span>
+                            </div>
+                        </div>
+
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
+                            Models trained on historically biased data amplify existing medical inequities. In a landmark 2019 study published in <em>Science</em> (Obermeyer et al.), a commercial risk algorithm used past healthcare spending as a proxy for illness severity. Because less money was historically spent on Black patients due to systemic access barriers, the algorithm falsely classified sick Black patients as healthier than equally sick White patients.
+                        </p>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700">
+                        <strong>Informatics Solution:</strong> Mandatory subgroup fairness auditing across race, biological sex, age, and insurance status prior to hospital deployment.
+                    </div>
+                </div>
+
+                <!-- Explainability & XAI -->
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 card-hover flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 rounded-xl bg-teal-100/70 text-teal-700 flex items-center justify-center text-2xl">
+                                🔍
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-[#0B2D48]">Explainability &amp; The "Clinician-in-the-Loop"</h3>
+                                <span class="text-xs font-semibold text-[#205A70]">Trust &amp; Auditability</span>
+                            </div>
+                        </div>
+
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
+                            AI should never act as an unchecked, autonomous doctor. It functions strictly as an <strong>assistive co-pilot</strong>. Clinicians must understand <em>why</em> a model issued a warning. Tools like <strong>SHAP</strong> (Shapley Additive Explanations) show exactly how much each vital sign contributed (+25% for high lactate, -15% for normal blood pressure).
+                        </p>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700">
+                        <strong>Informatics Solution:</strong> Provide interactive bedside feature contribution gauges alongside any risk prediction in the EHR.
+                    </div>
+                </div>
+
+                <!-- Data Privacy & HIPAA -->
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 card-hover flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 rounded-xl bg-blue-100/70 text-blue-700 flex items-center justify-center text-2xl">
+                                🛡️
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-[#0B2D48]">Data Privacy &amp; HIPAA Safe Harbor</h3>
+                                <span class="text-xs font-semibold text-blue-700">Confidentiality</span>
+                            </div>
+                        </div>
+
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
+                            Under the HIPAA Privacy Rule, training clinical machine learning requires stripping the <strong>18 direct identifiers</strong> (patient names, medical record numbers, dates of service, zip codes, and contact info). Modern systems also employ <em>Federated Learning</em>, where models train across hospital firewalls without patient data ever leaving the facility.
+                        </p>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700">
+                        <strong>Informatics Solution:</strong> Automated de-identification pipelines and cryptographically secure differential privacy.
+                    </div>
+                </div>
+
+                <!-- FDA SaMD & Dataset Shift -->
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 card-hover flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 rounded-xl bg-purple-100/70 text-purple-700 flex items-center justify-center text-2xl">
+                                📋
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-[#0B2D48]">FDA SaMD &amp; The "Dataset Shift" Gap</h3>
+                                <span class="text-xs font-semibold text-purple-700">Regulatory Oversight</span>
+                            </div>
+                        </div>
+
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
+                            The US FDA regulates diagnostic AI as <strong>Software as a Medical Device (SaMD)</strong>. Over 85% of algorithms published in top medical journals degrade when deployed in live hospital wards due to <em>dataset shift</em> (different patient populations, scanner calibration differences, new nursing documentation habits).
+                        </p>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700">
+                        <strong>Informatics Solution:</strong> Continuous prospective monitoring and drift detection to recalibrate models over time.
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- Course Module Navigation Bottom Card -->
+        <div class="bg-gradient-to-r from-[#0B2D48] to-[#205A70] rounded-2xl p-6 sm:p-8 text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div class="text-center sm:text-left">
+                <div class="text-xs font-semibold text-[#56A0A9] uppercase tracking-wider mb-1">Learning Journey</div>
+                <h4 class="text-xl font-bold">Finished Module 01: Introduction to ML</h4>
+                <p class="text-sm text-slate-300 mt-1">Ready to clean clinical data, impute missing labs, and encode medical features?</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition-colors border border-white/20">
+                    ← Hub
+                </a>
+                <a href="data-preprocessing.html" class="px-5 py-2.5 rounded-xl bg-[#F9A03F] hover:bg-[#f89528] text-slate-900 text-sm font-bold shadow-md transition-colors flex items-center gap-2">
+                    <span>Module 02: Preprocessing</span>
+                    <span>→</span>
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200/80 py-10 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="flex items-center justify-center gap-2 mb-3">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#56A0A9]"></span>
+                <span class="font-bold text-[#0B2D48] tracking-tight">ML Notes for Healthcare</span>
+            </div>
+            <p class="text-slate-500 text-sm max-w-lg mx-auto mb-2">
+                Department of Bio-Medical Sciences, The Apollo University, Chittoor.
+            </p>
+            <div class="text-xs text-slate-400">
+                Designed for healthcare professionals, students, and machine learning researchers.
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Chart.js & Interactive Simulators Initialization Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Initialize KaTeX Auto-Render
+            if (typeof renderMathInElement === 'function') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
+            }
+
+            const colorPrimary = '#205A70';
+            const colorSecondary = '#56A0A9';
+            const colorAccent = '#F9A03F';
+            const colorLight = '#C2C2C2';
+            const colorRiskHigh = '#F9A03F';
+            const colorRiskLow = '#205A70';
+            const colorUnknown = '#FBC17D';
+
+            // Safe Tooltip Title Callback
+            const tooltipTitleCallback = (tooltipItems) => {
+                if (!tooltipItems || !tooltipItems.length) return '';
+                const item = tooltipItems[0];
+                const labels = item.chart?.data?.labels;
+                if (labels && labels[item.dataIndex] !== undefined) {
+                    const label = labels[item.dataIndex];
+                    return Array.isArray(label) ? label.join(' ') : label;
+                }
+                return item.dataset?.label || '';
+            };
+
+            // Custom Tooltip Label Callback
+            const tooltipLabelCallback = (context) => {
+                const raw = context.raw;
+                if (raw && typeof raw === 'object' && 'x' in raw && 'y' in raw) {
+                    return ` ${context.dataset.label}: (${raw.x}, ${raw.y})`;
+                }
+                return ` ${context.dataset.label}: ${context.formattedValue}`;
+            };
+            
+            const defaultChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: { family: 'Inter', size: 12 },
+                            color: '#0B2D48',
+                            boxWidth: 12,
+                            padding: 12
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback,
+                            label: tooltipLabelCallback
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#64748B', font: { family: 'Inter' } }
+                    },
+                    y: {
+                        grid: { color: '#f1f5f9' },
+                        ticks: { color: '#64748B', font: { family: 'Inter' } }
+                    }
+                }
+            };
+
+            // 1. Linear Regression Chart
+            if (document.getElementById('linearRegressionChart')) {
+                const ctxLinear = document.getElementById('linearRegressionChart').getContext('2d');
+                const ageVsBpData = [
+                    { x: 20, y: 120 }, { x: 25, y: 122 }, { x: 30, y: 125 }, { x: 35, y: 128 },
+                    { x: 40, y: 130 }, { x: 45, y: 131 }, { x: 50, y: 135 }, { x: 55, y: 138 },
+                    { x: 60, y: 140 }, { x: 65, y: 142 }, { x: 70, y: 144 }, { x: 75, y: 145 },
+                    { x: 42, y: 128 }, { x: 58, y: 141 }, { x: 33, y: 126 }
+                ];
+                const regressionLine = [
+                    { x: 20, y: 121 }, { x: 75, y: 145 }
+                ];
+
+                new Chart(ctxLinear, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'Patient Data',
+                                data: ageVsBpData,
+                                backgroundColor: colorSecondary,
+                                type: 'scatter',
+                                pointRadius: 5,
+                                pointHoverRadius: 7
+                            },
+                            {
+                                label: 'Regression Line (Fitted)',
+                                data: regressionLine,
+                                backgroundColor: colorRiskHigh,
+                                borderColor: colorRiskHigh,
+                                type: 'line',
+                                fill: false,
+                                borderWidth: 3,
+                                pointRadius: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            x: { 
+                                title: { display: true, text: 'Age (Years)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } },
+                                grid: { display: false },
+                                ticks: { color: '#64748B', font: { family: 'Inter' } }
+                            },
+                            y: { 
+                                title: { display: true, text: 'Systolic Blood Pressure (mmHg)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } },
+                                grid: { color: '#f1f5f9' },
+                                ticks: { color: '#64748B', font: { family: 'Inter' } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 2. Logistic Regression Chart
+            if (document.getElementById('logisticRegressionChart')) {
+                const ctxLogistic = document.getElementById('logisticRegressionChart').getContext('2d');
+                const lowRiskData = [
+                    { x: 80, y: 0.05 }, { x: 90, y: 0.08 }, { x: 95, y: 0.12 }, { x: 100, y: 0.10 },
+                    { x: 105, y: 0.18 }, { x: 110, y: 0.22 }, { x: 115, y: 0.25 }, { x: 120, y: 0.35 }
+                ];
+                const highRiskData = [
+                    { x: 125, y: 0.65 }, { x: 130, y: 0.78 }, { x: 140, y: 0.82 }, { x: 150, y: 0.88 },
+                    { x: 160, y: 0.92 }, { x: 170, y: 0.96 }, { x: 180, y: 0.95 }, { x: 190, y: 0.98 }
+                ];
+
+                const sigmoidCurve = [];
+                for (let x = 75; x <= 195; x += 3) {
+                    const prob = 1 / (1 + Math.exp(-0.085 * (x - 122)));
+                    sigmoidCurve.push({ x: x, y: Number(prob.toFixed(3)) });
+                }
+
+                const thresholdLine = [
+                    { x: 75, y: 0.5 }, { x: 195, y: 0.5 }
+                ];
+
+                new Chart(ctxLogistic, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'Sigmoid Probability P(Diabetes)',
+                                data: sigmoidCurve,
+                                type: 'line',
+                                fill: false,
+                                borderColor: colorPrimary,
+                                borderWidth: 3,
+                                pointRadius: 0,
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Low Risk Patients (P < 0.5)',
+                                data: lowRiskData,
+                                backgroundColor: colorSecondary,
+                                pointRadius: 5,
+                                pointHoverRadius: 7
+                            },
+                            {
+                                label: 'High Risk Patients (P ≥ 0.5)',
+                                data: highRiskData,
+                                backgroundColor: colorRiskHigh,
+                                pointRadius: 5,
+                                pointHoverRadius: 7
+                            },
+                            {
+                                label: 'Clinical Threshold (0.5)',
+                                data: thresholdLine,
+                                type: 'line',
+                                borderColor: '#94A3B8',
+                                borderDash: [4, 4],
+                                borderWidth: 1.5,
+                                pointRadius: 0,
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            x: { 
+                                title: { display: true, text: 'Fasting Glucose Level (mg/dL)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } },
+                                grid: { display: false },
+                                ticks: { color: '#64748B', font: { family: 'Inter' } }
+                            },
+                            y: { 
+                                title: { display: true, text: 'Predicted Risk Probability', color: '#0B2D48', font: { family: 'Inter', weight: 600 } },
+                                min: 0,
+                                max: 1.05,
+                                ticks: {
+                                    stepSize: 0.25,
+                                    color: '#64748B',
+                                    font: { family: 'Inter' }
+                                },
+                                grid: { color: '#f1f5f9' }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // 3. KNN Chart
+            if (document.getElementById('knnChart')) {
+                const ctxKnn = document.getElementById('knnChart').getContext('2d');
+                const classA = [
+                    { x: 2, y: 3 }, { x: 2.5, y: 3.5 }, { x: 1.5, y: 2.5 }, { x: 3, y: 2 }, { x: 3.5, y: 3 }
+                ];
+                const classB = [
+                    { x: 7, y: 8 }, { x: 7.5, y: 8.5 }, { x: 6.5, y: 7.5 }, { x: 8, y: 7 }, { x: 8.5, y: 8 }
+                ];
+                const unknown = [
+                    { x: 5, y: 5.5 }
+                ];
+
+                const circlePoints = [];
+                const radius = 2.75;
+                for (let angle = 0; angle <= 360; angle += 15) {
+                    const rad = (angle * Math.PI) / 180;
+                    circlePoints.push({
+                        x: Number((5 + radius * Math.cos(rad)).toFixed(2)),
+                        y: Number((5.5 + radius * Math.sin(rad)).toFixed(2))
+                    });
+                }
+
+                new Chart(ctxKnn, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'Class A (Healthy Biomarkers)',
+                                data: classA,
+                                backgroundColor: colorSecondary,
+                                pointRadius: 6,
+                                pointHoverRadius: 8
+                            },
+                            {
+                                label: 'Class B (Disease Biomarkers)',
+                                data: classB,
+                                backgroundColor: colorPrimary,
+                                pointRadius: 6,
+                                pointHoverRadius: 8
+                            },
+                            {
+                                label: 'Unknown Patient (Query Point)',
+                                data: unknown,
+                                backgroundColor: colorUnknown,
+                                pointRadius: 10,
+                                pointStyle: 'rectRot',
+                                borderWidth: 2.5,
+                                borderColor: colorAccent
+                            },
+                            {
+                                label: 'K=3 Neighborhood Radius',
+                                data: circlePoints,
+                                type: 'line',
+                                borderColor: '#F9A03F',
+                                borderDash: [4, 4],
+                                borderWidth: 1.5,
+                                pointRadius: 0,
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            x: { 
+                                title: { display: true, text: 'Biomarker 1 (Cardiac Troponin ng/mL)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } },
+                                grid: { display: false },
+                                ticks: { color: '#64748B', font: { family: 'Inter' } }
+                            },
+                            y: { 
+                                title: { display: true, text: 'Biomarker 2 (D-Dimer ng/mL)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } },
+                                grid: { color: '#f1f5f9' },
+                                ticks: { color: '#64748B', font: { family: 'Inter' } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 4. Deep Learning Applications Chart
+            if (document.getElementById('dlApplicationsChart')) {
+                const ctxDlApps = document.getElementById('dlApplicationsChart').getContext('2d');
+                
+                const wrapLabel = (label, maxWidth = 16) => {
+                  if (label.length <= maxWidth) return label;
+                  const words = label.split(' ');
+                  let lines = [];
+                  let currentLine = '';
+                  for (const word of words) {
+                    if ((currentLine + ' ' + word).trim().length > maxWidth) {
+                      lines.push(currentLine.trim());
+                      currentLine = word;
+                    } else {
+                      currentLine = (currentLine + ' ' + word).trim();
+                    }
+                  }
+                  if (currentLine) lines.push(currentLine.trim());
+                  return lines;
+                };
+
+                const dlLabels = [
+                  'Medical Image Analysis', 
+                  'Predictive ICU Monitoring', 
+                  'Genomic Sequencing', 
+                  'Clinical Drug Discovery'
+                ].map(l => wrapLabel(l));
+                
+                new Chart(ctxDlApps, {
+                    type: 'bar',
+                    data: {
+                        labels: dlLabels,
+                        datasets: [{
+                            label: 'Impact & Adoption Score',
+                            data: [92, 78, 72, 84],
+                            backgroundColor: [
+                                colorPrimary,
+                                colorAccent,
+                                colorSecondary,
+                                colorLight
+                            ],
+                            borderColor: colorPrimary,
+                            borderWidth: 1,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    title: tooltipTitleCallback,
+                                    label: (context) => ` Clinical Impact Score: ${context.parsed.y}/100`
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#64748B', font: { family: 'Inter', size: 11 } }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: { display: true, text: 'Clinical Impact Score (out of 100)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } },
+                                grid: { color: '#f1f5f9' },
+                                ticks: { color: '#64748B', font: { family: 'Inter' } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 5. K-Means Clustering Chart
+            if (document.getElementById('kmeansChart')) {
+                const ctxKmeans = document.getElementById('kmeansChart').getContext('2d');
+                new Chart(ctxKmeans, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'Cluster 1: Acute Cardiorenal Risk',
+                                data: [{x: 2, y: 3}, {x: 2.5, y: 3.5}, {x: 1.5, y: 2.5}, {x: 3, y: 2}],
+                                backgroundColor: colorPrimary,
+                                pointRadius: 6,
+                                pointHoverRadius: 8
+                            },
+                            {
+                                label: 'Cluster 2: Metabolic Syndrome',
+                                data: [{x: 7, y: 8}, {x: 7.5, y: 8.5}, {x: 6.5, y: 7.5}, {x: 8, y: 7}],
+                                backgroundColor: colorSecondary,
+                                pointRadius: 6,
+                                pointHoverRadius: 8
+                            },
+                            {
+                                label: 'Cluster 3: Healthy Baseline',
+                                data: [{x: 2, y: 8}, {x: 3.5, y: 8.5}, {x: 1.5, y: 7.5}, {x: 3, y: 9}],
+                                backgroundColor: colorAccent,
+                                pointRadius: 6,
+                                pointHoverRadius: 8
+                            }
+                        ]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            x: { 
+                                title: { display: true, text: 'Biomarker A (Inflammatory hs-CRP)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } },
+                                grid: { display: false },
+                                ticks: { color: '#64748B', font: { family: 'Inter' } }
+                            },
+                            y: { 
+                                title: { display: true, text: 'Biomarker B (Lipid / Nephropathy)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } },
+                                grid: { color: '#f1f5f9' },
+                                ticks: { color: '#64748B', font: { family: 'Inter' } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 6. Support Vector Machine (SVM) Chart
+            if (document.getElementById('svmChart')) {
+                const ctxSvm = document.getElementById('svmChart').getContext('2d');
+                new Chart(ctxSvm, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'Benign Tumor Samples',
+                                data: [{x: 2, y: 3}, {x: 2.5, y: 4.5}, {x: 1.5, y: 2.5}, {x: 3, y: 2}, {x: 4, y: 5}],
+                                backgroundColor: colorPrimary,
+                                type: 'scatter',
+                                pointRadius: 6,
+                                pointHoverRadius: 8
+                            },
+                            {
+                                label: 'Malignant Tumor Samples',
+                                data: [{x: 7, y: 8}, {x: 7.5, y: 9.5}, {x: 6.5, y: 7.5}, {x: 8, y: 7}, {x: 6, y: 8.5}],
+                                backgroundColor: colorSecondary,
+                                type: 'scatter',
+                                pointRadius: 6,
+                                pointHoverRadius: 8
+                            },
+                            {
+                                label: 'Optimal Separating Hyperplane',
+                                data: [{x: 0, y: 6.5}, {x: 10, y: 4.5}],
+                                backgroundColor: colorAccent,
+                                borderColor: colorAccent,
+                                type: 'line',
+                                fill: false,
+                                borderWidth: 3,
+                                pointRadius: 0
+                            },
+                            {
+                                label: 'Positive Margin (+1 Boundary)',
+                                data: [{x: 0, y: 7.6}, {x: 10, y: 5.6}],
+                                borderColor: '#56A0A9',
+                                borderDash: [5, 5],
+                                borderWidth: 1.5,
+                                pointRadius: 0,
+                                type: 'line',
+                                fill: false
+                            },
+                            {
+                                label: 'Negative Margin (-1 Boundary)',
+                                data: [{x: 0, y: 5.4}, {x: 10, y: 3.4}],
+                                borderColor: '#56A0A9',
+                                borderDash: [5, 5],
+                                borderWidth: 1.5,
+                                pointRadius: 0,
+                                type: 'line',
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            x: { 
+                                title: { display: true, text: 'Cell Nucleus Mean Radius (µm)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } },
+                                grid: { display: false },
+                                ticks: { color: '#64748B', font: { family: 'Inter' } }
+                            },
+                            y: { 
+                                title: { display: true, text: 'Cell Nucleus Texture Variance', color: '#0B2D48', font: { family: 'Inter', weight: 600 } },
+                                grid: { color: '#f1f5f9' },
+                                ticks: { color: '#64748B', font: { family: 'Inter' } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // =========================================================
+            // INTERACTIVE DEMO 1: SEPSIS COMPARATOR LOGIC
+            // =========================================================
+            const sepsisHrSlider = document.getElementById('sepsis-hr');
+            const sepsisTempSlider = document.getElementById('sepsis-temp');
+            const sepsisWbcSlider = document.getElementById('sepsis-wbc');
+
+            const sepsisHrVal = document.getElementById('sepsis-hr-val');
+            const sepsisTempVal = document.getElementById('sepsis-temp-val');
+            const sepsisWbcVal = document.getElementById('sepsis-wbc-val');
+
+            const ruleHrStatus = document.getElementById('rule-hr-status');
+            const ruleTempStatus = document.getElementById('rule-temp-status');
+            const ruleWbcStatus = document.getElementById('rule-wbc-status');
+            const ruleFinalAlert = document.getElementById('rule-final-alert');
+
+            const mlRiskScore = document.getElementById('ml-risk-score');
+            const mlRiskBar = document.getElementById('ml-risk-bar');
+            const mlRiskBadge = document.getElementById('ml-risk-badge');
+            const mlRiskExplanation = document.getElementById('ml-risk-explanation');
+
+            function updateSepsisDemo() {
+                if (!sepsisHrSlider || !sepsisTempSlider || !sepsisWbcSlider) return;
+
+                const hr = parseFloat(sepsisHrSlider.value);
+                const temp = parseFloat(sepsisTempSlider.value);
+                const wbc = parseFloat(sepsisWbcSlider.value);
+
+                sepsisHrVal.textContent = `${hr} bpm`;
+                sepsisTempVal.textContent = `${temp.toFixed(1)} °F`;
+                sepsisWbcVal.textContent = `${wbc.toFixed(1)} ×10³/µL`;
+
+                // 1. Evaluate Rule-Based Engine (Strict AND conditions: HR > 90, Temp > 100.4, WBC > 12.0)
+                const hrMet = hr > 90;
+                const tempMet = temp > 100.4;
+                const wbcMet = wbc > 12.0;
+
+                ruleHrStatus.innerHTML = hrMet 
+                    ? `<span class="text-emerald-600 font-bold">✓ Met (${hr})</span>` 
+                    : `<span class="text-slate-400 font-bold">✕ Failed (${hr})</span>`;
+                
+                ruleTempStatus.innerHTML = tempMet 
+                    ? `<span class="text-emerald-600 font-bold">✓ Met (${temp.toFixed(1)})</span>` 
+                    : `<span class="text-rose-600 font-bold">✕ Failed (${temp.toFixed(1)})</span>`;
+
+                ruleWbcStatus.innerHTML = wbcMet 
+                    ? `<span class="text-emerald-600 font-bold">✓ Met (${wbc.toFixed(1)})</span>` 
+                    : `<span class="text-slate-400 font-bold">✕ Failed (${wbc.toFixed(1)})</span>`;
+
+                if (hrMet && tempMet && wbcMet) {
+                    ruleFinalAlert.className = 'mt-1 p-3 rounded-lg text-center font-bold text-xs bg-rose-600 text-white shadow-md border border-rose-700';
+                    ruleFinalAlert.innerHTML = `🚨 SEPSIS ALERT TRIGGERED<br><span class="text-[10px] font-normal text-rose-100">(All 3 criteria satisfied)</span>`;
+                } else {
+                    ruleFinalAlert.className = 'mt-1 p-3 rounded-lg text-center font-bold text-xs bg-slate-100 text-slate-600 border border-slate-300';
+                    ruleFinalAlert.innerHTML = `❌ NO ALERT TRIGGERED<br><span class="text-[10px] font-normal text-slate-500">(All 3 criteria must be strictly satisfied)</span>`;
+                }
+
+                // 2. Evaluate Continuous Machine Learning Risk (Multivariate Logistic Probability)
+                // z = -12.5 + 0.065*HR + 0.85*(temp - 98.6) + 0.35*WBC
+                const z = -14.2 + (0.075 * hr) + (0.95 * (temp - 98.6)) + (0.42 * wbc);
+                const prob = 1 / (1 + Math.exp(-z));
+                const probPct = Math.min(Math.max(Math.round(prob * 100), 2), 99);
+
+                mlRiskScore.textContent = `${probPct}%`;
+                mlRiskBar.style.width = `${probPct}%`;
+
+                if (probPct >= 70) {
+                    mlRiskBar.className = 'bg-gradient-to-r from-amber-500 to-rose-600 h-full rounded-full transition-all duration-300';
+                    mlRiskBadge.className = 'p-2.5 rounded-lg text-center font-bold text-xs bg-rose-50 text-rose-800 border border-rose-300 mb-2';
+                    mlRiskBadge.innerHTML = `🚨 HIGH SEPSIS RISK DETECTED (${probPct}%)`;
+                    mlRiskExplanation.innerHTML = `<strong>AI Clinical Insight:</strong> The model combines the non-linear interaction across all 3 vitals. Even if an individual vital is slightly below rigid cutoffs, the synergistic trajectory signals critical physiological decompensation.`;
+                } else if (probPct >= 40) {
+                    mlRiskBar.className = 'bg-gradient-to-r from-teal-500 to-amber-500 h-full rounded-full transition-all duration-300';
+                    mlRiskBadge.className = 'p-2.5 rounded-lg text-center font-bold text-xs bg-amber-50 text-amber-800 border border-amber-300 mb-2';
+                    mlRiskBadge.innerHTML = `⚠️ MODERATE CLINICAL RISK (${probPct}%)`;
+                    mlRiskExplanation.innerHTML = `<strong>AI Clinical Insight:</strong> Borderline elevation detected. Patient should be flagged for serial bedside lactate testing and close 2-hour monitoring.`;
+                } else {
+                    mlRiskBar.className = 'bg-teal-500 h-full rounded-full transition-all duration-300';
+                    mlRiskBadge.className = 'p-2.5 rounded-lg text-center font-bold text-xs bg-emerald-50 text-emerald-800 border border-emerald-300 mb-2';
+                    mlRiskBadge.innerHTML = `✅ LOW PHYSIOLOGICAL RISK (${probPct}%)`;
+                    mlRiskExplanation.innerHTML = `<strong>AI Clinical Insight:</strong> Patient vital parameters demonstrate benign baseline physiology with no evidence of systemic inflammatory response.`;
+                }
+            }
+
+            [sepsisHrSlider, sepsisTempSlider, sepsisWbcSlider].forEach(slider => {
+                if (slider) slider.addEventListener('input', updateSepsisDemo);
+            });
+
+            // Presets for Demo 1
+            const btnBorderline = document.getElementById('btn-preset-borderline');
+            if (btnBorderline) {
+                btnBorderline.addEventListener('click', () => {
+                    sepsisHrSlider.value = 96;
+                    sepsisTempSlider.value = 100.2; // just misses 100.4!
+                    sepsisWbcSlider.value = 14.5;
+                    updateSepsisDemo();
+                });
+            }
+
+            const btnTachy = document.getElementById('btn-preset-tachy');
+            if (btnTachy) {
+                btnTachy.addEventListener('click', () => {
+                    sepsisHrSlider.value = 118; // high!
+                    sepsisTempSlider.value = 98.6; // normal
+                    sepsisWbcSlider.value = 6.2; // normal
+                    updateSepsisDemo();
+                });
+            }
+
+            const btnSevere = document.getElementById('btn-preset-severe');
+            if (btnSevere) {
+                btnSevere.addEventListener('click', () => {
+                    sepsisHrSlider.value = 126;
+                    sepsisTempSlider.value = 102.6;
+                    sepsisWbcSlider.value = 19.8;
+                    updateSepsisDemo();
+                });
+            }
+
+            updateSepsisDemo();
+
+            // =========================================================
+            // INTERACTIVE DEMO 2: LOGISTIC THRESHOLD EXPLORER LOGIC
+            // =========================================================
+            const calcGlucose = document.getElementById('calc-glucose');
+            const calcAge = document.getElementById('calc-age');
+            const calcThreshold = document.getElementById('calc-threshold');
+
+            const calcGlucoseVal = document.getElementById('calc-glucose-val');
+            const calcAgeVal = document.getElementById('calc-age-val');
+            const calcThresholdVal = document.getElementById('calc-threshold-val');
+
+            const calcProbText = document.getElementById('calc-prob-text');
+            const calcProbBar = document.getElementById('calc-prob-bar');
+            const dispCalcRisk = document.getElementById('disp-calc-risk');
+            const dispCalcThresh = document.getElementById('disp-calc-thresh');
+            const calcDecisionBadge = document.getElementById('calc-decision-badge');
+            const calcDecisionRationale = document.getElementById('calc-decision-rationale');
+
+            function updateLogisticDemo() {
+                if (!calcGlucose || !calcAge || !calcThreshold) return;
+
+                const glucose = parseFloat(calcGlucose.value);
+                const age = parseFloat(calcAge.value);
+                const threshold = parseFloat(calcThreshold.value);
+
+                calcGlucoseVal.textContent = `${glucose} mg/dL`;
+                calcAgeVal.textContent = `${age} Years`;
+                calcThresholdVal.textContent = `${threshold.toFixed(2)} (${Math.round(threshold * 100)}%)`;
+
+                // Logistic model: z = -9.2 + 0.055*glucose + 0.04*age
+                const z = -9.2 + (0.055 * glucose) + (0.04 * age);
+                const prob = 1 / (1 + Math.exp(-z));
+                const probPct = (prob * 100).toFixed(1);
+
+                calcProbText.textContent = `${probPct}%`;
+                calcProbBar.style.width = `${Math.min(Math.max(prob * 100, 3), 100)}%`;
+                dispCalcRisk.textContent = `${probPct}%`;
+                dispCalcThresh.textContent = `${(threshold * 100).toFixed(0)}%`;
+
+                if (prob >= threshold) {
+                    calcDecisionBadge.className = 'p-3 rounded-xl text-center font-bold text-xs bg-rose-50 text-rose-800 border border-rose-300 mb-2';
+                    calcDecisionBadge.innerHTML = `🚨 POSITIVE CLASSIFICATION: REFER FOR INTERVENTION (Score ≥ Cutoff)`;
+                    calcDecisionRationale.innerHTML = `Because the patient's predicted risk (<strong>${probPct}%</strong>) meets or exceeds the active clinical policy threshold (<strong>${(threshold * 100).toFixed(0)}%</strong>), the patient is referred for diagnostic workup and glycemic management.`;
+                } else {
+                    calcDecisionBadge.className = 'p-3 rounded-xl text-center font-bold text-xs bg-emerald-50 text-emerald-800 border border-emerald-300 mb-2';
+                    calcDecisionBadge.innerHTML = `✅ NEGATIVE CLASSIFICATION: ROUTINE SCREENING (Score < Cutoff)`;
+                    calcDecisionRationale.innerHTML = `Because predicted risk (<strong>${probPct}%</strong>) falls below the clinical cutoff (<strong>${(threshold * 100).toFixed(0)}%</strong>), the patient does not warrant invasive diagnostic testing, preventing false alarm fatigue.`;
+                }
+            }
+
+            [calcGlucose, calcAge, calcThreshold].forEach(el => {
+                if (el) el.addEventListener('input', updateLogisticDemo);
+            });
+
+            const btnThreshScreen = document.getElementById('btn-thresh-screen');
+            if (btnThreshScreen) {
+                btnThreshScreen.addEventListener('click', () => {
+                    calcThreshold.value = 0.25;
+                    updateLogisticDemo();
+                });
+            }
+            const btnThreshStandard = document.getElementById('btn-thresh-standard');
+            if (btnThreshStandard) {
+                btnThreshStandard.addEventListener('click', () => {
+                    calcThreshold.value = 0.50;
+                    updateLogisticDemo();
+                });
+            }
+            const btnThreshStrict = document.getElementById('btn-thresh-strict');
+            if (btnThreshStrict) {
+                btnThreshStrict.addEventListener('click', () => {
+                    calcThreshold.value = 0.75;
+                    updateLogisticDemo();
+                });
+            }
+
+            updateLogisticDemo();
+
+            // =========================================================
+            // INTERACTIVE DEMO 3: KNN COHORT RETRIEVAL LOGIC
+            // =========================================================
+            const knnAgeSlider = document.getElementById('knn-patient-age');
+            const knnTropSlider = document.getElementById('knn-patient-trop');
+            const knnAgeVal = document.getElementById('knn-patient-age-val');
+            const knnTropVal = document.getElementById('knn-patient-trop-val');
+            const knnHistoricalList = document.getElementById('knn-cohort-list');
+            const knnPredictionBadge = document.getElementById('knn-prediction-badge');
+            const knnVoteSummary = document.getElementById('knn-vote-summary');
+
+            let currentK = 3;
+
+            // 10 Benchmark Patients in Database
+            const historicalPatients = [
+                { id: 'PT-101', age: 60, trop: 0.42, outcome: 'Acute MI', class: 'high' },
+                { id: 'PT-102', age: 65, trop: 0.50, outcome: 'Acute MI', class: 'high' },
+                { id: 'PT-103', age: 58, trop: 0.35, outcome: 'Non-Cardiac Angina', class: 'low' },
+                { id: 'PT-104', age: 72, trop: 0.85, outcome: 'Acute MI', class: 'high' },
+                { id: 'PT-105', age: 45, trop: 0.08, outcome: 'Non-Cardiac Angina', class: 'low' },
+                { id: 'PT-106', age: 50, trop: 0.12, outcome: 'Non-Cardiac Angina', class: 'low' },
+                { id: 'PT-107', age: 68, trop: 0.62, outcome: 'Acute MI', class: 'high' },
+                { id: 'PT-108', age: 38, trop: 0.04, outcome: 'Non-Cardiac Angina', class: 'low' },
+                { id: 'PT-109', age: 78, trop: 1.15, outcome: 'Acute MI', class: 'high' },
+                { id: 'PT-110', age: 54, trop: 0.22, outcome: 'Non-Cardiac Angina', class: 'low' },
+            ];
+
+            function updateKnnDemo() {
+                if (!knnAgeSlider || !knnTropSlider || !knnHistoricalList) return;
+
+                const qAge = parseFloat(knnAgeSlider.value);
+                const qTrop = parseFloat(knnTropSlider.value);
+
+                knnAgeVal.textContent = `${qAge} Years`;
+                knnTropVal.textContent = `${qTrop.toFixed(2)} ng/mL`;
+
+                // Calculate normalized Euclidean distance
+                // Normalized scale: Age (30-85 -> range 55), Trop (0.02 - 1.80 -> range 1.78)
+                const computed = historicalPatients.map(pt => {
+                    const normAgeDiff = (pt.age - qAge) / 55;
+                    const normTropDiff = (pt.trop - qTrop) / 1.78;
+                    const dist = Math.sqrt((normAgeDiff * normAgeDiff) + (normTropDiff * normTropDiff * 4)); // weight trop higher
+                    return { ...pt, dist: dist };
+                });
+
+                // Sort by ascending distance
+                computed.sort((a, b) => a.dist - b.dist);
+
+                // Top K neighbors
+                const topK = computed.slice(0, currentK);
+                const highCount = topK.filter(p => p.class === 'high').length;
+                const lowCount = currentK - highCount;
+                const highRatio = highCount / currentK;
+
+                // Render table
+                knnHistoricalList.innerHTML = computed.map((pt, idx) => {
+                    const isTopK = idx < currentK;
+                    const rowBg = isTopK ? 'bg-emerald-50/70 border-l-4 border-l-emerald-500 font-bold' : '';
+                    const badgeClass = pt.class === 'high' ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-700';
+                    return `
+                        <tr class="${rowBg} hover:bg-slate-50 transition-colors">
+                            <td class="py-2 px-2.5">
+                                ${isTopK ? `<span class="px-1.5 py-0.5 rounded text-[10px] bg-emerald-600 text-white font-bold">#${idx+1} Match</span>` : `<span class="text-slate-400">#${idx+1}</span>`}
+                            </td>
+                            <td class="py-2 px-2.5">${pt.age}y</td>
+                            <td class="py-2 px-2.5">${pt.trop.toFixed(2)}</td>
+                            <td class="py-2 px-2.5">
+                                <span class="px-2 py-0.5 rounded text-[11px] ${badgeClass}">${pt.outcome}</span>
+                            </td>
+                            <td class="py-2 px-2.5 text-right font-mono text-[11px] text-slate-500">${pt.dist.toFixed(3)}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                // Update Prediction Badge
+                if (highRatio >= 0.5) {
+                    knnPredictionBadge.className = 'p-3 rounded-xl text-center font-bold text-xs bg-rose-50 text-rose-800 border border-rose-300';
+                    knnPredictionBadge.innerHTML = `🚨 High Risk: Acute Myocardial Infarction (AMI)`;
+                } else {
+                    knnPredictionBadge.className = 'p-3 rounded-xl text-center font-bold text-xs bg-emerald-50 text-emerald-800 border border-emerald-300';
+                    knnPredictionBadge.innerHTML = `✅ Low Risk: Non-Cardiac Angina Suspected`;
+                }
+
+                knnVoteSummary.textContent = `Voting tally among ${currentK} closest: ${highCount} Acute MI vs. ${lowCount} Non-Cardiac (${(highRatio * 100).toFixed(0)}% confidence)`;
+            }
+
+            [knnAgeSlider, knnTropSlider].forEach(el => {
+                if (el) el.addEventListener('input', updateKnnDemo);
+            });
+
+            // Set K buttons
+            [1, 3, 5, 7].forEach(kVal => {
+                const btn = document.getElementById(`btn-k${kVal}`);
+                if (btn) {
+                    btn.addEventListener('click', () => {
+                        currentK = kVal;
+                        [1, 3, 5, 7].forEach(k => {
+                            const b = document.getElementById(`btn-k${k}`);
+                            if (b) {
+                                if (k === currentK) {
+                                    b.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-xs transition-colors';
+                                } else {
+                                    b.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-white/20 hover:bg-white/30 text-white transition-colors';
+                                }
+                            }
+                        });
+                        updateKnnDemo();
+                    });
+                }
+            });
+
+            updateKnnDemo();
+
+            // =========================================================
+            // INTERACTIVE DEMO 4: DECISION TREE & ENSEMBLE SIMULATOR
+            // =========================================================
+            let triageChest = true;
+            let triageTest = true;
+
+            const btnChestYes = document.getElementById('btn-triage-chest-yes');
+            const btnChestNo = document.getElementById('btn-triage-chest-no');
+            const btnTestYes = document.getElementById('btn-triage-test-yes');
+            const btnTestNo = document.getElementById('btn-triage-test-no');
+            const triageStep2Title = document.getElementById('triage-step2-title');
+            const triageDispCard = document.getElementById('triage-disposition-card');
+
+            const pathNode1 = document.getElementById('path-node-1');
+            const pathNode2 = document.getElementById('path-node-2');
+            const pathNode3 = document.getElementById('path-node-3');
+
+            function updateTriageDemo() {
+                // Update Step 1 buttons
+                if (triageChest) {
+                    btnChestYes.className = 'px-3 py-2 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 transition-colors shadow-xs';
+                    btnChestNo.className = 'px-3 py-2 rounded-lg text-xs font-bold bg-white/20 text-white hover:bg-white/30 transition-colors';
+                    triageStep2Title.textContent = 'Step 2: 12-Lead ECG Shows ST-Elevation?';
+                    btnTestYes.textContent = 'Yes (ST-Elevation)';
+                    btnTestNo.textContent = 'No (Non-ST)';
+
+                    pathNode1.textContent = 'Root: Patient Evaluation (Chest Pain = YES)';
+                    
+                    if (triageTest) {
+                        pathNode2.textContent = 'Diagnostic Node: ECG ST-Elevation (YES)';
+                        pathNode3.className = 'w-full text-center p-2.5 rounded-lg border-2 border-rose-600 bg-rose-50 font-bold text-rose-800';
+                        pathNode3.textContent = 'Leaf Node: Code STEMI → Cardiac Catheterization Activation';
+                        triageDispCard.className = 'p-3.5 rounded-xl text-center font-bold text-xs bg-rose-600 text-white shadow-md';
+                        triageDispCard.textContent = '🚨 Code STEMI: Immediate Cardiac Catheterization Lab (<90 Min Door-to-Balloon)';
+                    } else {
+                        pathNode2.textContent = 'Diagnostic Node: ECG ST-Elevation (NO) → High-Sensitivity Troponin Protocol';
+                        pathNode3.className = 'w-full text-center p-2.5 rounded-lg border-2 border-amber-600 bg-amber-50 font-bold text-amber-900';
+                        pathNode3.textContent = 'Leaf Node: Urgent Cardiology Observation & Serial Biomarkers';
+                        triageDispCard.className = 'p-3.5 rounded-xl text-center font-bold text-xs bg-amber-500 text-slate-900 shadow-md';
+                        triageDispCard.textContent = '⚠️ Urgent Observation: Serial Troponin Draw at 0h and 3h';
+                    }
+                } else {
+                    btnChestYes.className = 'px-3 py-2 rounded-lg text-xs font-bold bg-white/20 text-white hover:bg-white/30 transition-colors';
+                    btnChestNo.className = 'px-3 py-2 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 transition-colors shadow-xs';
+                    triageStep2Title.textContent = 'Step 2: Severe Dyspnea or SpO2 < 90%?';
+                    btnTestYes.textContent = 'Yes (Hypoxia/Dyspnea)';
+                    btnTestNo.textContent = 'No (Stable Vitals)';
+
+                    pathNode1.textContent = 'Root: Patient Evaluation (Chest Pain = NO)';
+
+                    if (triageTest) {
+                        pathNode2.textContent = 'Diagnostic Node: Hypoxia / Severe Dyspnea (YES)';
+                        pathNode3.className = 'w-full text-center p-2.5 rounded-lg border-2 border-amber-600 bg-amber-50 font-bold text-amber-900';
+                        pathNode3.textContent = 'Leaf Node: Respiratory Failure / PE Workup Protocol';
+                        triageDispCard.className = 'p-3.5 rounded-xl text-center font-bold text-xs bg-amber-600 text-white shadow-md';
+                        triageDispCard.textContent = '⚠️ Priority Respiratory Triage: Arterial Blood Gas & CT Pulmonary Angiogram';
+                    } else {
+                        pathNode2.textContent = 'Diagnostic Node: Hypoxia / Severe Dyspnea (NO)';
+                        pathNode3.className = 'w-full text-center p-2.5 rounded-lg border-2 border-emerald-600 bg-emerald-50 font-bold text-emerald-900';
+                        pathNode3.textContent = 'Leaf Node: Standard Non-Urgent Outpatient Triage';
+                        triageDispCard.className = 'p-3.5 rounded-xl text-center font-bold text-xs bg-emerald-600 text-white shadow-md';
+                        triageDispCard.textContent = '✅ Standard Urgent Care Triage: Low Risk Outpatient Pathway';
+                    }
+                }
+
+                // Update Step 2 buttons
+                if (triageTest) {
+                    btnTestYes.className = 'px-3 py-2 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 transition-colors shadow-xs';
+                    btnTestNo.className = 'px-3 py-2 rounded-lg text-xs font-bold bg-white/20 text-white hover:bg-white/30 transition-colors';
+                } else {
+                    btnTestYes.className = 'px-3 py-2 rounded-lg text-xs font-bold bg-white/20 text-white hover:bg-white/30 transition-colors';
+                    btnTestNo.className = 'px-3 py-2 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 transition-colors shadow-xs';
+                }
+            }
+
+            if (btnChestYes && btnChestNo && btnTestYes && btnTestNo) {
+                btnChestYes.addEventListener('click', () => { triageChest = true; updateTriageDemo(); });
+                btnChestNo.addEventListener('click', () => { triageChest = false; updateTriageDemo(); });
+                btnTestYes.addEventListener('click', () => { triageTest = true; updateTriageDemo(); });
+                btnTestNo.addEventListener('click', () => { triageTest = false; updateTriageDemo(); });
+            }
+
+            // Simulate Ensemble Tumor Board
+            const btnSimEnsemble = document.getElementById('btn-simulate-ensemble');
+            const ensembleContainer = document.getElementById('ensemble-votes-container');
+            if (btnSimEnsemble && ensembleContainer) {
+                btnSimEnsemble.addEventListener('click', () => {
+                    ensembleContainer.classList.toggle('hidden');
+                });
+            }
+
+            updateTriageDemo();
+
+            // =========================================================
+            // INTERACTIVE DEMO 5: PRECISION PHENOTYPE TABS
+            // =========================================================
+            const tab1 = document.getElementById('tab-pheno-1');
+            const tab2 = document.getElementById('tab-pheno-2');
+            const tab3 = document.getElementById('tab-pheno-3');
+            const phenoDetail = document.getElementById('pheno-detail-content');
+
+            const phenotypes = {
+                1: {
+                    title: 'Cluster 1: Cardiorenal Syndrome Subphenotype',
+                    badge: 'High Mortality Risk (32%)',
+                    badgeClass: 'text-rose-600 bg-rose-50',
+                    bio: 'Elevated BNP (>800 pg/mL), Serum Creatinine > 2.4 mg/dL, low eGFR.',
+                    vuln: 'Poor diuretic response; high susceptibility to acute kidney injury during aggressive fluid resuscitation.',
+                    pathway: 'Immediate nephrology consultation, CVVH readiness, strict restrictive fluid protocol.'
+                },
+                2: {
+                    title: 'Cluster 2: Metabolic Sepsis Subphenotype',
+                    badge: 'Hyperglycemic Inflammatory (18% Risk)',
+                    badgeClass: 'text-amber-700 bg-amber-50',
+                    bio: 'Extreme Hyperglycemia (Glucose > 280 mg/dL), severe lactic acidosis, marked leukocytosis.',
+                    vuln: 'High vasopressor resistance; rapid progression to septic cardiomyopathy.',
+                    pathway: 'Early initiation of hydrocortisone, continuous insulin infusion, balanced crystalloids.'
+                },
+                3: {
+                    title: 'Cluster 3: Baseline Stable / Immunocompetent',
+                    badge: 'Low Acute Risk (3% Risk)',
+                    badgeClass: 'text-emerald-700 bg-emerald-50',
+                    bio: 'Normal creatinine (0.9 mg/dL), modest CRP elevation, intact renal clearance.',
+                    vuln: 'Standard physiological reserves; responsive to conventional first-line antibiotics.',
+                    pathway: 'Standard floor admission, oral step-down antibiotic protocol, standard early discharge planning.'
+                }
+            };
+
+            function selectPhenotype(num) {
+                if (!phenoDetail) return;
+                const p = phenotypes[num];
+                
+                [tab1, tab2, tab3].forEach((t, i) => {
+                    if (t) {
+                        if (i + 1 === num) {
+                            t.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-sm transition-colors';
+                        } else {
+                            t.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white/20 text-white hover:bg-white/30 transition-colors';
+                        }
+                    }
+                });
+
+                phenoDetail.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider ${p.badgeClass} px-2 py-0.5 rounded">${p.badge}</span>
+                            <h4 class="text-lg font-bold text-[#0B2D48] mt-1">${p.title}</h4>
+                        </div>
+                        <span class="text-xs font-semibold text-slate-500">K-Means Cluster 0${num}</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                        <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                            <span class="font-bold text-slate-700 block mb-1">Dominant Biomarkers:</span>
+                            <p class="text-slate-600">${p.bio}</p>
+                        </div>
+                        <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                            <span class="font-bold text-slate-700 block mb-1">Clinical Vulnerability:</span>
+                            <p class="text-slate-600">${p.vuln}</p>
+                        </div>
+                        <div class="p-3 rounded-lg bg-teal-50 border border-teal-200 text-teal-900">
+                            <span class="font-bold block mb-1">Targeted Precision Pathway:</span>
+                            <p>${p.pathway}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (tab1) tab1.addEventListener('click', () => selectPhenotype(1));
+            if (tab2) tab2.addEventListener('click', () => selectPhenotype(2));
+            if (tab3) tab3.addEventListener('click', () => selectPhenotype(3));
+
+        });
+    </script>
+</body>
+</html>

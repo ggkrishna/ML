@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice Exercises & Clinical Case Challenges – ML Notes for Healthcare</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- KaTeX for Mathematics -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            navy: '#0B2D48',
+                            teal: '#205A70',
+                            softTeal: '#56A0A9',
+                            amber: '#F9A03F',
+                            bg: '#F8F9FA',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .bg-grid-pattern {
+            background-image: radial-gradient(rgba(32, 90, 112, 0.08) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .card-hover {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .card-hover:hover {
+            box-shadow: 0 12px 24px -6px rgba(11, 45, 72, 0.08);
+        }
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-[#F8F9FA] text-[#0B2D48] min-h-screen flex flex-col antialiased selection:bg-[#56A0A9]/20 selection:text-[#0B2D48]">
+
+    <!-- Main Navigation Bar -->
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#0B2D48] to-[#205A70] flex items-center justify-center text-white shadow-md shadow-[#205A70]/20 group-hover:scale-105 transition-transform">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-lg font-bold tracking-tight text-[#0B2D48]">ML Notes</span>
+                    <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-xs font-semibold bg-[#205A70]/10 text-[#205A70] rounded-full border border-[#205A70]/20">Healthcare Edition</span>
+                </div>
+            </a>
+            
+            <div class="flex items-center gap-2 sm:gap-3">
+                <a href="index.html" class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-[#205A70] transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    <span>All Modules</span>
+                </a>
+                <a href="case-studies.html" class="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-[#205A70] bg-[#205A70]/10 hover:bg-[#205A70]/20 border border-[#205A70]/20 px-2.5 py-1 rounded-lg transition-colors">
+                    <span>Case Studies</span>
+                </a>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Practice Exercises
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- In-Page Sub-Navigation Bar -->
+    <nav class="sticky top-16 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs py-2.5 px-4 sm:px-6">
+        <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center space-x-1 sm:space-x-2 overflow-x-auto whitespace-nowrap py-1 text-xs sm:text-sm font-medium text-slate-600">
+                <a href="#ex-module1" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">1. ML Types</a>
+                <a href="#ex-module2" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">2. Preprocessing</a>
+                <a href="#ex-module3" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">3. Python &amp; Scikit</a>
+                <a href="#ex-module4" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">4. Evaluation</a>
+                <a href="#ex-module5" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">5. Math &amp; Bayes</a>
+                <a href="#interactive-quiz" class="px-2.5 py-1 rounded-lg text-emerald-700 font-semibold bg-emerald-50 hover:bg-emerald-100 transition-colors">★ Interactive Quiz</a>
+            </div>
+            <div class="hidden lg:flex items-center gap-2 shrink-0">
+                <a href="case-studies.html" class="inline-flex items-center gap-1 text-xs font-semibold text-[#205A70] bg-[#205A70]/10 hover:bg-[#205A70]/20 px-3 py-1.5 rounded-lg transition-colors">
+                    <span>Next: Case Studies →</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative bg-gradient-to-b from-white via-[#F8FAFC] to-[#F1F5F9] border-b border-slate-200/60 bg-grid-pattern py-12 sm:py-16">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 mb-4">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>Hands-on Mastery • 5 Modules • Self-Checking</span>
+                </div>
+
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#0B2D48] mb-4">
+                    Clinical Case Exercises &amp; <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#205A70] via-[#357a94] to-emerald-600">Practice Drills</span>
+                </h1>
+
+                <p class="text-base sm:text-lg text-slate-600 leading-relaxed font-normal mb-6">
+                    Solidify your understanding of medical machine learning through realistic clinical scenarios, statistical drills, code completion challenges, and an interactive self-assessment quiz.
+                </p>
+
+                <div class="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-slate-500">
+                    <span class="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-xs">
+                        <span class="w-2 h-2 rounded-full bg-[#205A70]"></span>
+                        5 Module Problem Sets
+                    </span>
+                    <span class="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-xs">
+                        <span class="w-2 h-2 rounded-full bg-[#F9A03F]"></span>
+                        Detailed Step-by-Step Solutions
+                    </span>
+                    <span class="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-xs">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        Live Scoring Quiz
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-16">
+
+        <!-- ========================================== -->
+        <!-- MODULE 01: INTRODUCTION TO ML EXERCISES -->
+        <!-- ========================================== -->
+        <section id="ex-module1" class="pt-12 -mt-12">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-[#205A70]/10 text-[#205A70] border border-[#205A70]/20">Module 01</span>
+                    <span class="text-xs font-medium text-slate-400">• Fundamentals &amp; Algorithm Selection</span>
+                </div>
+                <a href="intro.html" class="text-xs font-semibold text-[#205A70] hover:underline flex items-center gap-1">
+                    <span>Review Module 01 Notes</span>
+                    <span>→</span>
+                </a>
+            </div>
+
+            <h2 class="text-2xl sm:text-3xl font-bold text-[#0B2D48] mb-6">Clinical Problem Formulation Drills</h2>
+
+            <div class="space-y-6">
+                <!-- Exercise 1.1 -->
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 card-hover">
+                    <div class="flex items-start gap-3 mb-4">
+                        <span class="w-8 h-8 rounded-lg bg-[#205A70]/10 text-[#205A70] font-bold flex items-center justify-center shrink-0 text-sm">1.1</span>
+                        <div>
+                            <h3 class="text-lg font-bold text-[#0B2D48]">Mapping Clinical Problems to Machine Learning Paradigms</h3>
+                            <p class="text-slate-600 text-sm mt-1">Match each healthcare scenario with the most appropriate machine learning task type.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                            <span class="font-semibold text-xs text-[#205A70] uppercase tracking-wider">Scenario A</span>
+                            <p class="text-sm font-medium text-slate-800 mt-1">Predicting the exact ICU length-of-stay (in days) following open-heart surgery.</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                            <span class="font-semibold text-xs text-[#205A70] uppercase tracking-wider">Scenario B</span>
+                            <p class="text-sm font-medium text-slate-800 mt-1">Detecting diabetic retinopathy (Present vs. Absent) from fundus photography.</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                            <span class="font-semibold text-xs text-[#205A70] uppercase tracking-wider">Scenario C</span>
+                            <p class="text-sm font-medium text-slate-800 mt-1">Discovering unknown subtypes of septic shock among 10,000 unlabelled EHR patient records.</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                            <span class="font-semibold text-xs text-[#205A70] uppercase tracking-wider">Scenario D</span>
+                            <p class="text-sm font-medium text-slate-800 mt-1">Recommending optimal dynamic insulin dosages over time using blood glucose sensor feedback.</p>
+                        </div>
+                    </div>
+
+                    <!-- Collapsible Solution -->
+                    <details class="group bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
+                        <summary class="flex items-center justify-between p-4 cursor-pointer select-none font-semibold text-sm text-[#205A70] group-hover:text-[#0B2D48]">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                Reveal Clinical Solution &amp; Rationale
+                            </span>
+                            <span class="text-xs text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                        </summary>
+                        <div class="p-4 pt-0 border-t border-slate-200/60 bg-white text-sm text-slate-700 space-y-3">
+                            <ul class="space-y-2 mt-3">
+                                <li><strong class="text-[#0B2D48]">Scenario A &rarr; Supervised Regression:</strong> The target is continuous (number of days). Linear regression or gradient boosted trees predict numeric durations.</li>
+                                <li><strong class="text-[#0B2D48]">Scenario B &rarr; Supervised Classification:</strong> The target is categorical/binary (0 = Absent, 1 = Present). Evaluated with AUC-ROC, Sensitivity, and Specificity.</li>
+                                <li><strong class="text-[#0B2D48]">Scenario C &rarr; Unsupervised Clustering:</strong> There are no ground truth labels. K-Means or Hierarchical Clustering segments patients into physiological clusters based on multivariate vitals.</li>
+                                <li><strong class="text-[#0B2D48]">Scenario D &rarr; Reinforcement Learning (RL):</strong> Involves sequential decision-making where an agent takes action (insulin dose), observes reward/penalty (blood glucose in target range), and optimizes policies.</li>
+                            </ul>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- Exercise 1.2 -->
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 card-hover">
+                    <div class="flex items-start gap-3 mb-4">
+                        <span class="w-8 h-8 rounded-lg bg-[#205A70]/10 text-[#205A70] font-bold flex items-center justify-center shrink-0 text-sm">1.2</span>
+                        <div>
+                            <h3 class="text-lg font-bold text-[#0B2D48]">Clinical Case Challenge: Algorithmic Interpretability vs. Complexity</h3>
+                            <p class="text-slate-600 text-sm mt-1">A cardiology department wants to deploy an automated bedside model to predict in-hospital cardiac arrest within 4 hours. The clinical director requires that bedside nurses and residents be able to inspect <em>exactly which 3 to 4 clinical features</em> triggered an emergency high-risk alert.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-amber-50/60 border border-amber-200 rounded-xl mb-4 text-sm text-amber-900">
+                        <strong>Question:</strong> Which model family would be most suitable to meet this regulatory and bedside interpretability constraint? Why would an ensemble of 500 Deep Neural Networks be problematic in this specific operational setting?
+                    </div>
+
+                    <details class="group bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
+                        <summary class="flex items-center justify-between p-4 cursor-pointer select-none font-semibold text-sm text-[#205A70] group-hover:text-[#0B2D48]">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                Reveal Solution &amp; Clinical Explanation
+                            </span>
+                            <span class="text-xs text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                        </summary>
+                        <div class="p-4 pt-0 border-t border-slate-200/60 bg-white text-sm text-slate-700 space-y-2 mt-3">
+                            <p><strong class="text-[#0B2D48]">Recommended Model:</strong> A shallow <strong>Decision Tree</strong> or <strong>Logistic Regression with L1 (Lasso) Regularization</strong>.</p>
+                            <p><strong>Clinical Reason:</strong> A decision tree provides clear, intuitive if-then branch logic (e.g., <em>Systolic BP &lt; 90 mmHg AND Lactate &gt; 3.5 mmol/L</em>). Logistic regression coefficients provide direct Odds Ratios per unit increase of vital sign.</p>
+                            <p><strong>Why Deep Neural Networks Fail Here:</strong> While potentially achieving a 1-2% higher AUROC, deep networks operate as non-linear black boxes. In acute emergencies, clinicians will reject or override alerts they cannot quickly audit and verify.</p>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- MODULE 02: DATA PREPROCESSING EXERCISES -->
+        <!-- ========================================== -->
+        <section id="ex-module2" class="pt-12 -mt-12">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">Module 02</span>
+                    <span class="text-xs font-medium text-slate-400">• Healthcare Data Preprocessing</span>
+                </div>
+                <a href="data-preprocessing.html" class="text-xs font-semibold text-[#205A70] hover:underline flex items-center gap-1">
+                    <span>Review Module 02 Notes</span>
+                    <span>→</span>
+                </a>
+            </div>
+
+            <h2 class="text-2xl sm:text-3xl font-bold text-[#0B2D48] mb-6">Clinical EHR Preprocessing Challenges</h2>
+
+            <div class="space-y-6">
+                <!-- Exercise 2.1 -->
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 card-hover">
+                    <div class="flex items-start gap-3 mb-4">
+                        <span class="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 font-bold flex items-center justify-center shrink-0 text-sm">2.1</span>
+                        <div>
+                            <h3 class="text-lg font-bold text-[#0B2D48]">Informing Missingness: When Mean Imputation is Clinically Fatal</h3>
+                            <p class="text-slate-600 text-sm mt-1">In an emergency department dataset, 78% of incoming patients have a `NaN` (missing) value for Serum Troponin levels.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl mb-4 text-sm text-slate-700">
+                        <strong>Question:</strong> Why would replacing missing Troponin values with the mean of the available values (\(\text{Mean} = 1.45 \text{ ng/mL}\)) severely distort clinical risk prediction? What does the <em>act of missingness</em> convey in medical practice?
+                    </div>
+
+                    <details class="group bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
+                        <summary class="flex items-center justify-between p-4 cursor-pointer select-none font-semibold text-sm text-[#205A70] group-hover:text-[#0B2D48]">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                Reveal Clinical Preprocessing Solution
+                            </span>
+                            <span class="text-xs text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                        </summary>
+                        <div class="p-4 pt-0 border-t border-slate-200/60 bg-white text-sm text-slate-700 space-y-2 mt-3">
+                            <p><strong class="text-[#0B2D48]">Clinical Mechanism:</strong> In hospitals, Troponin is an acute cardiac marker ordered almost exclusively when myocardial infarction is suspected. It is <strong>Missing Not At Random (MNAR)</strong>.</p>
+                            <p>Patients who did <em>not</em> have Troponin drawn were presenting with non-cardiac conditions (e.g. sprained ankle, dermatological rash) and typically have baseline normal Troponin (&lt; 0.04 ng/mL). Imputing them with the mean (1.45 ng/mL) erroneously tags healthy non-cardiac patients as having massive acute cardiac necrosis!</p>
+                            <p><strong>Proper Preprocessing Strategy:</strong> Add a binary missingness indicator column (`troponin_was_ordered: 0 or 1`) and impute missing values with normal baseline 0.0, or use domain-informed clinical thresholds.</p>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- MODULE 03: PYTHON & SCIKIT-LEARN EXERCISES -->
+        <!-- ========================================== -->
+        <section id="ex-module3" class="pt-12 -mt-12">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">Module 03</span>
+                    <span class="text-xs font-medium text-slate-400">• Python &amp; Scikit-learn Hands-on</span>
+                </div>
+                <a href="python.html" class="text-xs font-semibold text-[#205A70] hover:underline flex items-center gap-1">
+                    <span>Review Module 03 Notes</span>
+                    <span>→</span>
+                </a>
+            </div>
+
+            <h2 class="text-2xl sm:text-3xl font-bold text-[#0B2D48] mb-6">Python Coding &amp; Scikit-learn Pipeline Drills</h2>
+
+            <div class="space-y-6">
+                <!-- Exercise 3.1 -->
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 card-hover">
+                    <div class="flex items-start gap-3 mb-4">
+                        <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 font-bold flex items-center justify-center shrink-0 text-sm">3.1</span>
+                        <div>
+                            <h3 class="text-lg font-bold text-[#0B2D48]">Preventing Data Leakage with Scikit-learn Pipeline</h3>
+                            <p class="text-slate-600 text-sm mt-1">A student writes the following code to evaluate a sepsis classifier:</p>
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl overflow-hidden border border-slate-700/80 bg-[#0F172A] my-4 shadow-md">
+                        <div class="bg-[#1E293B] px-3.5 py-2 flex items-center justify-between border-b border-slate-700/60 select-none">
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+                                <span class="ml-2 font-mono text-xs font-semibold text-rose-400">flawed_evaluation.py (Contains Leakage)</span>
+                            </div>
+                            <span class="text-[10px] font-mono uppercase text-slate-400 bg-slate-800 px-2 py-0.5 rounded">Python</span>
+                        </div>
+                        <pre class="p-4 overflow-x-auto font-mono text-xs sm:text-sm text-slate-100 leading-relaxed bg-[#0F172A]"><code><span class="text-slate-400 italic"># Flawed Implementation (Full-cohort transformation):</span>
+<span class="text-purple-400 font-semibold">from</span> <span class="text-slate-200">sklearn.preprocessing</span> <span class="text-purple-400 font-semibold">import</span> <span class="text-sky-300">StandardScaler</span>
+<span class="text-purple-400 font-semibold">from</span> <span class="text-slate-200">sklearn.linear_model</span> <span class="text-purple-400 font-semibold">import</span> <span class="text-sky-300">LogisticRegression</span>
+<span class="text-purple-400 font-semibold">from</span> <span class="text-slate-200">sklearn.model_selection</span> <span class="text-purple-400 font-semibold">import</span> <span class="text-sky-300">cross_val_score</span>
+
+<span class="text-slate-200">scaler</span> = <span class="text-sky-300">StandardScaler</span>()
+<span class="text-slate-200">X_scaled</span> = <span class="text-slate-200">scaler</span>.<span class="text-sky-300">fit_transform</span>(<span class="text-slate-200">X</span>)  <span class="text-rose-400 font-bold"># &lt;--- CRITICAL DATA LEAKAGE!</span>
+<span class="text-slate-200">scores</span> = <span class="text-sky-300">cross_val_score</span>(<span class="text-sky-300">LogisticRegression</span>(), <span class="text-slate-200">X_scaled</span>, <span class="text-slate-200">y</span>, cv=<span class="text-amber-300">5</span>)</code></pre>
+                    </div>
+
+                    <p class="text-sm text-slate-700 mb-4"><strong>Challenge:</strong> Identify the critical data leakage bug above, and rewrite this using `sklearn.pipeline.Pipeline` so feature scaling occurs <em>strictly inside each cross-validation fold</em>.</p>
+
+                    <details class="group bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
+                        <summary class="flex items-center justify-between p-4 cursor-pointer select-none font-semibold text-sm text-[#205A70] group-hover:text-[#0B2D48]">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                Reveal Correct Pipeline Implementation
+                            </span>
+                            <span class="text-xs text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                        </summary>
+                        <div class="p-4 pt-0 border-t border-slate-200/60 bg-white text-sm text-slate-700 space-y-3 mt-3">
+                            <p><strong class="text-rose-600">The Flaw:</strong> By calling `scaler.fit_transform(X)` on the full dataset, test fold distribution information (mean and standard deviation) leaks into the training step, producing artificially optimistic cross-validation scores.</p>
+                            
+                            <div class="rounded-xl overflow-hidden border border-slate-700/80 bg-[#0F172A] my-3 shadow-md">
+                                <div class="bg-[#1E293B] px-3.5 py-2 flex items-center justify-between border-b border-slate-700/60 select-none">
+                                    <span class="font-mono text-xs font-semibold text-emerald-400">leak_free_pipeline.py (Correct)</span>
+                                    <span class="text-[10px] font-mono uppercase text-slate-400 bg-slate-800 px-2 py-0.5 rounded">Python</span>
+                                </div>
+                                <pre class="p-4 overflow-x-auto font-mono text-xs sm:text-sm text-slate-100 leading-relaxed bg-[#0F172A]"><code><span class="text-slate-400 italic"># Correct Leak-Free Solution with Encapsulated Pipeline:</span>
+<span class="text-purple-400 font-semibold">from</span> <span class="text-slate-200">sklearn.pipeline</span> <span class="text-purple-400 font-semibold">import</span> <span class="text-sky-300">Pipeline</span>
+<span class="text-purple-400 font-semibold">from</span> <span class="text-slate-200">sklearn.preprocessing</span> <span class="text-purple-400 font-semibold">import</span> <span class="text-sky-300">StandardScaler</span>
+<span class="text-purple-400 font-semibold">from</span> <span class="text-slate-200">sklearn.linear_model</span> <span class="text-purple-400 font-semibold">import</span> <span class="text-sky-300">LogisticRegression</span>
+<span class="text-purple-400 font-semibold">from</span> <span class="text-slate-200">sklearn.model_selection</span> <span class="text-purple-400 font-semibold">import</span> <span class="text-sky-300">cross_val_score</span>
+
+<span class="text-slate-200">pipeline</span> = <span class="text-sky-300">Pipeline</span>([
+    (<span class="text-amber-300">'scaler'</span>, <span class="text-sky-300">StandardScaler</span>()),
+    (<span class="text-amber-300">'classifier'</span>, <span class="text-sky-300">LogisticRegression</span>())
+])
+
+<span class="text-slate-400 italic"># Scaler will now only fit on 4 folds and transform the 5th fold automatically</span>
+<span class="text-slate-200">scores</span> = <span class="text-sky-300">cross_val_score</span>(<span class="text-slate-200">pipeline</span>, <span class="text-slate-200">X</span>, <span class="text-slate-200">y</span>, cv=<span class="text-amber-300">5</span>, scoring=<span class="text-amber-300">'roc_auc'</span>)
+<span class="text-sky-300">print</span>(<span class="text-amber-300">f"Mean CV AUROC: {scores.mean():.3f} ± {scores.std():.3f}"</span>)</code></pre>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- MODULE 04: EVALUATION & METRICS EXERCISES -->
+        <!-- ========================================== -->
+        <section id="ex-module4" class="pt-12 -mt-12">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-violet-50 text-violet-700 border border-violet-200">Module 04</span>
+                    <span class="text-xs font-medium text-slate-400">• Evaluation &amp; Metrics</span>
+                </div>
+                <a href="training-testing.html" class="text-xs font-semibold text-[#205A70] hover:underline flex items-center gap-1">
+                    <span>Review Module 04 Notes</span>
+                    <span>→</span>
+                </a>
+            </div>
+
+            <h2 class="text-2xl sm:text-3xl font-bold text-[#0B2D48] mb-6">Diagnostic Confusion Matrix &amp; Clinical Trade-Offs</h2>
+
+            <div class="space-y-6">
+                <!-- Exercise 4.1 -->
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 card-hover">
+                    <div class="flex items-start gap-3 mb-4">
+                        <span class="w-8 h-8 rounded-lg bg-violet-50 text-violet-700 font-bold flex items-center justify-center shrink-0 text-sm">4.1</span>
+                        <div>
+                            <h3 class="text-lg font-bold text-[#0B2D48]">Full Diagnostic Metric Calculation Drill</h3>
+                            <p class="text-slate-600 text-sm mt-1">An AI model was evaluated on 1,000 mammograms for breast malignancy detection. The resulting 2x2 confusion matrix is shown below:</p>
+                        </div>
+                    </div>
+
+                    <!-- Visual Confusion Matrix Table -->
+                    <div class="max-w-md mx-auto my-6 border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+                        <div class="grid grid-cols-3 bg-slate-100 text-center text-xs font-bold py-2 border-b border-slate-200">
+                            <div></div>
+                            <div class="text-[#0B2D48]">Predicted Malignant</div>
+                            <div class="text-[#0B2D48]">Predicted Benign</div>
+                        </div>
+                        <div class="grid grid-cols-3 text-center text-xs sm:text-sm border-b border-slate-200">
+                            <div class="bg-slate-50 font-bold p-3 flex items-center justify-center text-slate-700">Actual Malignant</div>
+                            <div class="p-3 bg-emerald-50 text-emerald-800 font-bold">TP = 80</div>
+                            <div class="p-3 bg-rose-50 text-rose-800 font-bold">FN = 20</div>
+                        </div>
+                        <div class="grid grid-cols-3 text-center text-xs sm:text-sm">
+                            <div class="bg-slate-50 font-bold p-3 flex items-center justify-center text-slate-700">Actual Benign</div>
+                            <div class="p-3 bg-amber-50 text-amber-800 font-bold">FP = 50</div>
+                            <div class="p-3 bg-blue-50 text-blue-800 font-bold">TN = 850</div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl mb-4 text-sm text-slate-700">
+                        <strong>Calculate the following 4 metrics:</strong>
+                        <ol class="list-decimal list-inside space-y-1 mt-2 font-mono text-xs sm:text-sm">
+                            <li>Sensitivity (Recall) = TP / (TP + FN)</li>
+                            <li>Specificity = TN / (TN + FP)</li>
+                            <li>Positive Predictive Value (Precision) = TP / (TP + FP)</li>
+                            <li>Raw Accuracy = (TP + TN) / Total</li>
+                        </ol>
+                    </div>
+
+                    <details class="group bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
+                        <summary class="flex items-center justify-between p-4 cursor-pointer select-none font-semibold text-sm text-[#205A70] group-hover:text-[#0B2D48]">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                Reveal Calculated Answers &amp; Clinical Impact
+                            </span>
+                            <span class="text-xs text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                        </summary>
+                        <div class="p-4 pt-0 border-t border-slate-200/60 bg-white text-sm text-slate-700 space-y-3 mt-3">
+                            <ul class="space-y-1.5 font-mono text-xs sm:text-sm">
+                                <li><strong>Sensitivity (Recall):</strong> \(80 / (80 + 20) = 80 / 100 = \mathbf{80.0\%}\)</li>
+                                <li><strong>Specificity:</strong> \(850 / (850 + 50) = 850 / 900 = \mathbf{94.4\%}\)</li>
+                                <li><strong>Precision (PPV):</strong> \(80 / (80 + 50) = 80 / 130 = \mathbf{61.5\%}\)</li>
+                                <li><strong>Raw Accuracy:</strong> \((80 + 850) / 1000 = \mathbf{93.0\%}\)</li>
+                            </ul>
+                            <div class="p-3 bg-violet-50 text-violet-900 border border-violet-200 rounded-lg text-xs mt-2">
+                                <strong>Clinical Interpretation:</strong> Notice that while overall Accuracy is high (93%), the model misses 20 out of 100 actual cancer patients (20 False Negatives). In clinical screening, missing 20% of malignancies is hazardous, proving why high Accuracy alone is misleading in imbalanced healthcare tasks.
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- MODULE 05: MATHEMATICS FOR ML EXERCISES -->
+        <!-- ========================================== -->
+        <section id="ex-module5" class="pt-12 -mt-12">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">Module 05</span>
+                    <span class="text-xs font-medium text-slate-400">• Math &amp; Probabilities</span>
+                </div>
+                <a href="math.html" class="text-xs font-semibold text-[#205A70] hover:underline flex items-center gap-1">
+                    <span>Review Module 05 Notes</span>
+                    <span>→</span>
+                </a>
+            </div>
+
+            <h2 class="text-2xl sm:text-3xl font-bold text-[#0B2D48] mb-6">Healthcare Mathematics &amp; Probability Drills</h2>
+
+            <div class="space-y-6">
+                <!-- Exercise 5.1 -->
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 card-hover">
+                    <div class="flex items-start gap-3 mb-4">
+                        <span class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 font-bold flex items-center justify-center shrink-0 text-sm">5.1</span>
+                        <div>
+                            <h3 class="text-lg font-bold text-[#0B2D48]">The Base-Rate Fallacy in Clinical Diagnostic Testing (Bayes' Theorem)</h3>
+                            <p class="text-slate-600 text-sm mt-1">A rapid antigen biomarker test for a rare autoimmune encephalitis has the following verified properties:</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 my-4">
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 text-center">
+                            <span class="text-xs text-slate-500 font-semibold block">Prevalence \(P(D)\)</span>
+                            <span class="text-lg font-bold text-[#0B2D48]">0.01 (1%)</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 text-center">
+                            <span class="text-xs text-slate-500 font-semibold block">Sensitivity \(P(T^+ \mid D)\)</span>
+                            <span class="text-lg font-bold text-emerald-600">0.98 (98%)</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 text-center">
+                            <span class="text-xs text-slate-500 font-semibold block">Specificity \(P(T^- \mid D^c)\)</span>
+                            <span class="text-lg font-bold text-[#205A70]">0.95 (95%)</span>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl mb-4 text-sm text-slate-700">
+                        <strong>Drill Question:</strong> A newly admitted patient tests positive (\(T^+\)). What is the actual posterior probability \(P(D \mid T^+)\) that the patient truly has the disease?
+                    </div>
+
+                    <details class="group bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
+                        <summary class="flex items-center justify-between p-4 cursor-pointer select-none font-semibold text-sm text-[#205A70] group-hover:text-[#0B2D48]">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                Reveal Step-by-Step Derivation &amp; KaTeX Math
+                            </span>
+                            <span class="text-xs text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                        </summary>
+                        <div class="p-4 pt-0 border-t border-slate-200/60 bg-white text-sm text-slate-700 space-y-3 mt-3">
+                            <p>Apply Bayes' Theorem with Total Probability in the denominator:</p>
+                            <div class="p-3 bg-slate-50 rounded-lg font-mono text-center overflow-x-auto text-xs sm:text-sm">
+                                $$P(D \mid T^+) = \frac{P(T^+ \mid D) \cdot P(D)}{P(T^+ \mid D) \cdot P(D) + P(T^+ \mid D^c) \cdot P(D^c)}$$
+                            </div>
+                            <ol class="list-decimal list-inside space-y-1.5 text-slate-600">
+                                <li>Numerator: \(0.98 \times 0.01 = 0.0098\)</li>
+                                <li>False Positive Rate: \(P(T^+ \mid D^c) = 1 - 0.95 = 0.05\)</li>
+                                <li>Denominator: \(0.0098 + (0.05 \times 0.99) = 0.0098 + 0.0495 = 0.0593\)</li>
+                                <li><strong>Result:</strong> \(\frac{0.0098}{0.0593} \approx 0.1652 \implies \mathbf{16.5\%}\)</li>
+                            </ol>
+                            <div class="p-3 bg-emerald-50 text-emerald-900 border border-emerald-200 rounded-lg text-xs mt-2">
+                                <strong>Clinical Takeaway:</strong> Even with a 98% sensitive test, because the condition is rare (1% prevalence), <strong>more than 83% of positive tests are false positives</strong>! This proves why broad, unselected screening with AI for rare diseases leads to severe overdiagnosis unless pre-test probability is high.
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- Exercise 5.2 -->
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 card-hover">
+                    <div class="flex items-start gap-3 mb-4">
+                        <span class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 font-bold flex items-center justify-center shrink-0 text-sm">5.2</span>
+                        <div>
+                            <h3 class="text-lg font-bold text-[#0B2D48]">Vector Euclidean Distance in Patient Similarity</h3>
+                            <p class="text-slate-600 text-sm mt-1">Consider two diabetic patients represented in 2D standardized space: \(\mathbf{x}_1 = [z_{\text{HbA1c}}, z_{\text{BMI}}] = [2.0, 1.5]\) and \(\mathbf{x}_2 = [0.5, -0.5]\).</p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl mb-4 text-sm text-slate-700">
+                        <strong>Calculation:</strong> Calculate the Euclidean distance \(d(\mathbf{x}_1, \mathbf{x}_2)\). What would happen to this calculation if raw unstandardized values (HbA1c: 6-12% vs. Platelet Count: 150,000-400,000) were used instead?
+                    </div>
+
+                    <details class="group bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
+                        <summary class="flex items-center justify-between p-4 cursor-pointer select-none font-semibold text-sm text-[#205A70] group-hover:text-[#0B2D48]">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                Reveal Solution
+                            </span>
+                            <span class="text-xs text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                        </summary>
+                        <div class="p-4 pt-0 border-t border-slate-200/60 bg-white text-sm text-slate-700 space-y-2 mt-3">
+                            <p><strong>Euclidean Distance Formula:</strong></p>
+                            <div class="p-2 bg-slate-50 rounded text-center font-mono text-xs sm:text-sm">
+                                $$d = \sqrt{(2.0 - 0.5)^2 + (1.5 - (-0.5))^2} = \sqrt{(1.5)^2 + (2.0)^2} = \sqrt{2.25 + 4.00} = \sqrt{6.25} = \mathbf{2.5}$$
+                            </div>
+                            <p class="mt-2 text-slate-600"><strong>Why Standardization Matters:</strong> If raw values were used, platelet differences of 50,000 units would squared to \(2.5 \times 10^9\), rendering the HbA1c variance completely invisible to distance-based algorithms like KNN or K-Means.</p>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- INTERACTIVE SELF-ASSESSMENT QUIZ -->
+        <!-- ========================================== -->
+        <section id="interactive-quiz" class="pt-12 -mt-12">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300">Self-Test</span>
+                    <span class="text-xs font-medium text-slate-400">• Comprehensive Check</span>
+                </div>
+                <div id="quiz-score-pill" class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                    Current Score: <span id="current-score">0</span> / 5
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-tr from-slate-900 to-[#0B2D48] text-white rounded-3xl p-6 sm:p-10 shadow-xl relative overflow-hidden mb-8">
+                <div class="max-w-2xl">
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-700/50">Interactive Assessment</span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold mt-3 mb-2">Healthcare ML Knowledge Check</h2>
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        Test your comprehension across all 5 modules. Select an answer for each question and submit for immediate clinical explanation and grading.
+                    </p>
+                </div>
+            </div>
+
+            <div class="space-y-6" id="quiz-container">
+
+                <!-- Q1 -->
+                <div class="quiz-card bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8" data-question="1" data-correct="c">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-[#205A70] uppercase tracking-wider">Question 1 of 5 • Module 01</span>
+                        <span class="result-badge hidden text-xs font-bold px-2.5 py-0.5 rounded-md"></span>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-bold text-[#0B2D48] mb-4">
+                        In medical diagnostics, what is the key mathematical difference between Linear Regression and Logistic Regression?
+                    </h3>
+                    <div class="space-y-2.5 text-sm">
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q1" value="a" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700">Linear regression outputs probabilities between 0 and 1; logistic regression outputs continuous lab values.</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q1" value="b" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700">Linear regression uses the Sigmoid function; logistic regression uses ordinary least squares.</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q1" value="c" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700 font-medium">Linear regression predicts unbounded continuous numbers; logistic regression passes predictions through a Sigmoid link function to yield calibrated probabilities \([0, 1]\).</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q1" value="d" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700">Logistic regression can only be trained with unsupervised clustering methods.</span>
+                        </label>
+                    </div>
+                    <div class="explanation hidden mt-4 p-4 rounded-xl text-xs sm:text-sm"></div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="quiz-card bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8" data-question="2" data-correct="c">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-amber-700 uppercase tracking-wider">Question 2 of 5 • Module 02</span>
+                        <span class="result-badge hidden text-xs font-bold px-2.5 py-0.5 rounded-md"></span>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-bold text-[#0B2D48] mb-4">
+                        When applying Synthetic Minority Over-sampling Technique (SMOTE) to rebalance rare disease data, when should SMOTE be executed?
+                    </h3>
+                    <div class="space-y-2.5 text-sm">
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q2" value="a" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700">On the entire dataset prior to splitting into train and test sets.</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q2" value="b" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700">Exclusively on the test set so the test set has more positive examples.</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q2" value="c" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700 font-medium">Strictly on the training folds only; test sets must remain untouched to reflect true real-world clinical prevalence.</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q2" value="d" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700">Only after the model has completed all training iterations.</span>
+                        </label>
+                    </div>
+                    <div class="explanation hidden mt-4 p-4 rounded-xl text-xs sm:text-sm"></div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="quiz-card bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8" data-question="3" data-correct="b">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-emerald-700 uppercase tracking-wider">Question 3 of 5 • Module 03</span>
+                        <span class="result-badge hidden text-xs font-bold px-2.5 py-0.5 rounded-md"></span>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-bold text-[#0B2D48] mb-4">
+                        Why is `stratify=y` critical when applying `train_test_split()` on an EHR dataset with 3% sepsis positive cases?
+                    </h3>
+                    <div class="space-y-2.5 text-sm">
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q3" value="a" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700">It normalizes the patient's blood pressure features to zero mean.</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q3" value="b" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700 font-medium">It preserves the identical 3% positive / 97% negative class proportion in both the training set and testing set, preventing split bias.</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q3" value="c" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700">It automatically imputes all missing values using KNN.</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q3" value="d" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700">It reduces training time by removing 50% of healthy patients.</span>
+                        </label>
+                    </div>
+                    <div class="explanation hidden mt-4 p-4 rounded-xl text-xs sm:text-sm"></div>
+                </div>
+
+                <!-- Q4 -->
+                <div class="quiz-card bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8" data-question="4" data-correct="a">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-violet-700 uppercase tracking-wider">Question 4 of 5 • Module 04</span>
+                        <span class="result-badge hidden text-xs font-bold px-2.5 py-0.5 rounded-md"></span>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-bold text-[#0B2D48] mb-4">
+                        In an emergency triage AI screening for Acute Myocardial Infarction (Heart Attack), which error is most clinically dangerous?
+                    </h3>
+                    <div class="space-y-2.5 text-sm">
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q4" value="a" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700 font-medium">A False Negative (Sensitivity failure), where a patient having an active heart attack is discharged home as benign.</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q4" value="b" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700">A False Positive (Specificity failure), where an anxious patient undergoes a confirmatory troponin test.</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q4" value="c" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700">Having an AUC-ROC above 0.95.</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q4" value="d" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700">Using 10-fold cross validation instead of 5-fold cross validation.</span>
+                        </label>
+                    </div>
+                    <div class="explanation hidden mt-4 p-4 rounded-xl text-xs sm:text-sm"></div>
+                </div>
+
+                <!-- Q5 -->
+                <div class="quiz-card bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8" data-question="5" data-correct="b">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-indigo-700 uppercase tracking-wider">Question 5 of 5 • Module 05</span>
+                        <span class="result-badge hidden text-xs font-bold px-2.5 py-0.5 rounded-md"></span>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-bold text-[#0B2D48] mb-4">
+                        During Gradient Descent optimization of a cross-entropy loss function, what role does the Learning Rate (\(\alpha\)) play?
+                    </h3>
+                    <div class="space-y-2.5 text-sm">
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q5" value="a" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700">It specifies the number of cross-validation folds.</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q5" value="b" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700 font-medium">It scales the step size taken along the negative gradient vector to update model weights.</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q5" value="c" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700">It calculates the Euclidean distance between patient feature vectors.</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="q5" value="d" class="mt-0.5 text-[#205A70]">
+                            <span class="text-slate-700">It sets the probability cutoff threshold (e.g. 0.5) for diagnosis.</span>
+                        </label>
+                    </div>
+                    <div class="explanation hidden mt-4 p-4 rounded-xl text-xs sm:text-sm"></div>
+                </div>
+
+            </div>
+
+            <!-- Quiz Controls -->
+            <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <div>
+                    <div class="font-bold text-[#0B2D48] text-base" id="quiz-final-title">Complete all 5 questions above</div>
+                    <div class="text-slate-500 text-xs sm:text-sm" id="quiz-final-sub">Click "Submit &amp; Check Answers" to evaluate your score and explanations.</div>
+                </div>
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <button id="submit-quiz-btn" onclick="submitQuiz()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#205A70] to-[#0B2D48] hover:from-[#174354] hover:to-[#071f32] text-white font-semibold text-sm shadow-md transition-all">
+                        Submit &amp; Check Answers
+                    </button>
+                    <button id="reset-quiz-btn" onclick="resetQuiz()" class="hidden px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition-colors">
+                        Reset
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Course Completion Banner -->
+        <section class="bg-gradient-to-r from-[#205A70] via-[#0B2D48] to-slate-900 rounded-3xl p-8 sm:p-12 text-white shadow-lg text-center relative overflow-hidden">
+            <div class="max-w-2xl mx-auto space-y-4">
+                <span class="px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    Comprehensive Curriculum Complete
+                </span>
+                <h3 class="text-2xl sm:text-3xl font-extrabold">Ready to Explore the Notes Again?</h3>
+                <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                    Review theoretical fundamentals, mathematical derivations, Python pipelines, and validation techniques across all 5 structured healthcare modules.
+                </p>
+                <div class="pt-4 flex flex-wrap justify-center gap-3">
+                    <a href="index.html" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-[#0B2D48] font-bold text-sm shadow-sm hover:bg-slate-100 transition-colors">
+                        <span>Return to Course Hub</span>
+                        <span>→</span>
+                    </a>
+                    <a href="intro.html" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm border border-white/20 transition-colors">
+                        <span>Start from Module 01</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer bg-white border-t border-slate-200/80 py-10 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="flex items-center justify-center gap-2 mb-3">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#56A0A9]"></span>
+                <span class="font-bold text-[#0B2D48] tracking-tight">ML Notes for Healthcare</span>
+            </div>
+            <p class="text-slate-500 text-sm max-w-lg mx-auto mb-2">
+                Department of Bio-Medical Sciences, The Apollo University, Chittoor.
+            </p>
+            <p class="text-slate-400 text-xs max-w-md mx-auto mb-3">
+                <em>Enjoy exploring ML Notes for Healthcare and happy learning!</em>
+            </p>
+            <div class="text-xs text-slate-400">
+                Designed for healthcare professionals, students, and machine learning researchers.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive Quiz Logic & KaTeX Renderer -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof renderMathInElement === "function") {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: "$$", right: "$$", display: true},
+                        {left: "\\(", right: "\\)", display: false}
+                    ],
+                    throwOnError: false
+                });
+            }
+        });
+
+        const explanations = {
+            1: {
+                correct: "Correct! Linear regression models unbounded continuous variables, while Logistic Regression applies the Sigmoid link function \\(\\sigma(z) = \\frac{1}{1 + e^{-z}}\\) to bound predictions between 0 and 1, interpreting them as calibrated clinical risk probabilities.",
+                incorrect: "Incorrect. The essential mathematical difference is that Logistic Regression passes the linear combination through the Sigmoid link function \\(\\sigma(z)\\) to bound output between 0 and 1 for classification, whereas Linear Regression outputs unbounded continuous numbers."
+            },
+            2: {
+                correct: "Correct! Synthesizing samples on the test set creates artificial patient data and invalidates test independence. SMOTE must strictly happen on the training folds only.",
+                incorrect: "Incorrect. Oversampling or synthesizing test set instances causes catastrophic data leakage. SMOTE must strictly be confined to training folds only."
+            },
+            3: {
+                correct: "Correct! In highly imbalanced clinical conditions (e.g. 3% sepsis), a random split could easily put all 3% cases in train and 0% in test. `stratify=y` guarantees identical class prevalence in every split.",
+                incorrect: "Incorrect. Stratification guarantees that the minority disease prevalence (3%) is preserved proportionally in both the train and test subsets."
+            },
+            4: {
+                correct: "Correct! In acute life-threatening screening (Heart Attack), a False Negative means a patient having an infarction is sent home untreated with fatal risk. Minimizing False Negatives (maximizing Sensitivity) is the cardinal clinical priority.",
+                incorrect: "Incorrect. Discharging an active heart attack patient home untreated (False Negative) has catastrophic clinical consequences compared to a benign confirmatory test (False Positive)."
+            },
+            5: {
+                correct: "Correct! The learning rate \\(\\alpha\\) controls the magnitude of the update vector: \\(w_{t+1} = w_t - \\alpha \\nabla L(w_t)\\). If too large, optimization diverges; if too small, training crawls.",
+                incorrect: "Incorrect. The learning rate \\(\\alpha\\) scales the step size taken along the negative gradient vector during weight updates."
+            }
+        };
+
+        function submitQuiz() {
+            let score = 0;
+            const cards = document.querySelectorAll('.quiz-card');
+
+            cards.forEach(card => {
+                const qNum = card.getAttribute('data-question');
+                const correctAns = card.getAttribute('data-correct');
+                const selectedRadio = card.querySelector(`input[name="q${qNum}"]:checked`);
+                const badge = card.querySelector('.result-badge');
+                const expBox = card.querySelector('.explanation');
+
+                badge.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-800', 'border-emerald-300', 'bg-rose-100', 'text-rose-800', 'border-rose-300');
+                expBox.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-900', 'border-emerald-200', 'bg-rose-50', 'text-rose-900', 'border-rose-200');
+                expBox.classList.add('border');
+
+                if (!selectedRadio) {
+                    badge.textContent = "Unanswered";
+                    badge.classList.add('bg-amber-100', 'text-amber-800', 'border', 'border-amber-300');
+                    expBox.textContent = "Please select an answer for this question.";
+                    expBox.classList.add('bg-amber-50', 'text-amber-900', 'border-amber-200');
+                    return;
+                }
+
+                if (selectedRadio.value === correctAns) {
+                    score++;
+                    badge.textContent = "✓ Correct";
+                    badge.classList.add('bg-emerald-100', 'text-emerald-800', 'border', 'border-emerald-300');
+                    expBox.innerHTML = explanations[qNum].correct;
+                    expBox.classList.add('bg-emerald-50', 'text-emerald-900', 'border-emerald-200');
+                } else {
+                    badge.textContent = "✗ Incorrect";
+                    badge.classList.add('bg-rose-100', 'text-rose-800', 'border', 'border-rose-300');
+                    expBox.innerHTML = explanations[qNum].incorrect;
+                    expBox.classList.add('bg-rose-50', 'text-rose-900', 'border-rose-200');
+                }
+
+                if (window.renderMathInElement) {
+                    renderMathInElement(expBox, {
+                        delimiters: [
+                            {left: "$$", right: "$$", display: true},
+                            {left: "\\(", right: "\\)", display: false}
+                        ],
+                        throwOnError: false
+                    });
+                }
+            });
+
+            document.getElementById('current-score').textContent = score;
+            const finalTitle = document.getElementById('quiz-final-title');
+            const finalSub = document.getElementById('quiz-final-sub');
+
+            if (score >= 4) {
+                finalTitle.textContent = `Excellent Work! You scored ${score} / 5 🎉`;
+                finalTitle.className = "font-bold text-emerald-700 text-base";
+                finalSub.textContent = "You have demonstrated strong grasp of healthcare machine learning concepts!";
+            } else {
+                finalTitle.textContent = `You scored ${score} / 5`;
+                finalTitle.className = "font-bold text-amber-700 text-base";
+                finalSub.textContent = "Review the explanations above or revisit the corresponding modules to reinforce your understanding.";
+            }
+
+            document.getElementById('reset-quiz-btn').classList.remove('hidden');
+        }
+
+        function resetQuiz() {
+            const cards = document.querySelectorAll('.quiz-card');
+            cards.forEach(card => {
+                const radios = card.querySelectorAll('input[type="radio"]');
+                radios.forEach(r => r.checked = false);
+                const badge = card.querySelector('.result-badge');
+                const expBox = card.querySelector('.explanation');
+                badge.classList.add('hidden');
+                expBox.classList.add('hidden');
+            });
+
+            document.getElementById('current-score').textContent = "0";
+            document.getElementById('quiz-final-title').textContent = "Complete all 5 questions above";
+            document.getElementById('quiz-final-title').className = "font-bold text-[#0B2D48] text-base";
+            document.getElementById('quiz-final-sub').textContent = "Click 'Submit & Check Answers' to evaluate your score and explanations.";
+            document.getElementById('reset-quiz-btn').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

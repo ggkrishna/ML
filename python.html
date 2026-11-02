@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 03: Python for Machine Learning in Healthcare – ML Notes</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- KaTeX CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+    <!-- Google Fonts Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            navy: '#0B2D48',
+                            teal: '#205A70',
+                            softTeal: '#56A0A9',
+                            amber: '#F9A03F',
+                            lightBg: '#F8FAFC',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .bg-grid-pattern {
+            background-image: radial-gradient(rgba(32, 90, 112, 0.08) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 380px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 400px;
+            }
+        }
+        .card-hover {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .card-hover:hover {
+            box-shadow: 0 14px 28px -6px rgba(11, 45, 72, 0.08);
+        }
+        .code-snippet {
+            background-color: #0F172A;
+            color: #F8FAFC;
+            border-left: 4px solid #F9A03F;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            border-radius: 0 0.75rem 0.75rem 0;
+            line-height: 1.6;
+        }
+        .code-keyword { color: #F9A03F; font-weight: 600; }
+        .code-comment { color: #64748B; font-style: italic; }
+        .code-string { color: #38BDF8; }
+        .code-function { color: #A78BFA; }
+        input[type=range] { accent-color: #205A70; }
+        .katex-display { margin: 0.5em 0 !important; }
+    </style>
+</head>
+<body class="bg-[#F8F9FA] text-[#0B2D48] min-h-screen flex flex-col antialiased selection:bg-[#56A0A9]/20 selection:text-[#0B2D48]">
+
+    <!-- Main Navigation Bar -->
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#0B2D48] to-[#205A70] flex items-center justify-center text-white shadow-md shadow-[#205A70]/20 group-hover:scale-105 transition-transform">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-lg font-bold tracking-tight text-[#0B2D48]">ML Notes</span>
+                    <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-xs font-semibold bg-[#205A70]/10 text-[#205A70] rounded-full border border-[#205A70]/20">Healthcare Edition</span>
+                </div>
+            </a>
+            
+            <div class="flex items-center gap-2 sm:gap-3">
+                <a href="index.html" class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-[#205A70] transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    <span>All Modules</span>
+                </a>
+                <a href="exercises.html" class="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-lg transition-colors">
+                    <span>Exercises</span>
+                </a>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#205A70]/10 text-[#205A70] border border-[#205A70]/20">
+                    Module 03
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- In-Page Sub-Navigation Bar -->
+    <nav class="sticky top-16 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs py-2.5 px-4 sm:px-6">
+        <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center space-x-1 sm:space-x-2 overflow-x-auto whitespace-nowrap py-1 text-xs sm:text-sm font-medium text-slate-600">
+                <a href="#section1" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">1. Sklearn API</a>
+                <a href="#section2" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">2. Regression</a>
+                <a href="#section3" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">3. KNN</a>
+                <a href="#section4" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">4. Decision Trees</a>
+                <a href="#section5" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">5. Neural Networks</a>
+                <a href="#section6" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">6. Other Models</a>
+                <a href="#section7" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">7. ML Pipeline</a>
+            </div>
+            <div class="hidden sm:flex items-center gap-2 shrink-0 text-xs">
+                <a href="data-preprocessing.html" class="inline-flex items-center gap-1 font-semibold text-slate-500 hover:text-slate-800 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition-colors">
+                    ← Prev: Preprocessing
+                </a>
+                <a href="training-testing.html" class="inline-flex items-center gap-1 font-semibold text-[#205A70] bg-[#205A70]/10 hover:bg-[#205A70]/20 px-3 py-1.5 rounded-lg transition-colors">
+                    Next: Evaluation →
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero / Header Section -->
+    <section class="relative bg-gradient-to-b from-white via-[#F8FAFC] to-[#F1F5F9] border-b border-slate-200/60 bg-grid-pattern py-12 sm:py-16">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl">
+                <!-- Breadcrumb badge -->
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-[#205A70]/10 text-[#205A70] border border-[#205A70]/20 mb-4">
+                    <a href="index.html" class="hover:underline">Home</a>
+                    <span class="text-slate-400">/</span>
+                    <span class="font-semibold">Module 03</span>
+                </div>
+
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#0B2D48] mb-4">
+                    Python for <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#205A70] via-[#357a94] to-[#56A0A9]">Machine Learning in Healthcare</span>
+                </h1>
+
+                <p class="text-base sm:text-lg text-slate-600 leading-relaxed font-normal mb-6">
+                    A code-friendly, clinical-first guide for <strong>health informatics students</strong>. Learn how Python's standardized Scikit-learn framework empowers clinicians to instantiate estimators, train on historical EHR encounters, tune hyperparameters, and build leak-free diagnostic pipelines.
+                </p>
+
+                <!-- Badges -->
+                <div class="flex flex-wrap items-center gap-2.5 text-xs">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200/80 shadow-xs font-medium text-slate-700">
+                        <span class="w-2 h-2 rounded-full bg-teal-500"></span>
+                        Unified Estimator Mental Model
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200/80 shadow-xs font-medium text-slate-700">
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                        3 Interactive Python Simulators
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200/80 shadow-xs font-medium text-slate-700">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        Hyperparameter Tuning Sandbox
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200/80 shadow-xs font-medium text-slate-700">
+                        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                        Leak-Free Pipeline Architecture
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Container -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-16">
+
+        <!-- ========================================================= -->
+        <!-- SECTION 1: SCIKIT-LEARN ESTIMATOR API                     -->
+        <!-- ========================================================= -->
+        <section id="section1" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">Section 01</span>
+                <span class="text-xs font-medium text-slate-400">• Standardized Interface</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">1. The Scikit-learn Estimator API</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                Why has Python become the global operating language for clinical machine learning? Because Python's <strong>Scikit-Learn</strong> library implements a clean, universal three-step workflow. Whether you are running a simple linear regression on blood pressure or a 500-tree random forest on cardiac ICU telemetry, the exact same three commands apply:
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col justify-between card-hover">
+                    <div>
+                        <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700">Step 01</span>
+                        <h4 class="font-bold text-[#0B2D48] text-base mt-2 mb-1">Instantiation</h4>
+                        <p class="font-mono text-xs text-[#205A70] my-2">model = RandomForestClassifier()</p>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Picking your diagnostic instrument off the medical shelf and configuring its hyperparameters (like setting the sensitivity dials on an ECG monitor).
+                        </p>
+                    </div>
+                </div>
+
+                <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col justify-between card-hover">
+                    <div>
+                        <span class="text-xs font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700">Step 02</span>
+                        <h4 class="font-bold text-[#0B2D48] text-base mt-2 mb-1">Fitting (Learning)</h4>
+                        <p class="font-mono text-xs text-amber-700 my-2">model.fit(X_train, y_train)</p>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            The algorithm reviews 10,000 historical patient charts with known gold-standard outcomes to calibrate internal mathematical decision weights.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col justify-between card-hover">
+                    <div>
+                        <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700">Step 03</span>
+                        <h4 class="font-bold text-[#0B2D48] text-base mt-2 mb-1">Inference (Prediction)</h4>
+                        <p class="font-mono text-xs text-emerald-700 my-2">risk = model.predict_proba(X_new)</p>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Feeding a newly admitted emergency patient's vitals into the trained model to calculate their real-time clinical probability score.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================================= -->
+            <!-- INTERACTIVE DEMO 1: SCIKIT-LEARN LIFECYCLE SIMULATOR      -->
+            <!-- ========================================================= -->
+            <div class="bg-gradient-to-br from-slate-900 via-[#0B2D48] to-[#205A70] rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-12">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#F9A03F] text-slate-900 mb-1">
+                            Interactive Bedside Demonstration 01
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                            The Scikit-Learn 3-Step Lifecycle Visualizer
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            Click through the three lifecycle stages to observe how Python loads clinical estimators, trains parameters, and scores new patient admissions.
+                        </p>
+                    </div>
+                    <!-- Step Action Buttons -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button id="btn-py-step1" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-sm transition-colors">
+                            1. Instantiate()
+                        </button>
+                        <button id="btn-py-step2" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white/20 hover:bg-white/30 text-white transition-colors">
+                            2. fit(X_train, y_train)
+                        </button>
+                        <button id="btn-py-step3" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white/20 hover:bg-white/30 text-white transition-colors">
+                            3. predict_proba(X_new)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    <!-- Code Terminal Output -->
+                    <div class="lg:col-span-7 bg-slate-950 p-5 rounded-xl border border-white/15 font-mono text-xs space-y-2 overflow-x-auto shadow-inner">
+                        <div class="text-slate-400"># Interactive Python Terminal (iPython / Jupyter)</div>
+                        <div id="py-terminal-code" class="text-emerald-400">
+                            &gt;&gt;&gt; from sklearn.ensemble import RandomForestClassifier<br>
+                            &gt;&gt;&gt; model = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42)<br>
+                            &gt;&gt;&gt; print(model)<br>
+                            <span class="text-slate-300">RandomForestClassifier(max_depth=5, n_estimators=100, random_state=42)</span><br>
+                            <span class="text-amber-300"># Status: Model instantiated with empty parameter weights (untrained)</span>
+                        </div>
+                    </div>
+
+                    <!-- Clinical Mental Model Explanation -->
+                    <div class="lg:col-span-5 bg-white/10 p-5 rounded-xl backdrop-blur-md border border-white/15 space-y-3">
+                        <div class="text-xs font-bold uppercase tracking-wider text-[#56A0A9]">Clinical Architecture Breakdown</div>
+                        
+                        <div id="py-step-title" class="font-bold text-sm text-white">
+                            Stage 1: Instantiation (Picking the Model)
+                        </div>
+                        
+                        <p id="py-step-desc" class="text-xs text-slate-200 leading-relaxed">
+                            Creating the estimator object sets hyperparameters (number of trees = 100, maximum tree depth = 5). At this stage, the model contains no patient knowledge—it is an empty algorithm ready to ingest EHR records.
+                        </p>
+
+                        <div id="py-step-badge" class="p-2.5 rounded-lg text-center font-bold text-xs bg-blue-500/20 border border-blue-400 text-blue-200">
+                            ⚙️ Model State: Initialized &amp; Configured
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 2: REGRESSION MODELS IN CODE                      -->
+        <!-- ========================================================= -->
+        <section id="section2" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">Section 02</span>
+                <span class="text-xs font-medium text-slate-400">• Parametric Code</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">2. Core Parametric Models: Regression</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                Linear and Logistic regression remain the clinical gold standards in health informatics because their learned coefficients ($\beta$) can be directly inspected, audited, and published in medical literature.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                <!-- Linear Regression -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Linear Regression</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-blue-50 text-blue-700">Hemodynamics</span>
+                        </div>
+                        <p class="text-slate-600 text-xs sm:text-sm mb-3">Predicting continuous metrics (e.g. SBP from Age &amp; BMI).</p>
+                        <div class="chart-container mb-4">
+                            <canvas id="linearRegressionChart"></canvas>
+                        </div>
+                        <div class="code-snippet"><pre><code><span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> LinearRegression
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+<span class="code-comment"># Inspecting learned clinical weights</span>
+print(<span class="code-string">"Baseline Intercept:"</span>, model.intercept_)
+print(<span class="code-string">"Coefficients (mmHg/year):"</span>, model.coef_)</code></pre></div>
+                    </div>
+                </div>
+
+                <!-- Logistic Regression -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Logistic Regression</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-amber-50 text-amber-700">Risk Probability</span>
+                        </div>
+                        <p class="text-slate-600 text-xs sm:text-sm mb-3">Predicting calibrated diabetes probability with Sigmoid curve.</p>
+                        <div class="chart-container mb-4">
+                            <canvas id="logisticRegressionChart"></canvas>
+                        </div>
+                        <div class="code-snippet"><pre><code><span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> LogisticRegression
+
+model = LogisticRegression(class_weight=<span class="code-string">'balanced'</span>)
+model.fit(X_train, y_train)
+
+<span class="code-comment"># In healthcare, always extract probabilities!</span>
+probs = model.predict_proba(X_test)[:, 1]</code></pre></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 3: K-NEAREST NEIGHBORS (KNN)                      -->
+        <!-- ========================================================= -->
+        <section id="section3" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">Section 03</span>
+                <span class="text-xs font-medium text-slate-400">• Distance Classification</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">3. Learning by Similarity: K-Nearest Neighbors</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                In Scikit-learn, KNN classifies new patients by measuring geometric distances across features. It requires only two lines of code, but is strictly sensitive to scaling and the choice of $K$.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold text-[#0B2D48] mb-2">KNeighborsClassifier in Python</h3>
+                        <p class="text-slate-600 text-xs sm:text-sm mb-3">
+                            Classifying myocardial infarction using Cardiac Troponin and D-Dimer.
+                        </p>
+                        <div class="chart-container mb-4">
+                            <canvas id="knnChart"></canvas>
+                        </div>
+                        <div class="code-snippet"><pre><code><span class="code-keyword">from</span> sklearn.neighbors <span class="code-keyword">import</span> KNeighborsClassifier
+<span class="code-keyword">from</span> sklearn.preprocessing <span class="code-keyword">import</span> StandardScaler
+<span class="code-keyword">from</span> sklearn.pipeline <span class="code-keyword">import</span> make_pipeline
+
+<span class="code-comment"># Mandatory: Scale features before measuring Euclidean distance</span>
+knn_pipeline = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=5))
+knn_pipeline.fit(X_train, y_train)</code></pre></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold text-[#0B2D48] mb-3">Clinical Rules for Setting Hyperparameter K</h3>
+                        <div class="space-y-3 text-xs sm:text-sm text-slate-600">
+                            <div class="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-900">
+                                <strong>K = 1 (Overfitting):</strong> A single anomalous patient with an unusual idiosyncratic drug reaction misdiagnoses all new patients who happen to fall nearby.
+                            </div>
+                            <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900">
+                                <strong>K = 5 or 7 (Optimal Consensus):</strong> Averages out biological measurement noise while preserving local patient similarity.
+                            </div>
+                            <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">
+                                <strong>K = 50+ (Underfitting):</strong> Dilutes the patient's individual uniqueness, simply predicting whatever condition is most common in the hospital.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 4: DECISION TREES & ENSEMBLES                     -->
+        <!-- ========================================================= -->
+        <section id="section4" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-[#F9A03F]/15 text-amber-800 border border-amber-200">Section 04</span>
+                <span class="text-xs font-medium text-slate-400">• Tree Architectures</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">4. Interpretable Decisions: Trees and Ensembles</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                In Scikit-learn, single decision trees (<code class="text-xs font-mono">DecisionTreeClassifier</code>) provide full flowchart interpretability, while Random Forests (<code class="text-xs font-mono">RandomForestClassifier</code>) build a multidisciplinary consensus of 100+ trees to maximize clinical accuracy.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                    <h3 class="text-xl font-bold text-[#0B2D48] mb-2">DecisionTreeClassifier</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mb-3">Constraining <code class="text-xs font-mono">max_depth</code> prevents the tree from memorizing individual chart numbers.</p>
+                    <div class="code-snippet"><pre><code><span class="code-keyword">from</span> sklearn.tree <span class="code-keyword">import</span> DecisionTreeClassifier, export_text
+
+<span class="code-comment"># max_depth=3 keeps the clinical flowchart human-readable</span>
+tree = DecisionTreeClassifier(max_depth=3, criterion=<span class="code-string">'gini'</span>)
+tree.fit(X_train, y_train)
+
+<span class="code-comment"># Print human-readable clinical flowchart</span>
+print(export_text(tree, feature_names=feature_names))</code></pre></div>
+                </div>
+
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                    <h3 class="text-xl font-bold text-[#0B2D48] mb-2">RandomForestClassifier</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mb-3">Aggregates 100 randomized trees via bootstrap majority voting.</p>
+                    <div class="code-snippet"><pre><code><span class="code-keyword">from</span> sklearn.ensemble <span class="code-keyword">import</span> RandomForestClassifier
+
+rf = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42)
+rf.fit(X_train, y_train)
+
+<span class="code-comment"># Extracting feature importances for clinical audits</span>
+importances = rf.feature_importances_</code></pre></div>
+                </div>
+            </div>
+
+            <!-- ========================================================= -->
+            <!-- INTERACTIVE DEMO 2: HYPERPARAMETER TUNING SANDBOX         -->
+            <!-- ========================================================= -->
+            <div class="bg-gradient-to-br from-slate-900 via-[#0B2D48] to-[#205A70] rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-12">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#F9A03F] text-slate-900 mb-1">
+                            Interactive Bedside Demonstration 02
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                            Interactive Clinical Hyperparameter Sandbox
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            Adjust key Scikit-Learn hyperparameters to observe the trade-off between clinical overfitting and underfitting in real time.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    <!-- Sliders -->
+                    <div class="lg:col-span-5 space-y-5 bg-white/10 p-5 rounded-xl backdrop-blur-md border border-white/15">
+                        <div>
+                            <div class="flex justify-between items-center text-xs font-medium mb-1">
+                                <span class="text-slate-200">KNN Neighbors (n_neighbors):</span>
+                                <span id="param-k-val" class="font-bold text-amber-300 bg-black/30 px-2 py-0.5 rounded">K = 5</span>
+                            </div>
+                            <input id="param-k" type="range" min="1" max="25" step="2" value="5" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                                <span>K=1 (Overfitting)</span>
+                                <span>K=5 (Optimal)</span>
+                                <span>K=25 (Underfitting)</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center text-xs font-medium mb-1">
+                                <span class="text-slate-200">Decision Tree Depth (max_depth):</span>
+                                <span id="param-depth-val" class="font-bold text-amber-300 bg-black/30 px-2 py-0.5 rounded">Depth = 3</span>
+                            </div>
+                            <input id="param-depth" type="range" min="1" max="15" value="3" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                                <span>1 (Underfitting)</span>
+                                <span>3 (Auditable)</span>
+                                <span>15 (Memorized)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Clinical Diagnostic Consequence -->
+                    <div class="lg:col-span-7 bg-white rounded-xl p-5 text-slate-800 shadow-md space-y-3">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-[#205A70]">Model Behavior &amp; Hospital Safety</span>
+                            <span id="param-status-badge" class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Optimal Calibration</span>
+                        </div>
+
+                        <p id="param-consequence-text" class="text-xs text-slate-600 leading-relaxed">
+                            With <strong>K = 5</strong> and <strong>Depth = 3</strong>, the models strike an optimal clinical balance. The decision tree remains concise enough for hospital medical boards to audit every branch, while KNN filters out noisy sensor outliers.
+                        </p>
+
+                        <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs">
+                            <strong class="text-[#0B2D48]">Informatics Audit Tip:</strong> In clinical governance, an overfitted model (Depth = 15) scores 99% during hospital training, but crashes to 60% when tested in community partner hospitals!
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 5: NEURAL NETWORKS (MLP)                          -->
+        <!-- ========================================================= -->
+        <section id="section5" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-violet-50 text-violet-700 border border-violet-200">Section 05</span>
+                <span class="text-xs font-medium text-slate-400">• Multi-Layer Perceptrons</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">5. Neural Networks: Multi-Layer Perceptron</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                Scikit-learn includes <code class="text-xs font-mono bg-slate-100 px-1 py-0.5 rounded">MLPClassifier</code> for tabular neural representations. While deep vision models (CNNs) require PyTorch or TensorFlow, MLPs in Scikit-learn excel at modeling complex multi-organ interactions on structured EHR vitals.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold text-[#0B2D48] mb-2">MLPClassifier in Python</h3>
+                        <p class="text-slate-600 text-xs sm:text-sm mb-3">Configuring hidden layers, ReLU activations, and Adam optimization.</p>
+                        <div class="code-snippet"><pre><code><span class="code-keyword">from</span> sklearn.neural_network <span class="code-keyword">import</span> MLPClassifier
+
+<span class="code-comment"># Two hidden layers with 64 and 32 artificial neurons</span>
+mlp = MLPClassifier(
+    hidden_layer_sizes=(64, 32),
+    activation=<span class="code-string">'relu'</span>,
+    max_iter=500,
+    random_state=42
+)
+mlp.fit(X_train, y_train)</code></pre></div>
+                    </div>
+                </div>
+
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                    <h3 class="text-xl font-bold text-[#0B2D48] mb-2">Neural Network Healthcare Suitability</h3>
+                    <div class="chart-container">
+                        <canvas id="nnApplicationsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 6: ADVANCED MODELS (K-MEANS & SVM)               -->
+        <!-- ========================================================= -->
+        <section id="section6" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">Section 06</span>
+                <span class="text-xs font-medium text-slate-400">• Clustering &amp; Margins</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">6. Advanced Models: K-Means &amp; SVM</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                Implementing patient phenotyping with <code class="text-xs font-mono">KMeans</code> and maximal-margin oncology classification with <code class="text-xs font-mono">SVC</code>.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                    <h3 class="text-xl font-bold text-[#0B2D48] mb-2">K-Means Phenotyping</h3>
+                    <div class="chart-container mb-4">
+                        <canvas id="kmeansChart"></canvas>
+                    </div>
+                    <div class="code-snippet"><pre><code><span class="code-keyword">from</span> sklearn.cluster <span class="code-keyword">import</span> KMeans
+
+kmeans = KMeans(n_clusters=3, random_state=42)
+patient_clusters = kmeans.fit_predict(X_scaled)</code></pre></div>
+                </div>
+
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                    <h3 class="text-xl font-bold text-[#0B2D48] mb-2">Support Vector Classification (SVC)</h3>
+                    <div class="chart-container mb-4">
+                        <canvas id="svmChart"></canvas>
+                    </div>
+                    <div class="code-snippet"><pre><code><span class="code-keyword">from</span> sklearn.svm <span class="code-keyword">import</span> SVC
+
+<span class="code-comment"># probability=True calibrates distance to risk score</span>
+svm = SVC(kernel=<span class="code-string">'rbf'</span>, probability=<span class="code-function">True</span>, C=1.0)
+svm.fit(X_train, y_train)</code></pre></div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 7: PRODUCTION-READY SCIKIT-LEARN PIPELINE         -->
+        <!-- ========================================================= -->
+        <section id="section7" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">Section 07</span>
+                <span class="text-xs font-medium text-slate-400">• Production Architecture</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">7. Production-Ready Scikit-Learn Clinical Pipeline</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                In hospital enterprise deployments, you cannot execute preprocessing steps as disjointed, loose scripts. Doing so causes <strong>Data Leakage</strong>—where hospital-wide summary statistics bleed into test evaluations. Scikit-learn's <code class="text-xs font-mono">Pipeline</code> and <code class="text-xs font-mono">ColumnTransformer</code> package everything into a single, leak-free object.
+            </p>
+
+            <!-- ========================================================= -->
+            <!-- INTERACTIVE DEMO 3: CLINICAL PIPELINE RUNNER              -->
+            <!-- ========================================================= -->
+            <div class="bg-gradient-to-br from-slate-900 via-[#0B2D48] to-[#205A70] rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-10">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#F9A03F] text-slate-900 mb-1">
+                            Interactive Bedside Demonstration 03
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                            The Leak-Free Clinical Scikit-Learn Pipeline Runner
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            Watch an incoming raw EHR record travel sequentially through numeric imputation, scaling, one-hot encoding, and random forest classification.
+                        </p>
+                    </div>
+                    <button id="btn-run-pipeline" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-[#F9A03F] hover:bg-[#f89528] text-slate-900 shadow-md transition-colors flex items-center gap-1.5">
+                        <span>▶ Execute Clinical Pipeline</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+                    <div id="pipe-step-1" class="p-4 rounded-xl bg-white/10 border border-white/15 transition-all duration-300">
+                        <span class="text-xs font-bold text-slate-400 block mb-1">Step 01</span>
+                        <h4 class="font-bold text-sm text-white mb-1">SimpleImputer</h4>
+                        <p class="text-[11px] text-slate-300">Fills missing creatinine with training median</p>
+                    </div>
+
+                    <div id="pipe-step-2" class="p-4 rounded-xl bg-white/10 border border-white/15 transition-all duration-300">
+                        <span class="text-xs font-bold text-slate-400 block mb-1">Step 02</span>
+                        <h4 class="font-bold text-sm text-white mb-1">StandardScaler</h4>
+                        <p class="text-[11px] text-slate-300">Z-Scores vitals using training mean &amp; std</p>
+                    </div>
+
+                    <div id="pipe-step-3" class="p-4 rounded-xl bg-white/10 border border-white/15 transition-all duration-300">
+                        <span class="text-xs font-bold text-slate-400 block mb-1">Step 03</span>
+                        <h4 class="font-bold text-sm text-white mb-1">OneHotEncoder</h4>
+                        <p class="text-[11px] text-slate-300">Dummies blood type and admission ward</p>
+                    </div>
+
+                    <div id="pipe-step-4" class="p-4 rounded-xl bg-white/10 border border-white/15 transition-all duration-300">
+                        <span class="text-xs font-bold text-slate-400 block mb-1">Step 04</span>
+                        <h4 class="font-bold text-sm text-white mb-1">RandomForest</h4>
+                        <p class="text-[11px] text-slate-300">Outputs calibrated sepsis risk score</p>
+                    </div>
+                </div>
+
+                <div id="pipe-result-box" class="mt-6 p-4 rounded-xl bg-black/30 border border-white/10 text-center font-mono text-xs text-emerald-400 hidden">
+                    &gt;&gt;&gt; pipeline.predict_proba(raw_patient_ehr) → [0.18, 0.82] → Calibrated Clinical Risk: 82.0% (HIGH PRIORITY ALERT)
+                </div>
+            </div>
+
+            <!-- Complete Code Block -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                <h3 class="text-xl font-bold text-[#0B2D48] mb-2">Production Scikit-Learn Architecture Code</h3>
+                <p class="text-slate-600 text-xs sm:text-sm mb-4">
+                    Copy and deploy this exact leak-free pipeline pattern across clinical informatics research:
+                </p>
+                <div class="code-snippet"><pre><code><span class="code-keyword">from</span> sklearn.compose <span class="code-keyword">import</span> ColumnTransformer
+<span class="code-keyword">from</span> sklearn.pipeline <span class="code-keyword">import</span> Pipeline
+<span class="code-keyword">from</span> sklearn.impute <span class="code-keyword">import</span> SimpleImputer
+<span class="code-keyword">from</span> sklearn.preprocessing <span class="code-keyword">import</span> StandardScaler, OneHotEncoder
+<span class="code-keyword">from</span> sklearn.ensemble <span class="code-keyword">import</span> RandomForestClassifier
+
+numeric_features = [<span class="code-string">'age'</span>, <span class="code-string">'heart_rate'</span>, <span class="code-string">'systolic_bp'</span>, <span class="code-string">'creatinine'</span>]
+categorical_features = [<span class="code-string">'blood_type'</span>, <span class="code-string">'admission_department'</span>]
+
+numeric_transformer = Pipeline([
+    (<span class="code-string">'imputer'</span>, SimpleImputer(strategy=<span class="code-string">'median'</span>)),
+    (<span class="code-string">'scaler'</span>, StandardScaler())
+])
+
+categorical_transformer = Pipeline([
+    (<span class="code-string">'imputer'</span>, SimpleImputer(strategy=<span class="code-string">'most_frequent'</span>)),
+    (<span class="code-string">'onehot'</span>, OneHotEncoder(drop=<span class="code-string">'first'</span>, sparse_output=<span class="code-function">False</span>))
+])
+
+preprocessor = ColumnTransformer([
+    (<span class="code-string">'num'</span>, numeric_transformer, numeric_features),
+    (<span class="code-string">'cat'</span>, categorical_transformer, categorical_features)
+])
+
+clinical_pipeline = Pipeline([
+    (<span class="code-string">'preprocessor'</span>, preprocessor),
+    (<span class="code-string">'classifier'</span>, RandomForestClassifier(n_estimators=100, class_weight=<span class="code-string">'balanced'</span>, random_state=42))
+])
+
+<span class="code-comment"># Single call trains full preprocessing and model with ZERO data leakage!</span>
+clinical_pipeline.fit(X_train, y_train)
+risk_scores = clinical_pipeline.predict_proba(X_test)[:, 1]</code></pre></div>
+            </div>
+        </section>
+
+        <!-- Course Module Navigation Bottom Card -->
+        <div class="bg-gradient-to-r from-[#0B2D48] to-[#205A70] rounded-2xl p-6 sm:p-8 text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div class="text-center sm:text-left">
+                <div class="text-xs font-semibold text-[#56A0A9] uppercase tracking-wider mb-1">Learning Journey</div>
+                <h4 class="text-xl font-bold">Finished Module 03: Python for ML</h4>
+                <p class="text-sm text-slate-300 mt-1">Ready to master Model Training, Confusion Matrices, and Diagnostic Metrics?</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="data-preprocessing.html" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition-colors border border-white/20">
+                    ← Prev: Module 02
+                </a>
+                <a href="training-testing.html" class="px-5 py-2.5 rounded-xl bg-[#F9A03F] hover:bg-[#f89528] text-slate-900 text-sm font-bold shadow-md transition-colors flex items-center gap-2">
+                    <span>Module 04: Evaluation</span>
+                    <span>→</span>
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200/80 py-10 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="flex items-center justify-center gap-2 mb-3">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#56A0A9]"></span>
+                <span class="font-bold text-[#0B2D48] tracking-tight">ML Notes for Healthcare</span>
+            </div>
+            <p class="text-slate-500 text-sm max-w-lg mx-auto mb-2">
+                Department of Bio-Medical Sciences, The Apollo University, Chittoor.
+            </p>
+            <div class="text-xs text-slate-400">
+                Designed for healthcare professionals, students, and machine learning researchers.
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Chart.js & Interactive Python Simulators Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // KaTeX Auto-Render Initializer
+            if (typeof renderMathInElement === 'function') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
+            }
+
+            const colorPrimary = '#205A70';
+            const colorSecondary = '#56A0A9';
+            const colorAccent = '#F9A03F';
+            const colorLight = '#C2C2C2';
+            const colorRiskHigh = '#F9A03F';
+            const colorRiskLow = '#205A70';
+
+            const tooltipTitleCallback = (tooltipItems) => {
+                if (!tooltipItems || !tooltipItems.length) return '';
+                const item = tooltipItems[0];
+                const labels = item.chart?.data?.labels;
+                if (labels && labels[item.dataIndex] !== undefined) {
+                    const label = labels[item.dataIndex];
+                    return Array.isArray(label) ? label.join(' ') : label;
+                }
+                return item.dataset?.label || '';
+            };
+
+            const defaultChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { font: { family: 'Inter', size: 12 }, color: '#0B2D48', boxWidth: 12, padding: 12 }
+                    },
+                    tooltip: {
+                        callbacks: { title: tooltipTitleCallback }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: '#64748B', font: { family: 'Inter' } } },
+                    y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748B', font: { family: 'Inter' } } }
+                }
+            };
+
+            // 1. Linear Regression Chart
+            if (document.getElementById('linearRegressionChart')) {
+                const ctxLinear = document.getElementById('linearRegressionChart').getContext('2d');
+                new Chart(ctxLinear, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'Patient Cohort Observations',
+                                data: [{ x: 20, y: 120 }, { x: 30, y: 125 }, { x: 40, y: 130 }, { x: 50, y: 135 }, { x: 60, y: 140 }, { x: 70, y: 144 }],
+                                backgroundColor: colorSecondary,
+                                pointRadius: 5
+                            },
+                            {
+                                label: 'Fitted Scikit-Learn OLS Line',
+                                data: [{ x: 20, y: 120 }, { x: 70, y: 145 }],
+                                borderColor: colorRiskHigh,
+                                type: 'line',
+                                fill: false,
+                                borderWidth: 3,
+                                pointRadius: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            x: { title: { display: true, text: 'Age (Years)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { display: false } },
+                            y: { title: { display: true, text: 'Systolic BP (mmHg)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { color: '#f1f5f9' } }
+                        }
+                    }
+                });
+            }
+
+            // 2. Logistic Regression Chart
+            if (document.getElementById('logisticRegressionChart')) {
+                const ctxLogistic = document.getElementById('logisticRegressionChart').getContext('2d');
+                const sigmoidPoints = [];
+                for (let x = 70; x <= 190; x += 5) {
+                    sigmoidPoints.push({ x: x, y: 1 / (1 + Math.exp(-0.08 * (x - 120))) });
+                }
+                new Chart(ctxLogistic, {
+                    type: 'line',
+                    data: {
+                        datasets: [{
+                            label: 'Probability P(Diabetes)',
+                            data: sigmoidPoints,
+                            borderColor: colorPrimary,
+                            borderWidth: 3,
+                            fill: false,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            x: { title: { display: true, text: 'Fasting Glucose (mg/dL)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { display: false } },
+                            y: { title: { display: true, text: 'Probability Score', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, min: 0, max: 1 }
+                        }
+                    }
+                });
+            }
+
+            // 3. KNN Chart
+            if (document.getElementById('knnChart')) {
+                const ctxKnn = document.getElementById('knnChart').getContext('2d');
+                new Chart(ctxKnn, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            { label: 'Healthy Baseline', data: [{x: 2, y: 3}, {x: 2.5, y: 3.5}, {x: 3, y: 2}], backgroundColor: colorSecondary, pointRadius: 6 },
+                            { label: 'Acute Disease', data: [{x: 7, y: 8}, {x: 7.5, y: 8.5}, {x: 8, y: 7}], backgroundColor: colorPrimary, pointRadius: 6 },
+                            { label: 'New Test Patient', data: [{x: 5, y: 5.5}], backgroundColor: colorAccent, pointRadius: 9, pointStyle: 'rectRot' }
+                        ]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            x: { title: { display: true, text: 'Troponin I (Scaled)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { display: false } },
+                            y: { title: { display: true, text: 'D-Dimer (Scaled)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { color: '#f1f5f9' } }
+                        }
+                    }
+                });
+            }
+
+            // 4. NN Applications Chart
+            if (document.getElementById('nnApplicationsChart')) {
+                const ctxNn = document.getElementById('nnApplicationsChart').getContext('2d');
+                new Chart(ctxNn, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Tabular Labs', 'Time-Series ICU', 'Image Analysis'],
+                        datasets: [{
+                            data: [92, 85, 96],
+                            backgroundColor: [colorPrimary, colorAccent, colorSecondary],
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: { beginAtZero: true, max: 100, title: { display: true, text: 'Clinical Suitability' } }
+                        }
+                    }
+                });
+            }
+
+            // 5. K-Means Chart
+            if (document.getElementById('kmeansChart')) {
+                const ctxKmeans = document.getElementById('kmeansChart').getContext('2d');
+                new Chart(ctxKmeans, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            { label: 'Phenotype 1', data: [{x: 2, y: 3}, {x: 3, y: 2}], backgroundColor: colorPrimary, pointRadius: 6 },
+                            { label: 'Phenotype 2', data: [{x: 7, y: 8}, {x: 8, y: 7}], backgroundColor: colorSecondary, pointRadius: 6 },
+                            { label: 'Centroid 1', data: [{x: 2.5, y: 2.5}], backgroundColor: colorAccent, pointRadius: 10, pointStyle: 'crossRot' }
+                        ]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            x: { title: { display: true, text: 'Biomarker A' } },
+                            y: { title: { display: true, text: 'Biomarker B' } }
+                        }
+                    }
+                });
+            }
+
+            // 6. SVM Chart
+            if (document.getElementById('svmChart')) {
+                const ctxSvm = document.getElementById('svmChart').getContext('2d');
+                new Chart(ctxSvm, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            { label: 'Benign', data: [{x: 2, y: 3}, {x: 3, y: 2}], backgroundColor: colorPrimary, pointRadius: 6 },
+                            { label: 'Malignant', data: [{x: 7, y: 8}, {x: 8, y: 7}], backgroundColor: colorSecondary, pointRadius: 6 },
+                            { label: 'Hyperplane', data: [{x: 0, y: 6.5}, {x: 10, y: 4.5}], borderColor: colorAccent, type: 'line', pointRadius: 0 }
+                        ]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            x: { title: { display: true, text: 'Tumor Radius' } },
+                            y: { title: { display: true, text: 'Tumor Texture' } }
+                        }
+                    }
+                });
+            }
+
+            // =========================================================
+            // INTERACTIVE DEMO 1: SCIKIT-LEARN LIFECYCLE LOGIC
+            // =========================================================
+            const btnPyStep1 = document.getElementById('btn-py-step1');
+            const btnPyStep2 = document.getElementById('btn-py-step2');
+            const btnPyStep3 = document.getElementById('btn-py-step3');
+
+            const pyTerminalCode = document.getElementById('py-terminal-code');
+            const pyStepTitle = document.getElementById('py-step-title');
+            const pyStepDesc = document.getElementById('py-step-desc');
+            const pyStepBadge = document.getElementById('py-step-badge');
+
+            function setPyStep(step) {
+                [btnPyStep1, btnPyStep2, btnPyStep3].forEach(b => {
+                    if (b) b.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white/20 hover:bg-white/30 text-white transition-colors';
+                });
+
+                if (step === 1) {
+                    if (btnPyStep1) btnPyStep1.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-sm transition-colors';
+                    pyTerminalCode.innerHTML = `
+                        &gt;&gt;&gt; from sklearn.ensemble import RandomForestClassifier<br>
+                        &gt;&gt;&gt; model = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42)<br>
+                        &gt;&gt;&gt; print(model)<br>
+                        <span class="text-slate-300">RandomForestClassifier(max_depth=5, n_estimators=100, random_state=42)</span><br>
+                        <span class="text-amber-300"># Status: Model instantiated with empty parameter weights (untrained)</span>
+                    `;
+                    pyStepTitle.textContent = 'Stage 1: Instantiation (Picking the Model)';
+                    pyStepDesc.textContent = 'Creating the estimator object sets hyperparameters (number of trees = 100, maximum tree depth = 5). At this stage, the model contains zero patient data—it is an empty algorithm ready to ingest EHR records.';
+                    pyStepBadge.className = 'p-2.5 rounded-lg text-center font-bold text-xs bg-blue-500/20 border border-blue-400 text-blue-200';
+                    pyStepBadge.textContent = '⚙️ Model State: Initialized & Configured';
+                } else if (step === 2) {
+                    if (btnPyStep2) btnPyStep2.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-sm transition-colors';
+                    pyTerminalCode.innerHTML = `
+                        &gt;&gt;&gt; model.fit(X_train, y_train)<br>
+                        <span class="text-slate-300">Fitting 100 decision trees across 10,000 patient records...</span><br>
+                        <span class="text-emerald-400">[==============================] 100% Complete (Elapsed: 0.8s)</span><br>
+                        <span class="text-amber-300"># Status: Model trained! Optimal decision split thresholds calibrated.</span>
+                    `;
+                    pyStepTitle.textContent = 'Stage 2: Model Training (.fit)';
+                    pyStepDesc.textContent = 'Executing .fit(X_train, y_train) trains the model. It cycles through 10,000 historical patient charts with known gold-standard outcomes, establishing optimal decision trees and feature weights.';
+                    pyStepBadge.className = 'p-2.5 rounded-lg text-center font-bold text-xs bg-emerald-500/20 border border-emerald-400 text-emerald-200';
+                    pyStepBadge.textContent = '🎓 Model State: Fully Fitted & Calibrated';
+                } else if (step === 3) {
+                    if (btnPyStep3) btnPyStep3.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-sm transition-colors';
+                    pyTerminalCode.innerHTML = `
+                        &gt;&gt;&gt; new_patient = [[64, 112, 88, 14.5]]  # [Age, HR, SBP, WBC]<br>
+                        &gt;&gt;&gt; probs = model.predict_proba(new_patient)<br>
+                        <span class="text-slate-300">&gt;&gt;&gt; print(probs)</span><br>
+                        <span class="text-emerald-400">array([[0.16, 0.84]])  # 16% Low Risk, 84% Sepsis Risk</span><br>
+                        <span class="text-rose-400">&gt;&gt;&gt; ALERT: Critical physiological risk threshold exceeded (84.0%)</span>
+                    `;
+                    pyStepTitle.textContent = 'Stage 3: Bedside Scoring (.predict_proba)';
+                    pyStepDesc.textContent = 'A newly admitted patient arrives in the Emergency Department. Their real-time vitals pass into the fitted model to generate a calibrated risk score, triggering an automatic bedside nurse notification.';
+                    pyStepBadge.className = 'p-2.5 rounded-lg text-center font-bold text-xs bg-rose-500/20 border border-rose-400 text-rose-200';
+                    pyStepBadge.textContent = '🚨 Live Clinical Inference: 84% Risk Output';
+                }
+            }
+
+            if (btnPyStep1) btnPyStep1.addEventListener('click', () => setPyStep(1));
+            if (btnPyStep2) btnPyStep2.addEventListener('click', () => setPyStep(2));
+            if (btnPyStep3) btnPyStep3.addEventListener('click', () => setPyStep(3));
+
+            // =========================================================
+            // INTERACTIVE DEMO 2: HYPERPARAMETER SANDBOX LOGIC
+            // =========================================================
+            const paramK = document.getElementById('param-k');
+            const paramDepth = document.getElementById('param-depth');
+            const paramKVal = document.getElementById('param-k-val');
+            const paramDepthVal = document.getElementById('param-depth-val');
+            const paramStatusBadge = document.getElementById('param-status-badge');
+            const paramConsequenceText = document.getElementById('param-consequence-text');
+
+            function updateParamDemo() {
+                if (!paramK || !paramDepth) return;
+                const k = parseInt(paramK.value);
+                const depth = parseInt(paramDepth.value);
+
+                paramKVal.textContent = `K = ${k}`;
+                paramDepthVal.textContent = `Depth = ${depth}`;
+
+                if (k === 1 || depth >= 10) {
+                    paramStatusBadge.className = 'text-xs font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-800';
+                    paramStatusBadge.textContent = '⚠️ Severe Overfitting Risk';
+                    paramConsequenceText.innerHTML = `With <strong>K = ${k}</strong> and <strong>Depth = ${depth}</strong>, the model memorizes noisy outliers from individual patients in the training set. It will achieve 99% accuracy on past records, but will misdiagnose incoming hospital admissions!`;
+                } else if (k >= 19 || depth === 1) {
+                    paramStatusBadge.className = 'text-xs font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800';
+                    paramStatusBadge.textContent = '⚠️ Severe Underfitting Risk';
+                    paramConsequenceText.innerHTML = `With <strong>K = ${k}</strong> and <strong>Depth = ${depth}</strong>, the model is overly simplistic. A tree of depth 1 can only ask one question, missing complex multi-organ clinical interactions.`;
+                } else {
+                    paramStatusBadge.className = 'text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800';
+                    paramStatusBadge.textContent = '✓ Optimal Clinical Calibration';
+                    paramConsequenceText.innerHTML = `With <strong>K = ${k}</strong> and <strong>Depth = ${depth}</strong>, the models strike an optimal clinical balance. The decision tree remains concise enough for hospital medical boards to audit every branch, while KNN filters out noisy sensor outliers.`;
+                }
+            }
+
+            if (paramK) paramK.addEventListener('input', updateParamDemo);
+            if (paramDepth) paramDepth.addEventListener('input', updateParamDemo);
+
+            // =========================================================
+            // INTERACTIVE DEMO 3: PIPELINE EXECUTION LOGIC
+            // =========================================================
+            const btnRunPipeline = document.getElementById('btn-run-pipeline');
+            const pipeResultBox = document.getElementById('pipe-result-box');
+
+            if (btnRunPipeline && pipeResultBox) {
+                btnRunPipeline.addEventListener('click', () => {
+                    const steps = ['pipe-step-1', 'pipe-step-2', 'pipe-step-3', 'pipe-step-4'];
+                    pipeResultBox.classList.add('hidden');
+
+                    steps.forEach((s, idx) => {
+                        setTimeout(() => {
+                            const el = document.getElementById(s);
+                            if (el) el.className = 'p-4 rounded-xl bg-[#F9A03F] text-slate-900 border-2 border-white font-bold transition-all duration-300 scale-105';
+                        }, idx * 300);
+
+                        setTimeout(() => {
+                            const el = document.getElementById(s);
+                            if (el) el.className = 'p-4 rounded-xl bg-emerald-600 text-white border border-white/20 transition-all duration-300';
+                        }, (idx * 300) + 400);
+                    });
+
+                    setTimeout(() => {
+                        pipeResultBox.classList.remove('hidden');
+                    }, 1600);
+                });
+            }
+
+        });
+    </script>
+</body>
+</html>

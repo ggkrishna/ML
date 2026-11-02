@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 05: Mathematics for Machine Learning in Healthcare – ML Notes</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- KaTeX for Mathematics -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            navy: '#0B2D48',
+                            teal: '#205A70',
+                            softTeal: '#56A0A9',
+                            amber: '#F9A03F',
+                            lightBg: '#F8FAFC',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .bg-grid-pattern {
+            background-image: radial-gradient(rgba(32, 90, 112, 0.08) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 380px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 400px;
+            }
+        }
+        .card-hover {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .card-hover:hover {
+            box-shadow: 0 14px 28px -6px rgba(11, 45, 72, 0.08);
+        }
+        .math-formula {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            margin: 0.75rem 0;
+            font-size: 1.1em;
+            overflow-x: auto;
+            width: 100%;
+            text-align: center;
+            background: #F8FAFC;
+            border-radius: 0.75rem;
+            border: 1px solid #E2E8F0;
+        }
+        .katex-display {
+            margin: 0 auto !important;
+            width: max-content;
+            display: block !important;
+            text-align: center;
+        }
+        .math-inline {
+            font-size: 1.05em;
+        }
+        input[type=range] {
+            accent-color: #205A70;
+        }
+    </style>
+</head>
+<body class="bg-[#F8F9FA] text-[#0B2D48] min-h-screen flex flex-col antialiased selection:bg-[#56A0A9]/20 selection:text-[#0B2D48]">
+
+    <!-- Main Navigation Bar -->
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#0B2D48] to-[#205A70] flex items-center justify-center text-white shadow-md shadow-[#205A70]/20 group-hover:scale-105 transition-transform">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-lg font-bold tracking-tight text-[#0B2D48]">ML Notes</span>
+                    <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-xs font-semibold bg-[#205A70]/10 text-[#205A70] rounded-full border border-[#205A70]/20">Healthcare Edition</span>
+                </div>
+            </a>
+            
+            <div class="flex items-center gap-2 sm:gap-3">
+                <a href="index.html" class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-[#205A70] transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    <span>All Modules</span>
+                </a>
+                <a href="exercises.html" class="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-lg transition-colors">
+                    <span>Exercises ★</span>
+                </a>
+                <a href="case-studies.html" class="hidden md:inline-flex items-center gap-1 text-xs font-semibold text-[#205A70] bg-[#205A70]/10 hover:bg-[#205A70]/20 border border-[#205A70]/20 px-2.5 py-1 rounded-lg transition-colors">
+                    <span>Case Studies 🏥</span>
+                </a>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                    Module 05
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- In-Page Sub-Navigation Bar -->
+    <nav class="sticky top-16 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs py-2.5 px-4 sm:px-6">
+        <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center space-x-1 sm:space-x-2 overflow-x-auto whitespace-nowrap py-1 text-xs sm:text-sm font-medium text-slate-600">
+                <a href="#section1" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">1. Formal Learning</a>
+                <a href="#section2" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">2. Regression &amp; Optimization</a>
+                <a href="#section3" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">3. KNN &amp; Distance</a>
+                <a href="#section4" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">4. Decision Trees &amp; Entropy</a>
+                <a href="#section5" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">5. Neural Networks &amp; Calculus</a>
+                <a href="#section6" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">6. Clustering, SVM &amp; Bayes</a>
+            </div>
+            <div class="hidden sm:flex items-center gap-2 shrink-0 text-xs">
+                <a href="training-testing.html" class="inline-flex items-center gap-1 font-semibold text-slate-500 hover:text-slate-800 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition-colors">
+                    ← Prev: Evaluation
+                </a>
+                <a href="exercises.html" class="inline-flex items-center gap-1 font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors border border-emerald-200">
+                    Next: Exercises ★
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero / Header Section -->
+    <section class="relative bg-gradient-to-b from-white via-[#F8FAFC] to-[#F1F5F9] border-b border-slate-200/60 bg-grid-pattern py-12 sm:py-16">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl">
+                <!-- Breadcrumb badge -->
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-[#205A70]/10 text-[#205A70] border border-[#205A70]/20 mb-4">
+                    <a href="index.html" class="hover:underline">Home</a>
+                    <span class="text-slate-400">/</span>
+                    <span class="font-semibold">Module 05</span>
+                </div>
+
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#0B2D48] mb-4">
+                    A Mathematical Guide: <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#205A70] via-[#357a94] to-[#56A0A9]">ML in Healthcare</span>
+                </h1>
+
+                <p class="text-base sm:text-lg text-slate-600 leading-relaxed font-normal mb-6">
+                    Demystifying the equations, loss surfaces, optimization dynamics, and probabilistic foundations that power modern clinical artificial intelligence — designed specifically for Health Informatics students and clinical researchers.
+                </p>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="px-3 py-1 rounded-lg bg-white border border-slate-200 text-xs font-medium text-slate-600 shadow-xs flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span> Empirical Risk &amp; Loss
+                    </span>
+                    <span class="px-3 py-1 rounded-lg bg-white border border-slate-200 text-xs font-medium text-slate-600 shadow-xs flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span> Gradient Descent &amp; IV Titration
+                    </span>
+                    <span class="px-3 py-1 rounded-lg bg-white border border-slate-200 text-xs font-medium text-slate-600 shadow-xs flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Shannon Entropy &amp; Gini
+                    </span>
+                    <span class="px-3 py-1 rounded-lg bg-white border border-slate-200 text-xs font-medium text-slate-600 shadow-xs flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500"></span> Bayes&#39; Screening Paradox
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Container -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-16">
+
+        <!-- Clinical Rosetta Stone Table -->
+        <section class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-teal-50 text-teal-700 border border-teal-200">Clinical Translator</span>
+                <span class="text-xs font-medium text-slate-400">• The Health Informatics Rosetta Stone</span>
+            </div>
+            <h3 class="text-xl sm:text-2xl font-bold text-[#0B2D48] mb-2">Translating Abstract Mathematical Notation into Clinical Reality</h3>
+            <p class="text-slate-600 text-sm leading-relaxed mb-6">
+                Mathematical symbols in machine learning are not mysterious puzzles — they are precise abbreviations for everyday hospital realities. Before analyzing equations, use this translation matrix to map mathematical symbols directly to clinical concepts.
+            </p>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-[#0B2D48] font-bold">
+                            <th class="p-3">Math Symbol</th>
+                            <th class="p-3">Pure Math Definition</th>
+                            <th class="p-3">Healthcare &amp; EHR Reality</th>
+                            <th class="p-3">Concrete Hospital Example</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-slate-600">
+                        <tr class="hover:bg-slate-50/70">
+                            <td class="p-3 font-mono font-bold text-blue-700 text-sm">\(N\)</td>
+                            <td class="p-3">Sample size (cardinality of dataset)</td>
+                            <td class="p-3 font-medium text-slate-900">Total patient cohort count</td>
+                            <td class="p-3">10,000 emergency department admissions evaluated</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50/70">
+                            <td class="p-3 font-mono font-bold text-blue-700 text-sm">\(\mathbf{x}_i \in \mathbb{R}^d\)</td>
+                            <td class="p-3">\(d\)-dimensional input vector for instance \(i\)</td>
+                            <td class="p-3 font-medium text-slate-900">Patient feature profile</td>
+                            <td class="p-3">[Age=68, SBP=142, Troponin=0.25, Creatinine=1.8, WBC=14.2]</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50/70">
+                            <td class="p-3 font-mono font-bold text-blue-700 text-sm">\(y_i\)</td>
+                            <td class="p-3">Ground truth label or scalar target</td>
+                            <td class="p-3 font-medium text-slate-900">Gold-standard clinical outcome</td>
+                            <td class="p-3">Biopsy result (1=Malignant, 0=Benign) or ICU stay (4.5 days)</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50/70">
+                            <td class="p-3 font-mono font-bold text-blue-700 text-sm">\(\hat{y}_i = f(\mathbf{x}_i)\)</td>
+                            <td class="p-3">Function output / hypothesis estimate</td>
+                            <td class="p-3 font-medium text-slate-900">Algorithm risk score or prediction</td>
+                            <td class="p-3">Predicted 82% probability of septic shock within 6 hours</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50/70">
+                            <td class="p-3 font-mono font-bold text-blue-700 text-sm">\(\mathbf{w} = [w_1, \dots, w_d]^T\)</td>
+                            <td class="p-3">Learnable weight vector</td>
+                            <td class="p-3 font-medium text-slate-900">Clinical diagnostic weights</td>
+                            <td class="p-3">Relative diagnostic importance of Troponin vs Age in cardiac arrest</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50/70">
+                            <td class="p-3 font-mono font-bold text-blue-700 text-sm">\(b\) or \(w_0\)</td>
+                            <td class="p-3">Bias term / intercept</td>
+                            <td class="p-3 font-medium text-slate-900">Baseline population risk offset</td>
+                            <td class="p-3">Prior baseline incidence of diabetes before reviewing patient blood tests</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50/70">
+                            <td class="p-3 font-mono font-bold text-blue-700 text-sm">\(\sum_{i=1}^N\)</td>
+                            <td class="p-3">Summation operator across all indices</td>
+                            <td class="p-3 font-medium text-slate-900">Hospital-wide patient tally</td>
+                            <td class="p-3">Summing up individual diagnostic errors across every patient chart</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50/70">
+                            <td class="p-3 font-mono font-bold text-blue-700 text-sm">\(\mathcal{L}(y, \hat{y})\)</td>
+                            <td class="p-3">Loss / cost function</td>
+                            <td class="p-3 font-medium text-slate-900">Clinical error penalty</td>
+                            <td class="p-3">Quantifying the clinical severity of predicting a sick patient is healthy</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50/70">
+                            <td class="p-3 font-mono font-bold text-blue-700 text-sm">\(\nabla_{\mathbf{w}} \mathcal{L}\)</td>
+                            <td class="p-3">Gradient vector (partial derivatives)</td>
+                            <td class="p-3 font-medium text-slate-900">Clinical compass for improvement</td>
+                            <td class="p-3">Tells the algorithm how to alter biomarker weights to reduce mistakes</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50/70">
+                            <td class="p-3 font-mono font-bold text-blue-700 text-sm">\(\eta\) (eta)</td>
+                            <td class="p-3">Optimization step size (learning rate)</td>
+                            <td class="p-3 font-medium text-slate-900">IV drip medication titration speed</td>
+                            <td class="p-3">How aggressively the algorithm updates weights per iteration</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 1: Formal Intro -->
+        <section id="section1" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">Section 01</span>
+                <span class="text-xs font-medium text-slate-400">• Formalization</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">1. A Formal Introduction to Learning &amp; Empirical Risk</h2>
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                In computer science, machine learning is formally defined as searching an infinite hypothesis space \(\mathcal{H}\) to find an optimal mapping function \(f: \mathcal{X} \to \mathcal{Y}\) that maps patient clinical signs \(\mathbf{x}\) to clinical target outcomes \(y\).
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Supervised Learning -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Supervised Learning (Task-Driven)</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-blue-50 text-blue-700">Risk Minimization</span>
+                        </div>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                            Given an EHR training cohort of \(N\) verified patient records \(\mathcal{D} = \{(\mathbf{x}_i, y_i)\}_{i=1}^{N}\), we seek parameters \(\mathbf{w}^*\) that minimize the <strong>Empirical Risk</strong>:
+                        </p>
+                        <div class="math-formula">
+                            $$R_{\text{emp}}(f) = \frac{1}{N} \sum_{i=1}^{N} \mathcal{L}(f(\mathbf{x}_i), y_i)$$
+                        </div>
+                        <div class="mt-4 p-4 rounded-xl bg-blue-50/60 border border-blue-100 text-xs sm:text-sm text-slate-700 space-y-2">
+                            <p><strong>Clinical Translation:</strong> Add up the clinical penalties across all \(N\) hospital patients and divide by \(N\) to obtain average hospital error.</p>
+                            <p><strong>The Generalization Hazard:</strong> We minimize empirical risk on <em>past</em> hospital patients (\(\mathcal{D}_{\text{train}}\)), but our true clinical mission is minimizing <em>True Risk</em> \(\mathbb{E}_{(\mathbf{x},y)\sim \mathcal{P}}[\mathcal{L}(f(\mathbf{x}), y)]\) on <em>future unseen patients</em>!</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200/60 text-sm text-slate-600 leading-relaxed">
+                        <strong class="text-slate-800">Loss Function \(\mathcal{L}\):</strong> Quantifies prediction discrepancy (e.g., Mean Squared Error for blood pressure estimation, Binary Cross-Entropy for 30-day readmission).
+                    </div>
+                </div>
+
+                <!-- Unsupervised Learning -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Unsupervised Learning (Data-Driven)</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700">Density Estimation</span>
+                        </div>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                            Given an unlabeled clinical dataset \(\mathcal{D} = \{\mathbf{x}_i\}_{i=1}^{N}\) without gold-standard diagnosis tags, the objective is to model the underlying probability distribution \(P(\mathbf{x})\) or discover geometric manifold topology:
+                        </p>
+                        <ul class="space-y-2.5 text-sm text-slate-600 my-4">
+                            <li class="flex items-start gap-2">
+                                <span class="text-teal-600 font-bold">•</span>
+                                <span><strong>Clustering (Inertia Minimization):</strong> Partitioning ICU sepsis encounters into distinct physiological clusters to discover uncharacterized endotypes.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-teal-600 font-bold">•</span>
+                                <span><strong>Dimensionality Reduction:</strong> Compressing 20,000 gene expression dimensions \(\mathbf{x} \in \mathbb{R}^{20000}\) into a 2D latent embedding \(\mathbf{z} \in \mathbb{R}^2\) using PCA or UMAP.</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200/60 text-sm text-slate-600 leading-relaxed">
+                        <strong class="text-slate-800">Clinical Purpose:</strong> Precision medicine phenotyping — grouping patients by molecular pathophysiology rather than broad symptom labels.
+                    </div>
+                </div>
+            </div>
+
+            <!-- The Clinical Bias-Variance Tradeoff -->
+            <div class="mt-8 bg-gradient-to-r from-slate-50 via-blue-50/30 to-indigo-50/30 rounded-2xl border border-slate-200/80 p-6 sm:p-8">
+                <h3 class="text-lg sm:text-xl font-bold text-[#0B2D48] mb-3">The Clinical Bias-Variance Decomposition</h3>
+                <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                    For any continuous clinical prediction task under squared error loss, expected prediction error breaks down mathematically into three irreducible clinical components:
+                </p>
+                <div class="math-formula">
+                    $$\mathbb{E}[(y - \hat{f}(\mathbf{x}))^2] = \underbrace{\text{Bias}[\hat{f}(\mathbf{x})]^2}_{\text{Clinical Oversimplification}} + \underbrace{\text{Var}[\hat{f}(\mathbf{x})]}_{\text{Over-Sensitivity to Hospital Noise}} + \underbrace{\sigma_{\epsilon}^2}_{\text{Irreducible Biological Noise}}$$
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 text-xs sm:text-sm">
+                    <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
+                        <div class="font-bold text-amber-700 mb-1">1. High Bias (Underfitting)</div>
+                        <p class="text-slate-600">The model is too primitive (e.g., a rigid rule stating &quot;Sepsis if Temp &gt; 38°C&quot;). It fails to capture multi-organ pathophysiology and constantly misses septic shock in hypothermic patients.</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
+                        <div class="font-bold text-red-700 mb-1">2. High Variance (Overfitting)</div>
+                        <p class="text-slate-600">The model has millions of parameters and memorizes Hospital Ward A&#39;s exact shift schedules and thermometer calibration errors. It gets 99.8% training accuracy but fails completely when tested at Hospital Ward B.</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
+                        <div class="font-bold text-slate-700 mb-1">3. Irreducible Noise (\(\sigma_{\epsilon}^2\))</div>
+                        <p class="text-slate-600">Unmeasured biological variation, unknown genetic polymorphisms, or EHR entry typing mistakes. No mathematical model, no matter how complex, can eliminate this baseline uncertainty.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Regression Models -->
+        <section id="section2" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">Section 02</span>
+                <span class="text-xs font-medium text-slate-400">• Parametric Models</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">2. Core Parametric Models: Regression &amp; Optimization</h2>
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-8">
+                Parametric models assume a specific functional form \(f(\mathbf{x}; \mathbf{w})\) governed by learnable parameter weights \(\mathbf{w}\). Here we examine how linear models, logit transforms, and iterative optimization operate under the hood.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Linear Regression -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Linear Regression</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-blue-50 text-blue-700">Ordinary Least Squares</span>
+                        </div>
+                        <p class="text-slate-600 text-sm mb-2">Linear combination of clinical vitals with baseline intercept \(w_0\):</p>
+                        <div class="math-formula">
+                            $$\hat{y} = w_0 + \sum_{j=1}^{d} w_j x_j = \mathbf{w}^T\mathbf{x}$$
+                        </div>
+                        <p class="text-slate-600 text-sm mt-4 mb-2">Mean Squared Error (MSE) objective function:</p>
+                        <div class="math-formula">
+                            $$L(\mathbf{w}) = \frac{1}{N} \sum_{i=1}^{N} (y_i - \mathbf{w}^T\mathbf{x}_i)^2$$
+                        </div>
+                        <div class="chart-container mt-4">
+                            <canvas id="linearRegressionChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200/60 text-xs sm:text-sm text-slate-600 space-y-2">
+                        <p><strong class="text-slate-800">Closed-Form Analytical Solution:</strong> Setting \(\nabla_{\mathbf{w}} L(\mathbf{w}) = 0\) yields \(\mathbf{w}^* = (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^Ty\).</p>
+                        <p class="text-slate-500 italic"><strong>Clinical Bottleneck:</strong> Inverting \((\mathbf{X}^T\mathbf{X})\) requires \(\mathcal{O}(d^3)\) operations. For 50,000 genomic features or collinear EHR labs, the matrix cannot be inverted! This forces us to use <em>Gradient Descent</em>.</p>
+                    </div>
+                </div>
+
+                <!-- Logistic Regression -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Logistic Regression</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-amber-50 text-amber-700">Cross-Entropy Loss</span>
+                        </div>
+                        <p class="text-slate-600 text-sm mb-2">Sigmoid activation mapping linear risk score \(z = \mathbf{w}^T\mathbf{x}\) into a valid \([0, 1]\) probability:</p>
+                        <div class="math-formula">
+                            $$P(y=1 \mid \mathbf{x}) = \sigma(\mathbf{w}^T\mathbf{x}) = \frac{1}{1 + e^{-\mathbf{w}^T\mathbf{x}}}$$
+                        </div>
+                        <p class="text-slate-600 text-sm mt-4 mb-2">Binary Cross-Entropy (Negative Log-Likelihood):</p>
+                        <div class="math-formula">
+                            $$L(\mathbf{w}) = -\frac{1}{N} \sum_{i=1}^{N} \left[ y_i \ln(\hat{y}_i) + (1-y_i)\ln(1-\hat{y}_i) \right]$$
+                        </div>
+                        <div class="chart-container mt-4">
+                            <canvas id="logisticRegressionChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 rounded-xl bg-amber-50/60 border border-amber-200/60 text-xs sm:text-sm text-slate-700 space-y-2">
+                        <p><strong>Why Not Mean Squared Error?</strong> If a patient has septic shock (\(y=1\)) and our model predicts a calm \(\hat{y}=0.01\), \(-\ln(0.01) \approx 4.60\) (massive penalty). Cross-entropy penalizes confident medical blunders exponentially!</p>
+                        <p class="text-slate-600 italic">No closed-form solution exists for logistic regression — weights must be solved iteratively via Gradient Descent.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Simulator 1: Gradient Descent & IV Drip Titration -->
+            <div class="mt-8 bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                    <div>
+                        <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200">Interactive Simulator 01</span>
+                        <h3 class="text-xl font-bold text-[#0B2D48] mt-1">Gradient Descent: The ICU Medication Titration Simulator</h3>
+                        <p class="text-sm text-slate-500">Visualizing how Learning Rate (\(\eta\)) mirrors clinical IV drug infusion titration.</p>
+                    </div>
+                    <span class="self-start sm:self-auto text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                        Live Optimizer
+                    </span>
+                </div>
+
+                <div class="p-4 rounded-xl bg-amber-50/50 border border-amber-200/60 mb-6 text-sm text-slate-700">
+                    <p><strong>The Clinical Analogy:</strong> Think of Gradient Descent like titrating a powerful norepinephrine IV drip to stabilize an ICU patient&#39;s blood pressure. The error surface is the patient&#39;s hemodynamic distress. 
+                    If your titration step \(\eta\) is too tiny, the patient takes hours to stabilize. If \(\eta\) is optimal, blood pressure smoothly reaches the target. If \(\eta\) is too large, the patient&#39;s blood pressure violently oscillates and crashes!</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    <!-- Controls -->
+                    <div class="lg:col-span-5 space-y-5 bg-slate-50 p-5 rounded-xl border border-slate-200">
+                        <div>
+                            <div class="flex justify-between items-center text-sm font-semibold text-slate-700 mb-1">
+                                <label for="gdEtaSlider">Learning Rate \(\eta\) (Titration Speed):</label>
+                                <span id="gdEtaVal" class="font-mono text-blue-700 font-bold">0.18</span>
+                            </div>
+                            <input type="range" id="gdEtaSlider" min="0.02" max="1.15" step="0.01" value="0.18" class="w-full h-2 bg-slate-200 rounded-lg cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                                <span>0.02 (Sluggish)</span>
+                                <span>0.18 (Optimal)</span>
+                                <span>0.85 (Oscillatory)</span>
+                                <span>1.15 (Divergence!)</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center text-sm font-semibold text-slate-700 mb-1">
+                                <label for="gdStartSlider">Initial Weight \(w_{\text{init}}\):</label>
+                                <span id="gdStartVal" class="font-mono text-slate-800 font-bold">-2.2</span>
+                            </div>
+                            <input type="range" id="gdStartSlider" min="-3.0" max="3.0" step="0.2" value="-2.2" class="w-full h-2 bg-slate-200 rounded-lg cursor-pointer">
+                        </div>
+
+                        <div class="flex flex-wrap gap-2 pt-2">
+                            <button id="gdStepBtn" class="flex-1 px-3 py-2 bg-[#205A70] hover:bg-[#163f4f] text-white font-bold rounded-lg text-xs shadow-xs transition-colors">
+                                Step 1 Epoch →
+                            </button>
+                            <button id="gdRun10Btn" class="flex-1 px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-lg text-xs shadow-xs transition-colors">
+                                Run 10 Steps ⚡
+                            </button>
+                            <button id="gdResetBtn" class="px-3 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold rounded-lg text-xs transition-colors">
+                                Reset ↺
+                            </button>
+                        </div>
+
+                        <!-- Live Telemetry Monitor -->
+                        <div class="p-3.5 rounded-lg bg-white border border-slate-200 space-y-2 text-xs">
+                            <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                                <span class="font-bold text-slate-700">Optimization Telemetry:</span>
+                                <span id="gdStatusBadge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                    Converging
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-slate-600">
+                                <div>Epochs / Steps: <span id="gdStepCount" class="font-mono font-bold text-slate-900">0</span></div>
+                                <div>Current \(w\): <span id="gdCurrentW" class="font-mono font-bold text-blue-700">-2.20</span></div>
+                                <div>Loss \(L(w)\): <span id="gdCurrentLoss" class="font-mono font-bold text-amber-700">13.89</span></div>
+                                <div>Gradient \(\nabla L\): <span id="gdCurrentGrad" class="font-mono font-bold text-slate-900">-7.40</span></div>
+                            </div>
+                            <p id="gdClinicalNarrative" class="text-[11px] text-slate-500 italic pt-1 border-t border-slate-100">
+                                Ready to titrate. Click &#39;Step 1 Epoch&#39; to descend the clinical loss curve toward minimal hospital error.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- SVG Error Surface Plot -->
+                    <div class="lg:col-span-7 bg-slate-900 rounded-xl p-4 text-white shadow-inner flex flex-col items-center">
+                        <div class="w-full flex justify-between items-center text-xs text-slate-400 mb-2 px-2">
+                            <span>Clinical Loss Surface: \(L(w) = (w - 1.5)^2 + 0.2\)</span>
+                            <span class="text-amber-400 font-mono">Target \(w^* = 1.50\)</span>
+                        </div>
+                        <div class="w-full h-64 sm:h-72 relative">
+                            <svg id="gdSvg" class="w-full h-full" viewBox="0 0 500 280">
+                                <!-- Grid Lines -->
+                                <line x1="40" y1="20" x2="40" y2="240" stroke="#334155" stroke-width="1.5" />
+                                <line x1="40" y1="240" x2="480" y2="240" stroke="#334155" stroke-width="1.5" />
+                                <!-- Parabola Path (Loss Curve) -->
+                                <path id="gdParabolaPath" fill="none" stroke="#56A0A9" stroke-width="3" />
+                                <!-- History Trajectory Path -->
+                                <polyline id="gdTrajectoryPath" fill="none" stroke="#F9A03F" stroke-width="2" stroke-dasharray="4,4" />
+                                <!-- Tangent Line -->
+                                <line id="gdTangentLine" stroke="#EF4444" stroke-width="2" />
+                                <!-- Current Point Marker -->
+                                <circle id="gdBall" cx="100" cy="100" r="7" fill="#F9A03F" stroke="#FFFFFF" stroke-width="2" />
+                            </svg>
+                        </div>
+                        <div class="flex items-center gap-4 text-[11px] text-slate-400 mt-2">
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#56A0A9]"></span> Loss Surface</span>
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#F9A03F]"></span> Titration Trajectory</span>
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-0.5 bg-red-500"></span> Current Gradient Slope</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: KNN -->
+        <section id="section3" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">Section 03</span>
+                <span class="text-xs font-medium text-slate-400">• Non-Parametric</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">3. Non-Parametric: K-Nearest Neighbors (KNN) &amp; Distance Geometry</h2>
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-8">
+                Unlike parametric models, KNN does not learn an explicit weight vector during training. It memorizes the entire clinical cohort and defers calculation to bedside query time, comparing a new patient against past historical cases in multidimensional space.
+            </p>
+
+            <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-[#0B2D48]">Mathematical Formalization of KNN</h3>
+                        <p class="text-sm text-slate-500">Metric space distance calculation and posterior probability estimation.</p>
+                    </div>
+                    <span class="self-start sm:self-auto text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        Metric Space
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 my-4">
+                    <div>
+                        <p class="text-slate-600 text-sm mb-2">Distance Metrics in \(\mathbb{R}^n\) between Patient \(\mathbf{p}\) and Patient \(\mathbf{q}\):</p>
+                        <div class="math-formula">
+                            $$d_2(\mathbf{p}, \mathbf{q}) = \sqrt{ \sum_{j=1}^{n} (p_j - q_j)^2 } \quad \text{(Euclidean } L_2\text{)}$$
+                        </div>
+                        <div class="math-formula">
+                            $$d_1(\mathbf{p}, \mathbf{q}) = \sum_{j=1}^{n} |p_j - q_j| \quad \text{(Manhattan } L_1\text{)}$$
+                        </div>
+                        <p class="text-slate-600 text-sm mt-4 mb-2">Class Posterior Probability within neighborhood \(\mathcal{N}_K(\mathbf{x})\):</p>
+                        <div class="math-formula">
+                            $$P(y = c \mid \mathbf{x}) = \frac{1}{K} \sum_{i \in \mathcal{N}_K(\mathbf{x})} \mathbb{I}(y_i = c)$$
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="knnChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Deep Dive: The Curse of Dimensionality in Healthcare -->
+                <div class="mt-6 p-5 rounded-xl bg-slate-50 border border-slate-200/80 text-sm text-slate-700 space-y-3">
+                    <div class="flex items-center gap-2 font-bold text-slate-900">
+                        <span class="text-amber-600 text-base">⚠️</span> The Curse of Dimensionality in Health Informatics
+                    </div>
+                    <p class="leading-relaxed">
+                        In pure mathematics, as dimension \(d \to \infty\), the volume of a hypercube concentrates entirely in its corners, and the distance between the nearest neighbor and the farthest neighbor approaches zero:
+                    </p>
+                    <div class="math-formula">
+                        $$\lim_{d \to \infty} \frac{\text{dist}_{\max} - \text{dist}_{\min}}{\text{dist}_{\min}} = 0$$
+                    </div>
+                    <p class="leading-relaxed">
+                        <strong>Clinical Consequence:</strong> If an informatics student feeds 20,000 raw RNA sequencing genes or 500 unselected EHR ICD codes into KNN without dimensionality reduction (PCA or UMAP), <em>every single patient in the hospital appears almost exactly equidistant from every other patient</em>! The distance metric collapses, and the algorithm degrades into coin-flip chance.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Decision Trees -->
+        <section id="section4" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200">Section 04</span>
+                <span class="text-xs font-medium text-slate-400">• Information Theory</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">4. Interpretable Decisions: Trees, Entropy &amp; Random Forests</h2>
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-8">
+                Decision trees partition the feature space into hyper-rectangles using information-theoretic splitting criteria. They mimic clinical triage algorithms, asking sequential questions to maximize diagnostic purity.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- CART & Impurity -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Splitting Metrics: Gini &amp; Entropy</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-100 text-slate-600">Information Gain</span>
+                        </div>
+                        <p class="text-slate-600 text-sm mb-2">Gini Impurity (Misclassification Probability):</p>
+                        <div class="math-formula">
+                            $$G(p) = 1 - \sum_{k=1}^{C} p_k^2$$
+                        </div>
+                        <p class="text-slate-600 text-sm mt-4 mb-2">Shannon Entropy (Bits of Clinical Uncertainty):</p>
+                        <div class="math-formula">
+                            $$H(p) = -\sum_{k=1}^{C} p_k \log_2(p_k)$$
+                        </div>
+                        <p class="text-slate-600 text-sm mt-4 mb-2">Information Gain maximized at each clinical split:</p>
+                        <div class="math-formula">
+                            $$\Delta H = H(\text{Parent}) - \left[ \frac{N_L}{N} H(D_L) + \frac{N_R}{N} H(D_R) \right]$$
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200/60 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        <strong class="text-slate-800">Pure Clinical Leaf Nodes:</strong> A triage leaf node where 100% of patients have Acute MI has \(p_1 = 1.0, p_2 = 0\), yielding \(Gini = 1 - (1^2 + 0^2) = 0.0\) and \(Entropy = 0.0\) bits (zero medical doubt).
+                    </div>
+                </div>
+
+                <!-- Random Forest Bagging -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Random Forest: Bagging &amp; Variance Reduction</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700">Decorrelation</span>
+                        </div>
+                        <p class="text-slate-600 text-sm mb-4">
+                            A Random Forest trains \(B\) individual unpruned trees and averages their votes to reduce predictive variance:
+                        </p>
+                        <div class="math-formula">
+                            $$\text{Var}(\bar{f}_{\text{rf}}) = \rho \sigma^2 + \frac{1 - \rho}{B} \sigma^2$$
+                        </div>
+                        <div class="mt-4 p-4 rounded-xl bg-emerald-50/60 border border-emerald-100 text-xs sm:text-sm text-slate-700 space-y-2">
+                            <p><strong>Clinical Decorrelation (\(\rho\)):</strong> If every tree evaluated all features, every tree would split on Troponin first, producing correlated trees (\(\rho \to 1\)).</p>
+                            <p>By forcing each split to randomly consider only \(m = \lfloor \sqrt{d} \rfloor\) candidate biomarkers, trees look at ECG, Blood Pressure, Age, and History separately, driving \(\rho \downarrow 0\)!</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200/60 text-sm text-slate-600 leading-relaxed">
+                        <strong class="text-slate-800">Majority Aggregation:</strong> \(\hat{y}_{\text{rf}} = \text{mode}\left( \{ f_b(\mathbf{x}) \}_{b=1}^{B} \right)\)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Simulator 2: Decision Tree Entropy Split Explorer -->
+            <div class="mt-8 bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                    <div>
+                        <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200">Interactive Simulator 02</span>
+                        <h3 class="text-xl font-bold text-[#0B2D48] mt-1">Information Gain: Clinical Triage Split Explorer</h3>
+                        <p class="text-sm text-slate-500">Evaluate how candidate diagnostic biomarker thresholds purify patient cohorts.</p>
+                    </div>
+                    <span class="self-start sm:self-auto text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                        Shannon Entropy
+                    </span>
+                </div>
+
+                <div class="p-4 rounded-xl bg-blue-50/60 border border-blue-200/60 mb-6 text-sm text-slate-700">
+                    <p><strong>Clinical Scenario:</strong> An emergency triage room has <strong>100 chest pain patients</strong>: exactly <strong>50 have Acute Myocardial Infarction (AMI)</strong> and <strong>50 have Non-Cardiac Pain</strong>. 
+                    Because the room is a 50/50 mixture, baseline uncertainty is at its mathematical maximum: \(H(\text{Parent}) = - (0.5 \log_2 0.5 + 0.5 \log_2 0.5) = 1.000\text{ bit}\). Test different clinical candidate tests to see how much diagnostic clarity (Information Gain) they provide!</p>
+                </div>
+
+                <!-- Split Candidate Presets -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                    <button onclick="setTreePreset('troponin')" class="p-3 text-left rounded-xl border border-emerald-300 bg-emerald-50/70 hover:bg-emerald-100/70 transition-colors">
+                        <div class="font-bold text-emerald-900 text-xs">Test A: Troponin I &gt; 50 ng/L</div>
+                        <div class="text-[11px] text-emerald-700 mt-1">High Diagnostic Accuracy: 45/5 vs 5/45</div>
+                    </button>
+                    <button onclick="setTreePreset('age')" class="p-3 text-left rounded-xl border border-amber-300 bg-amber-50/70 hover:bg-amber-100/70 transition-colors">
+                        <div class="font-bold text-amber-900 text-xs">Test B: Patient Age &gt; 65 Years</div>
+                        <div class="text-[11px] text-amber-700 mt-1">Moderate Diagnostic Power: 35/15 vs 15/35</div>
+                    </button>
+                    <button onclick="setTreePreset('bloodtype')" class="p-3 text-left rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <div class="font-bold text-slate-900 text-xs">Test C: Blood Group Type O</div>
+                        <div class="text-[11px] text-slate-600 mt-1">Irrelevant Feature: 25/25 vs 25/25</div>
+                    </button>
+                </div>
+
+                <!-- Tree Visualizer & Live Math -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-slate-50 p-6 rounded-xl border border-slate-200">
+                    <!-- Tree Diagram -->
+                    <div class="lg:col-span-7 flex flex-col items-center">
+                        <!-- Parent Node -->
+                        <div class="w-64 p-3.5 rounded-xl bg-white border-2 border-[#205A70] text-center shadow-xs">
+                            <div class="text-xs font-bold text-slate-500 uppercase tracking-wide">Emergency Triage (Parent)</div>
+                            <div class="text-sm font-extrabold text-[#0B2D48] mt-0.5">50 AMI / 50 Non-Cardiac</div>
+                            <div class="text-xs font-mono text-blue-700 mt-1">Entropy: 1.000 bit | Gini: 0.500</div>
+                        </div>
+
+                        <!-- Split Arrow -->
+                        <div class="flex items-center justify-center my-2 text-slate-400 font-bold text-xs">
+                            <span id="treeSplitLabel" class="px-3 py-1 rounded-full bg-slate-200 text-slate-700 text-[11px]">
+                                Split: Troponin I &gt; 50 ng/L
+                            </span>
+                        </div>
+
+                        <!-- Children Row -->
+                        <div class="w-full flex justify-between gap-4">
+                            <!-- Left Child -->
+                            <div class="flex-1 p-3.5 rounded-xl bg-white border border-emerald-300 text-center shadow-xs">
+                                <div class="text-[11px] font-bold text-emerald-800">Left Child (Test Positive)</div>
+                                <div id="treeLeftCounts" class="text-xs font-extrabold text-slate-800 mt-0.5">45 AMI / 5 Non-Cardiac</div>
+                                <div id="treeLeftEntropy" class="text-[11px] font-mono text-emerald-700 mt-1">Entropy: 0.469 bit</div>
+                            </div>
+                            <!-- Right Child -->
+                            <div class="flex-1 p-3.5 rounded-xl bg-white border border-blue-300 text-center shadow-xs">
+                                <div class="text-[11px] font-bold text-blue-800">Right Child (Test Negative)</div>
+                                <div id="treeRightCounts" class="text-xs font-extrabold text-slate-800 mt-0.5">5 AMI / 45 Non-Cardiac</div>
+                                <div id="treeRightEntropy" class="text-[11px] font-mono text-blue-700 mt-1">Entropy: 0.469 bit</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Information Gain Scoreboard -->
+                    <div class="lg:col-span-5 space-y-3 bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
+                        <div class="text-xs font-bold uppercase tracking-wider text-slate-500">Mathematical Calculation</div>
+                        <div class="space-y-1.5 text-xs text-slate-600">
+                            <div class="flex justify-between">
+                                <span>Parent Entropy \(H(\text{Parent})\):</span>
+                                <span class="font-mono font-bold text-slate-900">1.000 bit</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Weighted Child Entropy:</span>
+                                <span id="treeWeightedEntropy" class="font-mono font-bold text-slate-900">0.469 bit</span>
+                            </div>
+                            <div class="flex justify-between pt-2 border-t border-slate-200 text-sm">
+                                <span class="font-bold text-[#0B2D48]">Information Gain (\(\Delta H\)):</span>
+                                <span id="treeInfoGain" class="font-mono font-extrabold text-emerald-700 text-base">0.531 bit</span>
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar of Information Gain -->
+                        <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden mt-2">
+                            <div id="treeGainBar" class="bg-emerald-500 h-3 rounded-full transition-all duration-300" style="width: 53.1%;"></div>
+                        </div>
+
+                        <div id="treeClinicalVerdict" class="text-xs text-slate-600 p-3 rounded-lg bg-emerald-50 border border-emerald-200 mt-2">
+                            <strong>CART Decision:</strong> Outstanding clinical split! The algorithm would immediately select this test because it eliminates 0.531 bits of diagnostic confusion.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Neural Networks -->
+        <section id="section5" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-violet-50 text-violet-700 border border-violet-200">Section 05</span>
+                <span class="text-xs font-medium text-slate-400">• Deep Architectures</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">5. Neural Networks &amp; Multivariate Matrix Calculus</h2>
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-8">
+                Neural networks are composite non-linear function approximators optimized by backpropagating the gradient of loss via the multivariate calculus chain rule.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Feedforward & Chain Rule -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">The Forward &amp; Backward Pass</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-violet-50 text-violet-700">Matrix Calculus</span>
+                        </div>
+                        <p class="text-slate-600 text-sm mb-2">Layer activation forward computation with non-linear activation \(g\):</p>
+                        <div class="math-formula">
+                            $$\mathbf{a}^{(l)} = g\left( \mathbf{W}^{(l)}\mathbf{a}^{(l-1)} + \mathbf{b}^{(l)} \right)$$
+                        </div>
+                        <p class="text-slate-600 text-sm mt-4 mb-2">Backpropagation gradient via chain rule for weight matrix \(\mathbf{W}^{(l)}\):</p>
+                        <div class="math-formula">
+                            $$\frac{\partial \mathcal{L}}{\partial \mathbf{W}^{(l)}} = \mathbf{\delta}^{(l)} (\mathbf{a}^{(l-1)})^T, \quad \mathbf{\delta}^{(l)} = \left( (\mathbf{W}^{(l+1)})^T \mathbf{\delta}^{(l+1)} \right) \odot g'(\mathbf{z}^{(l)})$$
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 rounded-xl bg-violet-50/60 border border-violet-100 text-xs sm:text-sm text-slate-700 space-y-2">
+                        <p><strong>Clinical Translation:</strong> Backpropagation is automated clinical audit. If an algorithm misdiagnoses a stroke patient, the chain rule calculates exactly how much blame belongs to each intermediate layer of synthetic biomarkers.</p>
+                        <p><strong>Modern Activations:</strong> ReLU \(\max(0, z)\) prevents vanishing gradients; Softmax \(\frac{e^{z_k}}{\sum e^{z_j}}\) ensures multi-class differential diagnosis outputs sum to exactly 100%.</p>
+                    </div>
+                </div>
+
+                <!-- Deep Learning Architectures -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Specialized Clinical Architectures</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-[#205A70]/10 text-[#205A70]">Problem Fit</span>
+                        </div>
+                        <p class="text-slate-600 text-sm mb-4">Suitability across healthcare modalities:</p>
+                        <div class="chart-container" style="height: 280px;">
+                            <canvas id="dlArchitecturesChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200/60 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        <strong class="text-slate-800">Clinical Fit:</strong> CNNs dominate radiology (2D/3D convolutions for CT/X-Ray); Transformers dominate unstructured EHR clinical notes via Self-Attention \(\text{softmax}\left(\frac{\mathbf{Q}\mathbf{K}^T}{\sqrt{d_k}}\right)\mathbf{V}\).
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Other Models -->
+        <section id="section6" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">Section 06</span>
+                <span class="text-xs font-medium text-slate-400">• Advanced Models</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">6. Beyond the Basics: Clustering, Support Vector Machines &amp; Bayes&#39; Rule</h2>
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-8">
+                Analytical formulations for unsupervised K-Means inertia minimization, Support Vector Machine quadratic programming, and Bayes&#39; Theorem in diagnostic decision-making.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- K-Means -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">K-Means Clustering</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-teal-50 text-teal-700">Expectation-Maximization</span>
+                        </div>
+                        <p class="text-slate-600 text-sm mb-2">Minimizing within-cluster sum of squares (WCSS / Inertia):</p>
+                        <div class="math-formula">
+                            $$J = \sum_{k=1}^{K} \sum_{\mathbf{x}_i \in C_k} ||\mathbf{x}_i - \mathbf{\mu}_k||^2$$
+                        </div>
+                        <div class="chart-container mt-4">
+                            <canvas id="kmeansChart"></canvas>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-xs sm:text-sm text-slate-500 italic text-center border-t border-slate-100 pt-3">
+                        Alternates: 1. Assignment step \(\arg\min_k ||\mathbf{x}_i - \mathbf{\mu}_k||\) &amp; 2. Centroid update \(\mathbf{\mu}_k = \frac{1}{|C_k|}\sum \mathbf{x}_i\).
+                    </p>
+                </div>
+
+                <!-- SVM -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Support Vector Machines</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700">Margin Maximization</span>
+                        </div>
+                        <p class="text-slate-600 text-sm mb-2">Primal constrained margin maximization:</p>
+                        <div class="math-formula">
+                            $$\min_{\mathbf{w}, b} \frac{1}{2} ||\mathbf{w}||^2 \quad \text{s.t.} \quad y_i(\mathbf{w}^T\mathbf{x}_i + b) \ge 1, \quad \forall i$$
+                        </div>
+                        <div class="chart-container mt-4">
+                            <canvas id="svmChart"></canvas>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-xs sm:text-sm text-slate-500 italic text-center border-t border-slate-100 pt-3">
+                        Dual formulation solved via Lagrange multipliers: \(\max_{\alpha} \sum \alpha_i - \frac{1}{2}\sum \alpha_i \alpha_j y_i y_j K(\mathbf{x}_i, \mathbf{x}_j)\).
+                    </p>
+                </div>
+            </div>
+
+            <!-- Deep Dive & Interactive Simulator 3: Bayes' Theorem in Clinical Diagnostics -->
+            <div class="mt-8 bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                    <div>
+                        <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200">Interactive Simulator 03</span>
+                        <h3 class="text-xl font-bold text-[#0B2D48] mt-1">Bayes&#39; Theorem &amp; The Clinical Screening Paradox</h3>
+                        <p class="text-sm text-slate-500">Why a 95% accurate AI model can produce 84% false alarms on rare hospital conditions.</p>
+                    </div>
+                    <span class="self-start sm:self-auto text-xs font-semibold px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                        Probabilistic Inference
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="text-sm text-slate-600 space-y-3">
+                        <p>
+                            Bayes&#39; Theorem is the cornerstone of clinical evidence-based diagnosis. When a diagnostic AI generates a positive alert (\(+\)), what is the real probability that the patient actually has the disease (\(D\))?
+                        </p>
+                        <div class="math-formula">
+                            $$P(D \mid +) = \frac{P(+ \mid D) \cdot P(D)}{P(+ \mid D) \cdot P(D) + P(+ \mid \neg D) \cdot P(\neg D)}$$
+                        </div>
+                        <p class="text-xs text-slate-500">
+                            Where \(P(+ \mid D)\) is <strong>Clinical Sensitivity</strong>, \(P(+ \mid \neg D) = 1 - \text{Specificity}\) is the False Positive Rate, and \(P(D)\) is the <strong>Prior Disease Prevalence</strong> in your hospital population.
+                        </p>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-amber-50/70 border border-amber-200/80 text-xs sm:text-sm text-slate-700 space-y-2">
+                        <div class="font-bold text-amber-900 flex items-center gap-1.5">
+                            <span>🚨</span> The Base Rate Fallacy &amp; EHR Alert Fatigue
+                        </div>
+                        <p>
+                            If an AI screening algorithm with <strong>95% Sensitivity</strong> and <strong>95% Specificity</strong> is deployed to detect a rare condition (prevalence <strong>1%</strong>), many clinicians assume a positive test means a 95% chance of disease.
+                        </p>
+                        <p class="font-semibold text-slate-900">
+                            The mathematical truth: The actual probability is only ~16.1%! Over 83% of positive alerts are false alarms, leading straight to dangerous clinician alert fatigue.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Interactive Bayes Calculator -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start bg-slate-50 p-6 rounded-xl border border-slate-200">
+                    <!-- Controls -->
+                    <div class="lg:col-span-5 space-y-5">
+                        <div>
+                            <div class="flex justify-between items-center text-sm font-semibold text-slate-700 mb-1">
+                                <label for="bayesPrevSlider">Disease Prevalence \(P(D)\):</label>
+                                <span id="bayesPrevVal" class="font-mono text-blue-700 font-bold">1.0%</span>
+                            </div>
+                            <input type="range" id="bayesPrevSlider" min="0.1" max="25.0" step="0.1" value="1.0" class="w-full h-2 bg-slate-200 rounded-lg cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                                <span>0.1% (Rare Sepsis)</span>
+                                <span>5% (ICU Stroke)</span>
+                                <span>25% (Clinic Diabetes)</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center text-sm font-semibold text-slate-700 mb-1">
+                                <label for="bayesSensSlider">Model Sensitivity \(P(+ \mid D)\):</label>
+                                <span id="bayesSensVal" class="font-mono text-emerald-700 font-bold">95.0%</span>
+                            </div>
+                            <input type="range" id="bayesSensSlider" min="70.0" max="99.9" step="0.5" value="95.0" class="w-full h-2 bg-slate-200 rounded-lg cursor-pointer">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center text-sm font-semibold text-slate-700 mb-1">
+                                <label for="bayesSpecSlider">Model Specificity \(P(- \mid \neg D)\):</label>
+                                <span id="bayesSpecVal" class="font-mono text-indigo-700 font-bold">95.0%</span>
+                            </div>
+                            <input type="range" id="bayesSpecSlider" min="70.0" max="99.9" step="0.5" value="95.0" class="w-full h-2 bg-slate-200 rounded-lg cursor-pointer">
+                        </div>
+
+                        <div class="p-3 bg-white rounded-lg border border-slate-200 text-xs text-slate-600">
+                            <strong>Tested Cohort:</strong> 10,000 hospital patient encounters.
+                        </div>
+                    </div>
+
+                    <!-- Outputs & Natural Frequency Breakdown -->
+                    <div class="lg:col-span-7 space-y-4">
+                        <!-- Scoreboard Cards -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-xs text-center">
+                                <div class="text-xs font-bold text-slate-500 uppercase">Posterior Probability (PPV)</div>
+                                <div id="bayesPPV" class="text-3xl font-extrabold text-[#0B2D48] mt-1">16.1%</div>
+                                <div class="text-[11px] text-slate-500 mt-1">Actual chance patient has disease if AI alerts (+)</div>
+                            </div>
+                            <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-xs text-center">
+                                <div class="text-xs font-bold text-slate-500 uppercase">False Alarm Rate</div>
+                                <div id="bayesFalseAlarm" class="text-3xl font-extrabold text-amber-600 mt-1">83.9%</div>
+                                <div class="text-[11px] text-slate-500 mt-1">Fraction of AI alerts that are false positives</div>
+                            </div>
+                        </div>
+
+                        <!-- 10,000 Patient Cohort Natural Frequency Table -->
+                        <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-xs text-xs">
+                            <div class="font-bold text-slate-800 mb-2 pb-1 border-b border-slate-100 flex justify-between">
+                                <span>Natural Frequency (Out of 10,000 Hospital Patients):</span>
+                                <span class="text-slate-400">EHR Breakdown</span>
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                                <div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200">
+                                    <div class="text-[10px] text-emerald-800 font-semibold">True Positives</div>
+                                    <div id="bayesTP" class="text-base font-mono font-bold text-emerald-700">95</div>
+                                </div>
+                                <div class="p-2 rounded-lg bg-amber-50 border border-amber-200">
+                                    <div class="text-[10px] text-amber-800 font-semibold">False Positives</div>
+                                    <div id="bayesFP" class="text-base font-mono font-bold text-amber-700">495</div>
+                                </div>
+                                <div class="p-2 rounded-lg bg-red-50 border border-red-200">
+                                    <div class="text-[10px] text-red-800 font-semibold">False Negatives</div>
+                                    <div id="bayesFN" class="text-base font-mono font-bold text-red-700">5</div>
+                                </div>
+                                <div class="p-2 rounded-lg bg-blue-50 border border-blue-200">
+                                    <div class="text-[10px] text-blue-800 font-semibold">True Negatives</div>
+                                    <div id="bayesTN" class="text-base font-mono font-bold text-blue-700">9,405</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Visual Ratio Bar -->
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[11px] font-semibold text-slate-600">
+                                <span>AI Positive Alerts Composition:</span>
+                                <span id="bayesRatioText">95 True Disease vs 495 False Alarms</span>
+                            </div>
+                            <div class="w-full bg-amber-200 rounded-full h-3 overflow-hidden flex">
+                                <div id="bayesBarTP" class="bg-emerald-500 h-3 transition-all duration-300" style="width: 16.1%;"></div>
+                                <div id="bayesBarFP" class="bg-amber-400 h-3 flex-1"></div>
+                            </div>
+                            <div class="flex justify-between text-[10px] text-slate-400">
+                                <span class="text-emerald-700 font-semibold">■ True Positives (Sick)</span>
+                                <span class="text-amber-700 font-semibold">■ False Alarms (Healthy)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Course Module Navigation Bottom Card -->
+        <div class="bg-gradient-to-r from-[#0B2D48] via-[#205A70] to-[#56A0A9] rounded-2xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div class="text-center sm:text-left">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/20 text-white mb-2">
+                    <span>🎉</span>
+                    <span>Curriculum Complete!</span>
+                </div>
+                <h4 class="text-2xl font-extrabold">All 5 Core Modules Explored</h4>
+                <p class="text-sm text-slate-200 mt-1 max-w-lg">
+                    From foundational concepts, clinical preprocessing, and Python pipelines to model evaluation and mathematical theory. Ready to test your mastery?
+                </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3 shrink-0">
+                <a href="training-testing.html" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-semibold transition-colors border border-white/20">
+                    ← Module 04
+                </a>
+                <a href="exercises.html" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs sm:text-sm font-bold shadow-md transition-colors flex items-center gap-1.5">
+                    <span>Exercises</span>
+                    <span>★</span>
+                </a>
+                <a href="case-studies.html" class="px-4 py-2 rounded-xl bg-[#F9A03F] hover:bg-[#f89528] text-slate-900 text-xs sm:text-sm font-bold shadow-md transition-colors flex items-center gap-1.5">
+                    <span>Case Studies</span>
+                    <span>🏥</span>
+                </a>
+                <a href="index.html" class="px-3.5 py-2 rounded-xl bg-white text-slate-900 text-xs sm:text-sm font-bold shadow-md hover:bg-slate-100 transition-colors flex items-center gap-1.5">
+                    <span>Hub</span>
+                    <span>🏠</span>
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200/80 py-10 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="flex items-center justify-center gap-2 mb-3">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#56A0A9]"></span>
+                <span class="font-bold text-[#0B2D48] tracking-tight">ML Notes for Healthcare</span>
+            </div>
+            <p class="text-slate-500 text-sm max-w-lg mx-auto mb-2">
+                Department of Bio-Medical Sciences, The Apollo University, Chittoor.
+            </p>
+            <div class="text-xs text-slate-400">
+                Designed for healthcare professionals, students, and machine learning researchers.
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Chart.js, KaTeX, and Simulators Initialization Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. KaTeX Auto-Render
+            if (typeof renderMathInElement === 'function') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
+            }
+
+            const colorPrimary = '#205A70';
+            const colorSecondary = '#56A0A9';
+            const colorAccent = '#F9A03F';
+            const colorLight = '#C2C2C2';
+            const colorUnknown = '#FBC17D';
+
+            // Safe Tooltip Title Callback
+            const tooltipTitleCallback = (tooltipItems) => {
+                if (!tooltipItems || !tooltipItems.length) return '';
+                const item = tooltipItems[0];
+                const labels = item.chart?.data?.labels;
+                if (labels && labels[item.dataIndex] !== undefined) {
+                    const label = labels[item.dataIndex];
+                    return Array.isArray(label) ? label.join(' ') : label;
+                }
+                return item.dataset?.label || '';
+            };
+
+            const tooltipLabelCallback = (context) => {
+                const raw = context.raw;
+                if (raw && typeof raw === 'object' && 'x' in raw && 'y' in raw) {
+                    return ` (${raw.x}, ${raw.y})`;
+                }
+                return ` ${context.dataset.label}: ${context.formattedValue}`;
+            };
+
+            const defaultChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: { family: 'Inter', size: 12 },
+                            color: '#0B2D48',
+                            boxWidth: 12,
+                            padding: 12
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback,
+                            label: tooltipLabelCallback
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#64748B', font: { family: 'Inter' } }
+                    },
+                    y: {
+                        grid: { color: '#f1f5f9' },
+                        ticks: { color: '#64748B', font: { family: 'Inter' } }
+                    }
+                }
+            };
+
+            const processLabels = (labels, maxWidth = 16) => {
+                return labels.map(label => {
+                    if (label.length <= maxWidth) return label;
+                    let lines = [];
+                    let currentLine = '';
+                    const words = label.split(' ');
+                    for (const word of words) {
+                        if ((currentLine + ' ' + word).trim().length > maxWidth) {
+                            lines.push(currentLine.trim());
+                            currentLine = word;
+                        } else {
+                            currentLine = (currentLine + ' ' + word).trim();
+                        }
+                    }
+                    if (currentLine) lines.push(currentLine.trim());
+                    return lines;
+                });
+            };
+
+            // 1. Linear Regression Chart
+            if (document.getElementById('linearRegressionChart')) {
+                const ctxLinear = document.getElementById('linearRegressionChart').getContext('2d');
+                const ageVsBpData = [
+                    {x: 40, y: 120}, {x: 45, y: 122}, {x: 50, y: 128}, {x: 55, y: 130},
+                    {x: 60, y: 135}, {x: 65, y: 138}, {x: 70, y: 142}, {x: 75, y: 144}
+                ];
+                new Chart(ctxLinear, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'Patient Cohort Data (Age, BP)',
+                                data: ageVsBpData,
+                                backgroundColor: colorSecondary,
+                                type: 'scatter',
+                                pointRadius: 5
+                            },
+                            {
+                                label: 'OLS Regression Line (w*x)',
+                                data: [{x: 40, y: 118}, {x: 75, y: 145}],
+                                type: 'line',
+                                fill: false,
+                                borderColor: colorAccent,
+                                borderWidth: 3,
+                                pointRadius: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            x: { title: { display: true, text: 'Age (Years)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { display: false } },
+                            y: { title: { display: true, text: 'Systolic Blood Pressure (mmHg)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { color: '#f1f5f9' } }
+                        }
+                    }
+                });
+            }
+
+            // 2. Logistic Regression Chart
+            if (document.getElementById('logisticRegressionChart')) {
+                const ctxLogistic = document.getElementById('logisticRegressionChart').getContext('2d');
+                const logisticCurve = Array.from({length: 100}, (_, i) => {
+                    const x = (i - 50) / 10;
+                    const y = 1 / (1 + Math.exp(-x));
+                    return {x: Number(x.toFixed(2)), y: Number(y.toFixed(3))};
+                });
+                const logisticData = [
+                    {x: -5, y: 0.05}, {x: -4, y: 0.1}, {x: -3, y: 0.15}, {x: -2, y: 0.3}, {x: -1, y: 0.4},
+                    {x: 1, y: 0.6}, {x: 2, y: 0.7}, {x: 3, y: 0.85}, {x: 4, y: 0.9}, {x: 5, y: 0.95}
+                ];
+
+                new Chart(ctxLogistic, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'Patient Observed Samples',
+                                data: logisticData,
+                                backgroundColor: colorSecondary,
+                                pointRadius: 5
+                            },
+                            {
+                                label: 'Sigmoid Probability σ(z)',
+                                data: logisticCurve,
+                                type: 'line',
+                                fill: false,
+                                borderColor: colorAccent,
+                                borderWidth: 3,
+                                pointRadius: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            x: { title: { display: true, text: 'Linear Score (z = wᵀx)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { display: false } },
+                            y: { title: { display: true, text: 'Probability P(y=1)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, min: 0, max: 1.05, grid: { color: '#f1f5f9' } }
+                        }
+                    }
+                });
+            }
+
+            // 3. KNN Chart
+            if (document.getElementById('knnChart')) {
+                const ctxKnn = document.getElementById('knnChart').getContext('2d');
+                const classA = [{x: 2, y: 3}, {x: 3, y: 4}, {x: 4, y: 2}, {x: 2.5, y: 2}, {x: 3.5, y: 3}];
+                const classB = [{x: 7, y: 8}, {x: 8, y: 9}, {x: 9, y: 7}, {x: 7.5, y: 7}, {x: 8.5, y: 8}];
+                const unknown = [{x: 5, y: 6}];
+
+                new Chart(ctxKnn, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'Class A (Healthy Cohort)',
+                                data: classA,
+                                backgroundColor: colorSecondary,
+                                pointRadius: 6
+                            },
+                            {
+                                label: 'Class B (Disease Cohort)',
+                                data: classB,
+                                backgroundColor: colorPrimary,
+                                pointRadius: 6
+                            },
+                            {
+                                label: 'Unknown Test Point (x_new)',
+                                data: unknown,
+                                backgroundColor: colorUnknown,
+                                pointRadius: 9,
+                                pointStyle: 'rectRot',
+                                borderWidth: 2,
+                                borderColor: colorAccent
+                            }
+                        ]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            x: { title: { display: true, text: 'Biomarker 1 Dimension', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { display: false } },
+                            y: { title: { display: true, text: 'Biomarker 2 Dimension', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { color: '#f1f5f9' } }
+                        }
+                    }
+                });
+            }
+
+            // 4. DL Architectures Chart
+            if (document.getElementById('dlArchitecturesChart')) {
+                const ctxDL = document.getElementById('dlArchitecturesChart').getContext('2d');
+                const labels = processLabels(['Convolutional Networks (CNNs)', 'Recurrent Networks (RNNs)', 'Transformers (Attention)']);
+                new Chart(ctxDL, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Problem-Fit Score',
+                            data: [95, 80, 90],
+                            backgroundColor: [
+                                colorPrimary,
+                                colorAccent,
+                                colorSecondary
+                            ],
+                            borderColor: colorPrimary,
+                            borderWidth: 1,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { title: tooltipTitleCallback } }
+                        },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: '#64748B', font: { family: 'Inter', size: 11 } } },
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: { display: true, text: 'Problem-Fit Score (out of 100)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } },
+                                grid: { color: '#f1f5f9' },
+                                ticks: { color: '#64748B', font: { family: 'Inter' } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 5. K-Means Chart
+            if (document.getElementById('kmeansChart')) {
+                const ctxKmeans = document.getElementById('kmeansChart').getContext('2d');
+                new Chart(ctxKmeans, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'Cluster 1 Subtype',
+                                data: [{x: 2, y: 3}, {x: 2.5, y: 3.5}, {x: 1.5, y: 2.5}, {x: 3, y: 2}],
+                                backgroundColor: colorPrimary,
+                                pointRadius: 6
+                            },
+                            {
+                                label: 'Cluster 2 Subtype',
+                                data: [{x: 7, y: 8}, {x: 7.5, y: 8.5}, {x: 6.5, y: 7.5}, {x: 8, y: 7}],
+                                backgroundColor: colorSecondary,
+                                pointRadius: 6
+                            },
+                            {
+                                label: 'Cluster 3 Centroid (μ₃)',
+                                data: [{x: 2.5, y: 8.125}],
+                                backgroundColor: colorAccent,
+                                pointRadius: 10,
+                                pointStyle: 'crossRot',
+                                borderWidth: 3,
+                                borderColor: colorAccent
+                            },
+                            {
+                                label: 'Cluster 3 Points',
+                                data: [{x: 2, y: 8}, {x: 3.5, y: 8.5}, {x: 1.5, y: 7.5}, {x: 3, y: 9}],
+                                backgroundColor: 'rgba(249, 160, 63, 0.5)',
+                                pointRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        plugins: {
+                            tooltip: { callbacks: { title: tooltipTitleCallback } },
+                            legend: {
+                                labels: {
+                                    filter: item => item.text && !item.text.includes('Points')
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { title: { display: true, text: 'Biomarker A', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { display: false } },
+                            y: { title: { display: true, text: 'Biomarker B', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { color: '#f1f5f9' } }
+                        }
+                    }
+                });
+            }
+
+            // 6. SVM Chart
+            if (document.getElementById('svmChart')) {
+                const ctxSvm = document.getElementById('svmChart').getContext('2d');
+                new Chart(ctxSvm, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'Class 1: Benign (y = +1)',
+                                data: [{x: 2, y: 3}, {x: 2.5, y: 4.5}, {x: 1.5, y: 2.5}, {x: 3, y: 2}, {x: 4, y: 5}],
+                                backgroundColor: colorPrimary,
+                                type: 'scatter',
+                                pointRadius: 6
+                            },
+                            {
+                                label: 'Class 2: Malignant (y = -1)',
+                                data: [{x: 7, y: 8}, {x: 7.5, y: 9.5}, {x: 6.5, y: 7.5}, {x: 8, y: 7}, {x: 6, y: 8.5}],
+                                backgroundColor: colorSecondary,
+                                type: 'scatter',
+                                pointRadius: 6
+                            },
+                            {
+                                label: 'Optimal Hyperplane (wᵀx + b = 0)',
+                                data: [{x: 0, y: 6.5}, {x: 10, y: 4.5}],
+                                backgroundColor: colorAccent,
+                                borderColor: colorAccent,
+                                type: 'line',
+                                fill: false,
+                                borderWidth: 3,
+                                pointRadius: 0
+                            },
+                            {
+                                label: 'Positive Margin (+1 Boundary)',
+                                data: [{x: 0, y: 8}, {x: 10, y: 6}],
+                                borderColor: 'rgba(249, 160, 63, 0.6)',
+                                type: 'line',
+                                fill: false,
+                                borderWidth: 1.5,
+                                borderDash: [5, 5],
+                                pointRadius: 0
+                            },
+                            {
+                                label: 'Negative Margin (-1 Boundary)',
+                                data: [{x: 0, y: 5}, {x: 10, y: 3}],
+                                borderColor: 'rgba(249, 160, 63, 0.6)',
+                                type: 'line',
+                                fill: false,
+                                borderWidth: 1.5,
+                                borderDash: [5, 5],
+                                pointRadius: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        plugins: {
+                            tooltip: { callbacks: { title: tooltipTitleCallback } },
+                            legend: {
+                                labels: {
+                                    filter: item => item.text && !item.text.includes('Boundary')
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { title: { display: true, text: 'Tumor Radius Dimension', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { display: false } },
+                            y: { title: { display: true, text: 'Tumor Texture Dimension', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { color: '#f1f5f9' } }
+                        }
+                    }
+                });
+            }
+
+            // ==========================================
+            // SIMULATOR 1: Gradient Descent & IV Titration
+            // ==========================================
+            const gdEtaSlider = document.getElementById('gdEtaSlider');
+            const gdEtaVal = document.getElementById('gdEtaVal');
+            const gdStartSlider = document.getElementById('gdStartSlider');
+            const gdStartVal = document.getElementById('gdStartVal');
+            const gdStepBtn = document.getElementById('gdStepBtn');
+            const gdRun10Btn = document.getElementById('gdRun10Btn');
+            const gdResetBtn = document.getElementById('gdResetBtn');
+
+            const gdStepCount = document.getElementById('gdStepCount');
+            const gdCurrentW = document.getElementById('gdCurrentW');
+            const gdCurrentLoss = document.getElementById('gdCurrentLoss');
+            const gdCurrentGrad = document.getElementById('gdCurrentGrad');
+            const gdStatusBadge = document.getElementById('gdStatusBadge');
+            const gdClinicalNarrative = document.getElementById('gdClinicalNarrative');
+
+            const gdParabolaPath = document.getElementById('gdParabolaPath');
+            const gdTrajectoryPath = document.getElementById('gdTrajectoryPath');
+            const gdBall = document.getElementById('gdBall');
+            const gdTangentLine = document.getElementById('gdTangentLine');
+
+            let gdW = -2.2;
+            let gdSteps = 0;
+            let gdHistory = [];
+
+            // Loss function: L(w) = (w - 1.5)^2 + 0.2
+            // dL/dw = 2 * (w - 1.5)
+            const targetW = 1.5;
+            const lossFn = (w) => (w - targetW) * (w - targetW) + 0.2;
+            const gradFn = (w) => 2 * (w - targetW);
+
+            // Coordinate transform for SVG (w from -3.5 to 4.5, loss from 0 to 20)
+            const mapX = (w) => 40 + ((w - (-3.5)) / 8.0) * 420;
+            const mapY = (loss) => 240 - (Math.min(loss, 20) / 20.0) * 210;
+
+            const drawParabola = () => {
+                let d = '';
+                for (let x = -3.5; x <= 4.5; x += 0.1) {
+                    const l = lossFn(x);
+                    const sx = mapX(x);
+                    const sy = mapY(l);
+                    d += (d === '' ? 'M' : 'L') + `${sx.toFixed(1)},${sy.toFixed(1)} `;
+                }
+                gdParabolaPath.setAttribute('d', d);
+            };
+
+            const updateGdVisuals = () => {
+                const loss = lossFn(gdW);
+                const grad = gradFn(gdW);
+
+                gdStepCount.textContent = gdSteps;
+                gdCurrentW.textContent = gdW.toFixed(2);
+                gdCurrentLoss.textContent = loss > 999 ? '> 999 (Exploded)' : loss.toFixed(2);
+                gdCurrentGrad.textContent = Math.abs(grad) > 999 ? '> 999' : grad.toFixed(2);
+
+                const cx = mapX(Math.max(-3.5, Math.min(4.5, gdW)));
+                const cy = mapY(Math.max(0, Math.min(20, loss)));
+                gdBall.setAttribute('cx', cx);
+                gdBall.setAttribute('cy', cy);
+
+                // Update trajectory line
+                if (gdHistory.length > 0) {
+                    const points = gdHistory.map(h => `${mapX(h.w).toFixed(1)},${mapY(h.loss).toFixed(1)}`).join(' ');
+                    gdTrajectoryPath.setAttribute('points', points);
+                } else {
+                    gdTrajectoryPath.setAttribute('points', '');
+                }
+
+                // Update tangent line
+                const slope = grad;
+                const dx = 20;
+                const dy = -slope * 5; // SVG coordinate flip
+                gdTangentLine.setAttribute('x1', cx - dx);
+                gdTangentLine.setAttribute('y1', cy - dy);
+                gdTangentLine.setAttribute('x2', cx + dx);
+                gdTangentLine.setAttribute('y2', cy + dy);
+
+                // Clinical status narrative
+                const eta = parseFloat(gdEtaSlider.value);
+                const dist = Math.abs(gdW - targetW);
+
+                if (loss > 50 || Math.abs(gdW) > 10) {
+                    gdStatusBadge.textContent = 'Divergence / Hemodynamic Crash!';
+                    gdStatusBadge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800';
+                    gdClinicalNarrative.innerHTML = '<span class="text-red-700 font-bold">Fatal Over-Titration:</span> Learning rate is too high (\\(\\eta &gt; 1.0\\)). Weights overshot uncontrollably, loss exploded to infinity, and the clinical model crashed.';
+                } else if (dist < 0.05) {
+                    gdStatusBadge.textContent = 'Optimal Stabilization';
+                    gdStatusBadge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800';
+                    gdClinicalNarrative.innerHTML = '<span class="text-emerald-700 font-bold">Clinical Target Reached:</span> Optimal parameter weight \\(w^* = 1.50\\) attained. Hospital prediction error minimized!';
+                } else if (eta > 0.8) {
+                    gdStatusBadge.textContent = 'Oscillatory Over-Titration';
+                    gdStatusBadge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800';
+                    gdClinicalNarrative.textContent = 'Warning: Titration step is aggressive. Weights are bouncing back and forth across the optimal basin before settling.';
+                } else if (eta < 0.08) {
+                    gdStatusBadge.textContent = 'Sluggish Titration';
+                    gdStatusBadge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800';
+                    gdClinicalNarrative.textContent = 'Very safe but sluggish: The parameter is advancing too slowly. Requires hundreds of training epochs to reach clinical convergence.';
+                } else {
+                    gdStatusBadge.textContent = 'Safe Convergence';
+                    gdStatusBadge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-teal-100 text-teal-800';
+                    gdClinicalNarrative.textContent = 'Ideal titration: Smooth exponential descent along the loss gradient toward the minimal clinical risk surface.';
+                }
+            };
+
+            const stepGd = () => {
+                const eta = parseFloat(gdEtaSlider.value);
+                const grad = gradFn(gdW);
+                gdHistory.push({w: gdW, loss: lossFn(gdW)});
+                gdW = gdW - eta * grad;
+                gdSteps++;
+                updateGdVisuals();
+            };
+
+            const resetGd = () => {
+                gdW = parseFloat(gdStartSlider.value);
+                gdSteps = 0;
+                gdHistory = [{w: gdW, loss: lossFn(gdW)}];
+                updateGdVisuals();
+            };
+
+            drawParabola();
+            resetGd();
+
+            gdEtaSlider.addEventListener('input', (e) => {
+                gdEtaVal.textContent = parseFloat(e.target.value).toFixed(2);
+                updateGdVisuals();
+            });
+
+            gdStartSlider.addEventListener('input', (e) => {
+                gdStartVal.textContent = parseFloat(e.target.value).toFixed(1);
+                resetGd();
+            });
+
+            gdStepBtn.addEventListener('click', stepGd);
+            gdRun10Btn.addEventListener('click', () => {
+                for (let i = 0; i < 10; i++) stepGd();
+            });
+            gdResetBtn.addEventListener('click', resetGd);
+
+            // ==========================================
+            // SIMULATOR 3: Bayes' Theorem Calculator
+            // ==========================================
+            const bayesPrevSlider = document.getElementById('bayesPrevSlider');
+            const bayesPrevVal = document.getElementById('bayesPrevVal');
+            const bayesSensSlider = document.getElementById('bayesSensSlider');
+            const bayesSensVal = document.getElementById('bayesSensVal');
+            const bayesSpecSlider = document.getElementById('bayesSpecSlider');
+            const bayesSpecVal = document.getElementById('bayesSpecVal');
+
+            const bayesPPV = document.getElementById('bayesPPV');
+            const bayesFalseAlarm = document.getElementById('bayesFalseAlarm');
+            const bayesTP = document.getElementById('bayesTP');
+            const bayesFP = document.getElementById('bayesFP');
+            const bayesFN = document.getElementById('bayesFN');
+            const bayesTN = document.getElementById('bayesTN');
+            const bayesRatioText = document.getElementById('bayesRatioText');
+            const bayesBarTP = document.getElementById('bayesBarTP');
+
+            const updateBayes = () => {
+                const prev = parseFloat(bayesPrevSlider.value) / 100.0;
+                const sens = parseFloat(bayesSensSlider.value) / 100.0;
+                const spec = parseFloat(bayesSpecSlider.value) / 100.0;
+
+                bayesPrevVal.textContent = (prev * 100).toFixed(1) + '%';
+                bayesSensVal.textContent = (sens * 100).toFixed(1) + '%';
+                bayesSpecVal.textContent = (spec * 100).toFixed(1) + '%';
+
+                const totalPatients = 10000;
+                const diseased = totalPatients * prev;
+                const healthy = totalPatients * (1 - prev);
+
+                const tp = diseased * sens;
+                const fn = diseased * (1 - sens);
+                const fp = healthy * (1 - spec);
+                const tn = healthy * spec;
+
+                const totalPosAlerts = tp + fp;
+                const ppv = totalPosAlerts > 0 ? (tp / totalPosAlerts) * 100.0 : 0;
+                const falseAlarmPct = 100.0 - ppv;
+
+                bayesPPV.textContent = ppv.toFixed(1) + '%';
+                bayesFalseAlarm.textContent = falseAlarmPct.toFixed(1) + '%';
+
+                bayesTP.textContent = Math.round(tp).toLocaleString();
+                bayesFP.textContent = Math.round(fp).toLocaleString();
+                bayesFN.textContent = Math.round(fn).toLocaleString();
+                bayesTN.textContent = Math.round(tn).toLocaleString();
+
+                bayesRatioText.textContent = `${Math.round(tp)} True Disease vs ${Math.round(fp)} False Alarms`;
+                bayesBarTP.style.width = `${Math.max(2, Math.min(98, ppv)).toFixed(1)}%`;
+            };
+
+            bayesPrevSlider.addEventListener('input', updateBayes);
+            bayesSensSlider.addEventListener('input', updateBayes);
+            bayesSpecSlider.addEventListener('input', updateBayes);
+            updateBayes();
+
+        });
+
+        // Global function for Decision Tree Preset
+        window.setTreePreset = (type) => {
+            const splitLabel = document.getElementById('treeSplitLabel');
+            const leftCounts = document.getElementById('treeLeftCounts');
+            const rightCounts = document.getElementById('treeRightCounts');
+            const leftEntropy = document.getElementById('treeLeftEntropy');
+            const rightEntropy = document.getElementById('treeRightEntropy');
+            const weightedEntropy = document.getElementById('treeWeightedEntropy');
+            const infoGain = document.getElementById('treeInfoGain');
+            const gainBar = document.getElementById('treeGainBar');
+            const verdict = document.getElementById('treeClinicalVerdict');
+
+            const calcEntropy = (p1, p2) => {
+                const total = p1 + p2;
+                if (total === 0 || p1 === 0 || p2 === 0) return 0;
+                const pr1 = p1 / total;
+                const pr2 = p2 / total;
+                return -(pr1 * Math.log2(pr1) + pr2 * Math.log2(pr2));
+            };
+
+            let name, lAmi, lNon, rAmi, rNon, note;
+            if (type === 'troponin') {
+                name = 'Split: Troponin I > 50 ng/L';
+                lAmi = 45; lNon = 5;
+                rAmi = 5; rNon = 45;
+                note = '<strong>CART Decision:</strong> Outstanding clinical split! The algorithm immediately adopts this test because it purifies the cohort and eliminates 0.531 bits of uncertainty.';
+            } else if (type === 'age') {
+                name = 'Split: Patient Age > 65 Years';
+                lAmi = 35; lNon = 15;
+                rAmi = 15; rNon = 35;
+                note = '<strong>Moderate Clinical Split:</strong> Useful secondary triage question (age correlates with coronary artery disease), but yields lower information gain than Troponin.';
+            } else {
+                name = 'Split: Blood Group Type O';
+                lAmi = 25; lNon = 25;
+                rAmi = 25; rNon = 25;
+                note = '<strong>Rejected Split:</strong> Zero information gain! Blood group does not discriminate acute coronary occlusion; both branches remain exactly 50/50 confused.';
+            }
+
+            const hL = calcEntropy(lAmi, lNon);
+            const hR = calcEntropy(rAmi, rNon);
+            const total = (lAmi + lNon) + (rAmi + rNon);
+            const wH = ((lAmi + lNon) / total) * hL + ((rAmi + rNon) / total) * hR;
+            const ig = 1.000 - wH;
+
+            splitLabel.textContent = name;
+            leftCounts.textContent = `${lAmi} AMI / ${lNon} Non-Cardiac`;
+            rightCounts.textContent = `${rAmi} AMI / ${rNon} Non-Cardiac`;
+            leftEntropy.textContent = `Entropy: ${hL.toFixed(3)} bit`;
+            rightEntropy.textContent = `Entropy: ${hR.toFixed(3)} bit`;
+            weightedEntropy.textContent = `${wH.toFixed(3)} bit`;
+            infoGain.textContent = `${ig.toFixed(3)} bit`;
+            gainBar.style.width = `${(ig * 100).toFixed(1)}%`;
+            verdict.innerHTML = note;
+        };
+    </script>
+</body>
+</html>

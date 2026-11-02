@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 02: Data Preprocessing in Healthcare – ML Notes</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- KaTeX CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+    <!-- Google Fonts Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            navy: '#0B2D48',
+                            teal: '#205A70',
+                            softTeal: '#56A0A9',
+                            amber: '#F9A03F',
+                            lightBg: '#F8FAFC',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .bg-grid-pattern {
+            background-image: radial-gradient(rgba(32, 90, 112, 0.08) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 380px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 400px;
+            }
+        }
+        .card-hover {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .card-hover:hover {
+            box-shadow: 0 14px 28px -6px rgba(11, 45, 72, 0.08);
+        }
+        .code-snippet {
+            background-color: #0F172A;
+            color: #F8FAFC;
+            border-left: 4px solid #F9A03F;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            border-radius: 0 0.75rem 0.75rem 0;
+            line-height: 1.6;
+        }
+        .code-keyword { color: #F9A03F; font-weight: 600; }
+        .code-comment { color: #64748B; font-style: italic; }
+        .code-string { color: #38BDF8; }
+        .code-function { color: #A78BFA; }
+        input[type=range] { accent-color: #205A70; }
+        .katex-display { margin: 0.5em 0 !important; }
+    </style>
+</head>
+<body class="bg-[#F8F9FA] text-[#0B2D48] min-h-screen flex flex-col antialiased selection:bg-[#56A0A9]/20 selection:text-[#0B2D48]">
+
+    <!-- Main Navigation Bar -->
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#0B2D48] to-[#205A70] flex items-center justify-center text-white shadow-md shadow-[#205A70]/20 group-hover:scale-105 transition-transform">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-lg font-bold tracking-tight text-[#0B2D48]">ML Notes</span>
+                    <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-xs font-semibold bg-[#205A70]/10 text-[#205A70] rounded-full border border-[#205A70]/20">Healthcare Edition</span>
+                </div>
+            </a>
+            
+            <div class="flex items-center gap-2 sm:gap-3">
+                <a href="index.html" class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-[#205A70] transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    <span>All Modules</span>
+                </a>
+                <a href="clinical-preprocessing-lab.html" class="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-2.5 py-1 rounded-lg transition-colors">
+                    <span>Lab 🧪</span>
+                </a>
+                <a href="exercises.html" class="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-lg transition-colors">
+                    <span>Exercises</span>
+                </a>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#205A70]/10 text-[#205A70] border border-[#205A70]/20">
+                    Module 02
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- In-Page Sub-Navigation Bar -->
+    <nav class="sticky top-16 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs py-2.5 px-4 sm:px-6">
+        <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center space-x-1 sm:space-x-2 overflow-x-auto whitespace-nowrap py-1 text-xs sm:text-sm font-medium text-slate-600">
+                <a href="#section1" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">1. Overview</a>
+                <a href="#section2" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">2. Missing Data</a>
+                <a href="#section3" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">3. Categorical Data</a>
+                <a href="#section4" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">4. Feature Scaling</a>
+                <a href="#section5" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">5. Engineering</a>
+                <a href="#section6" class="px-2.5 py-1 rounded-lg hover:text-[#205A70] hover:bg-slate-100 transition-colors">6. Imbalance</a>
+            </div>
+            <div class="hidden sm:flex items-center gap-2 shrink-0 text-xs">
+                <a href="intro.html" class="inline-flex items-center gap-1 font-semibold text-slate-500 hover:text-slate-800 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition-colors">
+                    ← Prev: Intro
+                </a>
+                <a href="clinical-preprocessing-lab.html" class="inline-flex items-center gap-1 font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 px-2.5 py-1.5 rounded-lg transition-colors border border-amber-200">
+                    <span>Lab 🧪</span>
+                </a>
+                <a href="python.html" class="inline-flex items-center gap-1 font-semibold text-[#205A70] bg-[#205A70]/10 hover:bg-[#205A70]/20 px-3 py-1.5 rounded-lg transition-colors">
+                    Next: Python →
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero / Header Section -->
+    <section class="relative bg-gradient-to-b from-white via-[#F8FAFC] to-[#F1F5F9] border-b border-slate-200/60 bg-grid-pattern py-12 sm:py-16">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl">
+                <!-- Breadcrumb badge -->
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-[#205A70]/10 text-[#205A70] border border-[#205A70]/20 mb-4">
+                    <a href="index.html" class="hover:underline">Home</a>
+                    <span class="text-slate-400">/</span>
+                    <span class="font-semibold">Module 02</span>
+                </div>
+
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#0B2D48] mb-4">
+                    Clinical Data Preprocessing <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#205A70] via-[#357a94] to-[#56A0A9]">in Healthcare Informatics</span>
+                </h1>
+
+                <p class="text-base sm:text-lg text-slate-600 leading-relaxed font-normal mb-6">
+                    A comprehensive, intuition-first masterclass on taming real-world Electronic Health Record (EHR) data. Learn how informaticians impute omitted lab panels, preserve ordinal cancer stages, normalize disparate physiological scales, and balance rare disease cohorts—with four live bedside simulators.
+                </p>
+
+                <!-- Value Proposition Badges -->
+                <div class="flex flex-wrap items-center gap-2.5 text-xs">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200/80 shadow-xs font-medium text-slate-700">
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                        EHR Missingness &amp; Informed Absence
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200/80 shadow-xs font-medium text-slate-700">
+                        <span class="w-2 h-2 rounded-full bg-teal-500"></span>
+                        4 Interactive Preprocessing Simulators
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200/80 shadow-xs font-medium text-slate-700">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        Z-Score vs. Robust Scaling
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200/80 shadow-xs font-medium text-slate-700">
+                        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                        SMOTE &amp; The Accuracy Paradox
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Container -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-16">
+
+        <!-- ========================================================= -->
+        <!-- SECTION 1: OVERVIEW OF DATA PREPROCESSING                 -->
+        <!-- ========================================================= -->
+        <section id="section1" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200">Section 01</span>
+                <span class="text-xs font-medium text-slate-400">• Clinical Data Quality</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">1. What is Data Preprocessing in Healthcare?</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                In textbook computer science courses, datasets arrive clean, balanced, and perfectly formatted. In real healthcare informatics, <strong>over 80% of modeling time is spent on data preprocessing</strong>. Real hospital records are notoriously heterogeneous—fraught with missing arterial blood draws, unit discrepancies (<code class="text-xs font-mono">mg/dL</code> vs. <code class="text-xs font-mono">mmol/L</code>), telemetric sensor disconnections, and physician documentation shortcuts.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="card-hover bg-white rounded-2xl border-l-4 border-l-[#F9A03F] border border-slate-200/90 shadow-sm p-6">
+                    <h4 class="text-base font-bold text-[#0B2D48] mb-2 flex items-center gap-2">
+                        <span>⚠️</span>
+                        <span>Garbage In, Fatal Out</span>
+                    </h4>
+                    <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                        In healthcare, bad training data doesn't just lower an accuracy metric—it misallocates intensive care beds, delays sepsis antibiotics, and perpetuates diagnostic biases.
+                    </p>
+                </div>
+
+                <div class="card-hover bg-white rounded-2xl border-l-4 border-l-[#56A0A9] border border-slate-200/90 shadow-sm p-6">
+                    <h4 class="text-base font-bold text-[#0B2D48] mb-2 flex items-center gap-2">
+                        <span>🔢</span>
+                        <span>Algorithms Speak Numbers</span>
+                    </h4>
+                    <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                        Mathematical estimators cannot multiply qualitative text strings like "Blood Type B" or "ICD-10 I21.0". Preprocessing systematically vectorizes qualitative EHR clinical charts.
+                    </p>
+                </div>
+
+                <div class="card-hover bg-white rounded-2xl border-l-4 border-l-[#205A70] border border-slate-200/90 shadow-sm p-6">
+                    <h4 class="text-base font-bold text-[#0B2D48] mb-2 flex items-center gap-2">
+                        <span>⚖️</span>
+                        <span>Equitable Metric Scales</span>
+                    </h4>
+                    <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                        Features measured on vast scales (Patient Age: 20–90) will mathematically overpower life-critical decimal biomarkers (Troponin: 0.01–0.40 ng/mL) unless standardized.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Translation Table -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 shadow-sm">
+                <h3 class="text-xl font-bold text-[#0B2D48] mb-2">The Clinical Data Pipeline: Raw EHR vs. Clean ML Features</h3>
+                <p class="text-slate-600 text-xs sm:text-sm mb-6">
+                    How raw, messy hospital observations are systematically transformed into high-performance machine learning inputs:
+                </p>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs sm:text-sm border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-200 text-[#0B2D48] bg-slate-50/70">
+                                <th class="py-3 px-4 font-bold">Raw EHR Observation</th>
+                                <th class="py-3 px-4 font-bold text-rose-600">Clinical Data Flaw</th>
+                                <th class="py-3 px-4 font-bold text-[#205A70]">Preprocessing Solution</th>
+                                <th class="py-3 px-4 font-bold text-emerald-700">Machine Learning Input</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-600">
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="py-3 px-4 font-mono font-semibold text-slate-800">Troponin I: [NaN]</td>
+                                <td class="py-3 px-4 text-rose-600 font-medium">Test not ordered (Informed Missingness)</td>
+                                <td class="py-3 px-4 text-[#205A70]">Median Imputation + Missingness Indicator</td>
+                                <td class="py-3 px-4 font-mono text-emerald-700">Trop = 0.02, Trop_Ordered = 0</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="py-3 px-4 font-mono font-semibold text-slate-800">Blood Type: "O Positive"</td>
+                                <td class="py-3 px-4 text-rose-600 font-medium">Nominal text string without ranking</td>
+                                <td class="py-3 px-4 text-[#205A70]">OneHotEncoder (Dummy binary columns)</td>
+                                <td class="py-3 px-4 font-mono text-emerald-700">[is_A=0, is_B=0, is_O=1]</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="py-3 px-4 font-mono font-semibold text-slate-800">Tumor Stage: "Stage III"</td>
+                                <td class="py-3 px-4 text-rose-600 font-medium">Categorical text with intrinsic severity order</td>
+                                <td class="py-3 px-4 text-[#205A70]">OrdinalEncoder ([I, II, III, IV] → [1, 2, 3, 4])</td>
+                                <td class="py-3 px-4 font-mono text-emerald-700">Stage_Numeric = 3.0</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="py-3 px-4 font-mono font-semibold text-slate-800">Age: 78y, Trop: 0.12 ng/mL</td>
+                                <td class="py-3 px-4 text-rose-600 font-medium">Disparate scales (Range 70 vs. Range 0.4)</td>
+                                <td class="py-3 px-4 text-[#205A70]">StandardScaler (Z-Score Standardization)</td>
+                                <td class="py-3 px-4 font-mono text-emerald-700">Age_z = +1.24, Trop_z = +1.18</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="py-3 px-4 font-mono font-semibold text-slate-800">Rare Sepsis (2% Prevalence)</td>
+                                <td class="py-3 px-4 text-rose-600 font-medium">Severe class asymmetry (Accuracy Paradox)</td>
+                                <td class="py-3 px-4 text-[#205A70]">SMOTE Resampling or Cost-Sensitive Loss</td>
+                                <td class="py-3 px-4 font-mono text-emerald-700">Balanced loss penalty (50x for FN)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 2: HANDLING MISSING CLINICAL DATA (IMPUTATION)   -->
+        <!-- ========================================================= -->
+        <section id="section2" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">Section 02</span>
+                <span class="text-xs font-medium text-slate-400">• Clinical Imputation</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">2. Handling Missing Clinical Data (Imputation)</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                In non-medical data science, missing values are treated as accidental defects to be discarded. In clinical healthcare, <strong>the act of ordering or omitting a lab test is an informative clinical decision</strong>. Healthy patients have few lab orders; severely ill ICU patients receive frequent blood gas analysis and lactate monitoring.
+            </p>
+
+            <!-- Three Mechanisms of Missingness -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-slate-100 text-slate-700">Mechanism 01</span>
+                        <h4 class="font-bold text-[#0B2D48] text-base mt-2 mb-1">MCAR: Missing Completely at Random</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Missingness has zero correlation with patient state. Example: A blood tube was accidentally dropped on the lab floor, or a Wi-Fi telemetry packet dropped.
+                        </p>
+                    </div>
+                    <span class="mt-3 text-[11px] font-semibold text-emerald-700">Safe for standard mean/median imputation.</span>
+                </div>
+
+                <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-blue-700">Mechanism 02</span>
+                        <h4 class="font-bold text-[#0B2D48] text-base mt-2 mb-1">MAR: Missing at Random</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Missingness is predictable from other observed patient variables. Example: Troponin wasn't ordered because the patient presented for an elective knee replacement and has normal ECG vitals.
+                        </p>
+                    </div>
+                    <span class="mt-3 text-[11px] font-semibold text-[#205A70]">Requires multivariate imputation (KNN/MICE).</span>
+                </div>
+
+                <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-rose-50 text-rose-700">Mechanism 03</span>
+                        <h4 class="font-bold text-[#0B2D48] text-base mt-2 mb-1">MNAR: Informed Missingness</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            The value itself causes the missingness. Example: A combative, acutely hypoxic patient was too agitated for a successful arterial blood draw.
+                        </p>
+                    </div>
+                    <span class="mt-3 text-[11px] font-semibold text-rose-700">Requires a binary Missingness Indicator column!</span>
+                </div>
+            </div>
+
+            <!-- Imputation Techniques Overview -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                <!-- Simple Imputation -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Univariate: Median vs. Mean</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-100 text-slate-600">Fast &amp; Robust</span>
+                        </div>
+                        <p class="text-slate-600 text-xs sm:text-sm mb-3">
+                            In healthcare, <strong>always prefer Median over Mean</strong>. Clinical biomarkers (D-dimer, serum creatinine, troponin) exhibit severe positive skew with extreme outliers from dialysis or sepsis patients that distort the mathematical mean.
+                        </p>
+                        <div class="code-snippet"><pre><code><span class="code-keyword">from</span> sklearn.impute <span class="code-keyword">import</span> SimpleImputer
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+<span class="code-comment"># Median preserves realistic biomarker baselines against outliers</span>
+imputer = SimpleImputer(strategy=<span class="code-string">'median'</span>, add_indicator=<span class="code-function">True</span>)
+X_clean = imputer.fit_transform(X_vitals)</code></pre></div>
+                    </div>
+                </div>
+
+                <!-- KNN Imputation -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Multivariate: KNNImputer &amp; MICE</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-blue-50 text-blue-700">Physiology-Aware</span>
+                        </div>
+                        <p class="text-slate-600 text-xs sm:text-sm mb-3">
+                            Instead of filling the same constant for every patient, KNNImputer finds the 5 patients with the closest matching age, blood pressure, and renal profile, and averages their values.
+                        </p>
+                        <div class="code-snippet"><pre><code><span class="code-keyword">from</span> sklearn.impute <span class="code-keyword">import</span> KNNImputer
+<span class="code-keyword">from</span> sklearn.preprocessing <span class="code-keyword">import</span> StandardScaler
+
+<span class="code-comment"># Must scale before KNN distance calculation!</span>
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+imputer = KNNImputer(n_neighbors=5, weights=<span class="code-string">'distance'</span>)
+X_imputed = imputer.fit_transform(X_scaled)</code></pre></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================================= -->
+            <!-- INTERACTIVE DEMO 1: CLINICAL IMPUTATION SIMULATOR         -->
+            <!-- ========================================================= -->
+            <div class="bg-gradient-to-br from-slate-900 via-[#0B2D48] to-[#205A70] rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-12">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#F9A03F] text-slate-900 mb-1">
+                            Interactive Bedside Demonstration 01
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                            EHR Missing Data &amp; Imputation Diagnostic Simulator
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            Patient #03 is missing Serum Creatinine. Select an imputation technique to see how it reshapes the clinical cohort and alters mortality risk.
+                        </p>
+                    </div>
+                    <!-- Imputation Selector Buttons -->
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                        <button id="btn-imp-drop" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white/20 hover:bg-white/30 text-white transition-colors">
+                            ❌ Listwise Deletion (Drop)
+                        </button>
+                        <button id="btn-imp-mean" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white/20 hover:bg-white/30 text-white transition-colors">
+                            📊 Mean (With Outlier)
+                        </button>
+                        <button id="btn-imp-median" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-sm transition-colors">
+                            ⚖️ Median (Robust)
+                        </button>
+                        <button id="btn-imp-knn" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white/20 hover:bg-white/30 text-white transition-colors">
+                            👥 KNN Similarity
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    <!-- Table Display -->
+                    <div class="lg:col-span-7 bg-white rounded-xl p-5 text-slate-800 shadow-md">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider text-[#205A70]">Active Clinical Cohort (Bedside Monitor)</span>
+                            <span id="imp-cohort-size" class="text-xs font-semibold text-slate-500">Cohort Size: 5 Patients</span>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200 text-slate-500 bg-slate-50">
+                                        <th class="py-2.5 px-3 font-bold">Patient</th>
+                                        <th class="py-2.5 px-3 font-bold">Age</th>
+                                        <th class="py-2.5 px-3 font-bold">Heart Rate</th>
+                                        <th class="py-2.5 px-3 font-bold">Serum Creatinine</th>
+                                        <th class="py-2.5 px-3 font-bold">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="imp-table-body" class="divide-y divide-slate-100 text-slate-700">
+                                    <!-- Populated via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Clinical Impact Feedback -->
+                    <div class="lg:col-span-5 bg-white/10 p-5 rounded-xl backdrop-blur-md border border-white/15 space-y-4">
+                        <div class="text-xs font-bold uppercase tracking-wider text-[#56A0A9]">Informatics Impact Analysis</div>
+
+                        <div class="p-3.5 rounded-xl bg-black/20 border border-white/10 text-xs space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-300">Cohort Mean Creatinine:</span>
+                                <span id="imp-stat-mean" class="font-bold text-amber-300 text-sm">2.42 mg/dL</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-300">Sample Retention Rate:</span>
+                                <span id="imp-stat-retention" class="font-bold text-emerald-400 text-sm">100%</span>
+                            </div>
+                        </div>
+
+                        <div id="imp-feedback-card" class="p-4 rounded-xl bg-teal-500/20 border border-teal-400/30 text-xs text-slate-200 leading-relaxed">
+                            <strong>Median Imputation Selected:</strong> Filled Patient #03 with <strong>1.10 mg/dL</strong> (the median of non-missing values). This protects the cohort from Patient #05's massive dialysis outlier (7.2 mg/dL) while retaining 100% of patients for modeling.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 3: CATEGORICAL DATA ENCODING                      -->
+        <!-- ========================================================= -->
+        <section id="section3" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-violet-50 text-violet-700 border border-violet-200">Section 03</span>
+                <span class="text-xs font-medium text-slate-400">• Qualitative Variables</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">3. Encoding Categorical Clinical Data</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                Electronic Medical Records abound with qualitative categories: biological sex, ABO blood type, cancer staging, triage acuity, and primary diagnosis descriptions. To process these, we must strictly differentiate between <strong>Ordinal</strong> and <strong>Nominal</strong> variables.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                <!-- Ordinal -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Ordinal Variables: <code>OrdinalEncoder</code></h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-blue-50 text-blue-700">Rank Preserving</span>
+                        </div>
+                        <p class="text-slate-600 text-xs sm:text-sm mb-3">
+                            Variables with a natural clinical progression: Cancer Stage (Stage I &lt; Stage II &lt; Stage III &lt; Stage IV), Pain (Mild &lt; Moderate &lt; Severe), or NYHA Heart Failure classes.
+                        </p>
+                        <div class="code-snippet"><pre><code><span class="code-keyword">from</span> sklearn.preprocessing <span class="code-keyword">import</span> OrdinalEncoder
+
+<span class="code-comment"># Explicitly define clinical progression</span>
+categories = [[<span class="code-string">'Stage I'</span>, <span class="code-string">'Stage II'</span>, <span class="code-string">'Stage III'</span>, <span class="code-string">'Stage IV'</span>]]
+encoder = OrdinalEncoder(categories=categories)
+X_ordinal = encoder.fit_transform(cancer_stages)</code></pre></div>
+                    </div>
+                </div>
+
+                <!-- One-Hot -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-[#0B2D48]">Nominal Variables: <code>OneHotEncoder</code></h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700">Binary Dummy Columns</span>
+                        </div>
+                        <p class="text-slate-600 text-xs sm:text-sm mb-3">
+                            Variables with zero intrinsic ranking: Blood Type (A, B, AB, O), Hospital Ward (ICU, ER, Stepdown). Creates individual binary columns to avoid false arithmetic hierarchy.
+                        </p>
+                        <div class="code-snippet"><pre><code><span class="code-keyword">from</span> sklearn.preprocessing <span class="code-keyword">import</span> OneHotEncoder
+
+<span class="code-comment"># drop='first' prevents collinearity in linear models</span>
+encoder = OneHotEncoder(sparse_output=<span class="code-function">False</span>, drop=<span class="code-string">'first'</span>)
+X_nominal = encoder.fit_transform(blood_types)</code></pre></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warning Callout Box -->
+            <div class="bg-rose-50 border-2 border-rose-300 rounded-2xl p-6 sm:p-8 shadow-sm mb-8 flex items-start gap-4">
+                <span class="text-3xl shrink-0">⚠️</span>
+                <div>
+                    <h4 class="font-bold text-rose-950 text-lg mb-1">The Fatal Healthcare Pitfall: LabelEncoder on Clinical Features</h4>
+                    <p class="text-rose-900 text-xs sm:text-sm leading-relaxed">
+                        Never use <code class="font-mono bg-rose-200 text-rose-950 px-1 py-0.5 rounded font-bold">LabelEncoder</code> on feature inputs! If you encode Blood Types [A, B, AB, O] as [0, 1, 2, 3], you falsely instruct your machine learning algorithm that Type O is mathematically <em>"three times larger"</em> than Type B! <code class="font-mono">LabelEncoder</code> is strictly intended for the 1-D target array <code class="font-mono">y</code>.
+                    </p>
+                </div>
+            </div>
+
+            <!-- ========================================================= -->
+            <!-- INTERACTIVE DEMO 2: CATEGORICAL ENCODING WORKBENCH        -->
+            <!-- ========================================================= -->
+            <div class="bg-gradient-to-br from-slate-900 via-[#0B2D48] to-[#205A70] rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-12">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#F9A03F] text-slate-900 mb-1">
+                            Interactive Bedside Demonstration 02
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                            Categorical Feature Encoding Diagnostic Workbench
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            Select patient categories to observe how different mathematical encoders convert qualitative EHR terms into model matrices.
+                        </p>
+                    </div>
+                    <!-- Encoding Switcher -->
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                        <button id="btn-enc-onehot" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-sm transition-colors">
+                            ✓ OneHotEncoder (Correct Nominal)
+                        </button>
+                        <button id="btn-enc-ordinal" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white/20 hover:bg-white/30 text-white transition-colors">
+                            ✓ OrdinalEncoder (Correct Ordered)
+                        </button>
+                        <button id="btn-enc-flawed" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-600/80 hover:bg-rose-600 text-white transition-colors border border-rose-400">
+                            ✕ Flawed LabelEncoder
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    <!-- Selection Controls -->
+                    <div class="lg:col-span-5 space-y-4 bg-white/10 p-5 rounded-xl backdrop-blur-md border border-white/15">
+                        <div class="text-xs font-bold uppercase tracking-wider text-[#56A0A9]">Patient Electronic Record Input</div>
+
+                        <div>
+                            <span class="text-xs font-semibold text-slate-200 block mb-1">Patient Blood Type (Nominal):</span>
+                            <select id="enc-select-blood" class="w-full p-2.5 rounded-lg bg-slate-800 text-white border border-slate-600 text-xs font-medium">
+                                <option value="A">Type A</option>
+                                <option value="B">Type B</option>
+                                <option value="AB">Type AB</option>
+                                <option value="O" selected>Type O</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <span class="text-xs font-semibold text-slate-200 block mb-1">Cancer Staging Acuity (Ordinal):</span>
+                            <select id="enc-select-stage" class="w-full p-2.5 rounded-lg bg-slate-800 text-white border border-slate-600 text-xs font-medium">
+                                <option value="Stage I">Stage I (Localized)</option>
+                                <option value="Stage II">Stage II (Early Advanced)</option>
+                                <option value="Stage III" selected>Stage III (Regional Lymph)</option>
+                                <option value="Stage IV">Stage IV (Distant Metastasis)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Output Matrix Display -->
+                    <div class="lg:col-span-7 bg-white rounded-xl p-5 text-slate-800 shadow-md flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-bold uppercase tracking-wider text-[#205A70]">Mathematical Vector Output</span>
+                                <span id="enc-mode-badge" class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">OneHot Encoding</span>
+                            </div>
+
+                            <div id="enc-matrix-display" class="p-4 rounded-xl bg-slate-900 font-mono text-xs text-emerald-400 space-y-1.5 overflow-x-auto">
+                                <!-- Populated via JS -->
+                            </div>
+                        </div>
+
+                        <div id="enc-explanation-box" class="mt-4 pt-3 border-t border-slate-200 text-xs text-slate-600 leading-relaxed">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 4: FEATURE SCALING                                -->
+        <!-- ========================================================= -->
+        <section id="section4" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-teal-50 text-teal-700 border border-teal-200">Section 04</span>
+                <span class="text-xs font-medium text-slate-400">• Normalization &amp; Standardization</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">4. Feature Scaling (StandardScaler vs. MinMaxScaler vs. RobustScaler)</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                In hospital databases, patient variables exist on radically different physical scales: <strong>Patient Age</strong> ranges from 20 to 90 years, <strong>Systolic Blood Pressure</strong> ranges from 80 to 200 mmHg, while <strong>Cardiac Troponin I</strong> ranges from 0.01 to 0.40 ng/mL. Without scaling, mathematical distance formulas assume that a 1-year age gap is 100 times more significant than a lethal troponin spike!
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Before Scaling Chart -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-xl font-bold text-[#0B2D48]">Before Scaling (Skewed Variance)</h3>
+                        <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-amber-50 text-amber-700">Raw Units</span>
+                    </div>
+                    <p class="text-slate-500 text-xs sm:text-sm mb-4">Age (range 20–90) completely warps Euclidean distance over biomarker (0.5–2.0 ng/mL).</p>
+                    <div class="chart-container">
+                        <canvas id="scalingBeforeChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- After Scaling Chart -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-xl font-bold text-[#0B2D48]">After StandardScaler (Z-Score)</h3>
+                        <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700">μ = 0, σ = 1</span>
+                    </div>
+                    <p class="text-slate-500 text-xs sm:text-sm mb-4">Both axes scaled symmetrically, ensuring equitable gradient steps and distance metrics.</p>
+                    <div class="chart-container">
+                        <canvas id="scalingAfterChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scaler Comparison Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm">
+                    <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700">StandardScaler</span>
+                    <h4 class="font-bold text-[#0B2D48] text-base mt-2 mb-1">Z-Score Normalization</h4>
+                    <p class="font-mono text-xs text-[#205A70] mb-2">$$z = \frac{x - \mu}{\sigma}$$</p>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Centers data so Mean = 0 and Variance = 1. Best for bell-shaped, Gaussian vitals (Blood Pressure, Heart Rate).
+                    </p>
+                </div>
+
+                <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm">
+                    <span class="text-xs font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700">MinMaxScaler</span>
+                    <h4 class="font-bold text-[#0B2D48] text-base mt-2 mb-1">Bound to [0.0, 1.0]</h4>
+                    <p class="font-mono text-xs text-amber-700 mb-2">$$x_{\text{scaled}} = \frac{x - x_{\min}}{x_{\max} - x_{\min}}$$</p>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Compacts variables into fixed boundaries. Excellent for image pixel intensities (0 to 255), but vulnerable to hospital outliers.
+                    </p>
+                </div>
+
+                <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm">
+                    <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700">RobustScaler</span>
+                    <h4 class="font-bold text-[#0B2D48] text-base mt-2 mb-1">Median &amp; IQR</h4>
+                    <p class="font-mono text-xs text-emerald-700 mb-2">$$x_{\text{scaled}} = \frac{x - \text{Median}}{Q_3 - Q_1}$$</p>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        <strong>Mandatory for noisy clinical monitors.</strong> Ignores telemetric spikes (e.g. Heart Rate = 250 bpm artifact).
+                    </p>
+                </div>
+            </div>
+
+            <!-- ========================================================= -->
+            <!-- INTERACTIVE DEMO 3: DISTANCE DISTORTION SIMULATOR        -->
+            <!-- ========================================================= -->
+            <div class="bg-gradient-to-br from-slate-900 via-[#0B2D48] to-[#205A70] rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-12">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#F9A03F] text-slate-900 mb-1">
+                            Interactive Bedside Demonstration 03
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                            Feature Scaling &amp; Distance Distortion Simulator
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            Compare two patients with identical age differences but divergent cardiac troponin levels under Raw vs. Scaled distance formulas.
+                        </p>
+                    </div>
+                    <!-- Scaler Toggle -->
+                    <div class="flex items-center gap-2">
+                        <button id="btn-scale-raw" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white/20 hover:bg-white/30 text-white transition-colors">
+                            Raw Euclidean Distance
+                        </button>
+                        <button id="btn-scale-standard" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-sm transition-colors">
+                            StandardScaler (Z-Score)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    <!-- Sliders -->
+                    <div class="lg:col-span-6 space-y-4 bg-white/10 p-5 rounded-xl backdrop-blur-md border border-white/15">
+                        <div class="text-xs font-bold uppercase tracking-wider text-[#56A0A9]">Patient A vs. Patient B Profiles</div>
+
+                        <div>
+                            <div class="flex justify-between items-center text-xs font-medium mb-1">
+                                <span class="text-slate-200">Age Gap (|Age_A - Age_B|):</span>
+                                <span id="dist-age-val" class="font-bold text-amber-300 bg-black/30 px-2 py-0.5 rounded">15 Years</span>
+                            </div>
+                            <input id="dist-age" type="range" min="0" max="40" value="15" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center text-xs font-medium mb-1">
+                                <span class="text-slate-200">Troponin I Gap (|Trop_A - Trop_B|):</span>
+                                <span id="dist-trop-val" class="font-bold text-amber-300 bg-black/30 px-2 py-0.5 rounded">0.45 ng/mL</span>
+                            </div>
+                            <input id="dist-trop" type="range" min="0.01" max="1.50" step="0.02" value="0.45" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                                <span>0.01 ng/mL</span>
+                                <span class="text-amber-200">Lethal Injury: &gt;0.40</span>
+                                <span>1.50 ng/mL</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Distance Calculation Result -->
+                    <div class="lg:col-span-6 bg-white rounded-xl p-5 text-slate-800 shadow-md flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-[#205A70]">Calculated Similarity Distance</span>
+                            
+                            <div class="text-center my-4">
+                                <div class="text-xs text-slate-500 font-semibold mb-1">Total Mathematical Distance:</div>
+                                <div id="dist-total-display" class="text-3xl font-extrabold text-[#0B2D48]">15.01</div>
+                            </div>
+
+                            <div class="space-y-2 text-xs">
+                                <div>
+                                    <div class="flex justify-between text-slate-600 mb-1">
+                                        <span>Contribution from Age:</span>
+                                        <span id="dist-age-contrib" class="font-bold text-[#0B2D48]">99.9%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                        <div id="dist-age-bar" class="bg-[#205A70] h-full" style="width: 99.9%;"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-slate-600 mb-1">
+                                        <span>Contribution from Troponin:</span>
+                                        <span id="dist-trop-contrib" class="font-bold text-[#F9A03F]">0.1%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                        <div id="dist-trop-bar" class="bg-[#F9A03F] h-full" style="width: 0.1%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="dist-insight-text" class="mt-4 pt-3 border-t border-slate-200 text-[11px] text-slate-600 leading-relaxed">
+                            ⚠️ <strong>Distortion Alert:</strong> In unscaled Euclidean space, the 15-year age gap completely drowns out the life-threatening troponin surge! Standardizing with StandardScaler restores equal geometric balance.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 5: CLINICAL FEATURE ENGINEERING                   -->
+        <!-- ========================================================= -->
+        <section id="section5" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">Section 05</span>
+                <span class="text-xs font-medium text-slate-400">• Medical Representation</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">5. Clinical Feature Engineering</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                Algorithms have no innate medical degree. Feeding raw numbers into a model is rarely enough; health informaticians engineer <strong>composite physiological biomarkers</strong> and <strong>temporal clinical context</strong> that capture clinical disease progression.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Shock Index -->
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 card-hover">
+                    <span class="text-2xl mb-2 block">🫀</span>
+                    <h4 class="font-bold text-[#0B2D48] text-base mb-1">Physiologic Shock Index (SI)</h4>
+                    <p class="font-mono text-xs text-[#205A70] my-2">$$\text{SI} = \frac{\text{Heart Rate (bpm)}}{\text{Systolic BP (mmHg)}}$$</p>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        A patient with HR 110 and SBP 95 has an SI of 1.16 (&gt; 0.9 = Occult Shock). While both vitals individually seem borderline, their ratio signals life-threatening cardiovascular decompensation.
+                    </p>
+                </div>
+
+                <!-- Weekend Effect -->
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 card-hover">
+                    <span class="text-2xl mb-2 block">📅</span>
+                    <h4 class="font-bold text-[#0B2D48] text-base mb-1">Temporal &amp; Shift Factors</h4>
+                    <p class="font-mono text-xs text-purple-700 my-2">is_weekend = admission_day &gt;= 5</p>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Captures the well-documented clinical "Weekend Effect" and night-shift staffing variations in intensive care units, accounting for operational delays in radiology and cardiac catheterization.
+                    </p>
+                </div>
+
+                <!-- Interaction Synergy -->
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 card-hover">
+                    <span class="text-2xl mb-2 block">🧬</span>
+                    <h4 class="font-bold text-[#0B2D48] text-base mb-1">Multi-Organ Interaction Terms</h4>
+                    <p class="font-mono text-xs text-teal-700 my-2">Interaction = SBP * Creatinine</p>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Captures systemic synergies (e.g., severe hypertension combined with failing renal clearance accelerates vascular end-organ damage exponentially rather than additively).
+                    </p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SECTION 6: HANDLING EXTREME CLASS IMBALANCE               -->
+        <!-- ========================================================= -->
+        <section id="section6" class="pt-12 -mt-12">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">Section 06</span>
+                <span class="text-xs font-medium text-slate-400">• Class Asymmetry</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B2D48] mb-3">6. Handling Extreme Class Imbalance (SMOTE vs. Cost-Sensitive)</h2>
+            
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-4xl mb-6">
+                In clinical epidemiology, life-threatening events are inherently rare: Sepsis in the emergency department occurs in ~2% to 4% of patients; acute in-hospital cardiac arrest occurs in ~1% of admissions. This creates the dangerous <strong>Accuracy Paradox</strong>.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Imbalance Before Chart -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                    <h3 class="text-xl font-bold text-[#0B2D48] mb-2">Before Resampling (95% Negative)</h3>
+                    <p class="text-slate-500 text-xs sm:text-sm mb-4">Naive algorithms predict "Healthy" 100% of the time, achieving 95% accuracy while missing every patient.</p>
+                    <div class="chart-container" style="height: 280px;">
+                        <canvas id="imbalanceBeforeChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Imbalance After Chart -->
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                    <h3 class="text-xl font-bold text-[#0B2D48] mb-2">After SMOTE (Synthetic Balance)</h3>
+                    <p class="text-slate-500 text-xs sm:text-sm mb-4">Synthetic Minority Over-sampling Technique interpolates synthetic patient feature vectors.</p>
+                    <div class="chart-container" style="height: 280px;">
+                        <canvas id="imbalanceAfterChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resampling vs Cost-Sensitive -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                    <h3 class="text-xl font-bold text-[#0B2D48] mb-2">Method 1: SMOTE (Oversampling)</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mb-3">
+                        <strong class="text-rose-700">The Golden Rule:</strong> Never resample the validation or test set! Only resample <code class="text-xs font-mono">X_train</code>. The test set must preserve true clinical epidemiological prevalence.
+                    </p>
+                    <div class="code-snippet"><pre><code><span class="code-keyword">from</span> imblearn.over_sampling <span class="code-keyword">import</span> SMOTE
+<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y)
+
+<span class="code-comment"># Only resample TRAINING cohort</span>
+smote = SMOTE(random_state=42)
+X_train_res, y_train_res = smote.fit_resample(X_train, y_train)</code></pre></div>
+                </div>
+
+                <div class="card-hover bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+                    <h3 class="text-xl font-bold text-[#0B2D48] mb-2">Method 2: Cost-Sensitive Weights</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mb-3">
+                        Penalizes false negatives 50x more heavily inside the algorithm's loss function without generating artificial synthetic data points.
+                    </p>
+                    <div class="code-snippet"><pre><code><span class="code-keyword">from</span> sklearn.ensemble <span class="code-keyword">import</span> RandomForestClassifier
+
+<span class="code-comment"># Balances weights inversely to clinical class frequencies</span>
+model = RandomForestClassifier(class_weight=<span class="code-string">'balanced'</span>, random_state=42)
+model.fit(X_train, y_train)</code></pre></div>
+                </div>
+            </div>
+
+            <!-- ========================================================= -->
+            <!-- INTERACTIVE DEMO 4: ACCURACY PARADOX SIMULATOR            -->
+            <!-- ========================================================= -->
+            <div class="bg-gradient-to-br from-slate-900 via-[#0B2D48] to-[#205A70] rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-12">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#F9A03F] text-slate-900 mb-1">
+                            Interactive Bedside Demonstration 04
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                            The Clinical Accuracy Paradox &amp; SMOTE Simulator
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            Slide disease prevalence to see how a naive model claims high accuracy while letting every single critical patient die.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    <!-- Prevalence Slider -->
+                    <div class="lg:col-span-5 space-y-4 bg-white/10 p-5 rounded-xl backdrop-blur-md border border-white/15">
+                        <div class="text-xs font-bold uppercase tracking-wider text-[#56A0A9]">Hospital Cohort Sepsis Prevalence</div>
+
+                        <div>
+                            <div class="flex justify-between items-center text-xs font-medium mb-1">
+                                <span class="text-slate-200">Disease Prevalence:</span>
+                                <span id="prev-slider-val" class="font-bold text-amber-300 bg-black/30 px-2 py-0.5 rounded">2.0% (Rare)</span>
+                            </div>
+                            <input id="prev-slider" type="range" min="1" max="25" value="2" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                                <span>1% (Rare Sepsis)</span>
+                                <span>10%</span>
+                                <span>25% (Common Condition)</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-black/20 rounded-lg text-[11px] text-slate-300">
+                            Total Hospital Cohort: <strong>1,000 Admitted Patients</strong><br>
+                            True Diseased Patients: <strong id="prev-sick-count" class="text-rose-400">20 Patients</strong><br>
+                            True Healthy Patients: <strong id="prev-healthy-count" class="text-emerald-400">980 Patients</strong>
+                        </div>
+                    </div>
+
+                    <!-- Comparison Results -->
+                    <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        
+                        <!-- Naive Model Card -->
+                        <div class="bg-white rounded-xl p-5 text-slate-800 shadow-md flex flex-col justify-between border-2 border-rose-300">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-bold uppercase tracking-wider text-rose-700">Naive Model (Predicts All Healthy)</span>
+                                </div>
+                                <div class="text-center my-3">
+                                    <div class="text-[10px] text-slate-500 font-bold uppercase">Reported Accuracy:</div>
+                                    <div id="naive-acc-display" class="text-3xl font-extrabold text-emerald-600">98.0%</div>
+                                </div>
+                                <div class="space-y-1.5 text-xs">
+                                    <div class="flex justify-between p-1.5 rounded bg-rose-50 text-rose-900 font-semibold">
+                                        <span>Clinical Sensitivity:</span>
+                                        <span>0.0% (Zero Detected!)</span>
+                                    </div>
+                                    <div class="flex justify-between p-1.5 rounded bg-slate-50 text-slate-700">
+                                        <span>Missed Sepsis Cases:</span>
+                                        <span id="naive-missed-count" class="font-bold text-rose-600">20 Deaths</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3 pt-2 border-t border-slate-100 text-[10px] text-slate-500">
+                                ❌ Useless in clinical practice despite high accuracy!
+                            </div>
+                        </div>
+
+                        <!-- Balanced SMOTE Model Card -->
+                        <div class="bg-white rounded-xl p-5 text-slate-800 shadow-md flex flex-col justify-between border-2 border-emerald-500">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">SMOTE / Balanced Model</span>
+                                </div>
+                                <div class="text-center my-3">
+                                    <div class="text-[10px] text-slate-500 font-bold uppercase">Reported Accuracy:</div>
+                                    <div id="smote-acc-display" class="text-3xl font-extrabold text-[#0B2D48]">91.5%</div>
+                                </div>
+                                <div class="space-y-1.5 text-xs">
+                                    <div class="flex justify-between p-1.5 rounded bg-emerald-50 text-emerald-900 font-semibold">
+                                        <span>Clinical Sensitivity:</span>
+                                        <span>95.0% (High Recall)</span>
+                                    </div>
+                                    <div class="flex justify-between p-1.5 rounded bg-slate-50 text-slate-700">
+                                        <span>Missed Sepsis Cases:</span>
+                                        <span id="smote-missed-count" class="font-bold text-emerald-600">1 Case</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3 pt-2 border-t border-slate-100 text-[10px] text-emerald-700 font-semibold">
+                                ✓ Clinically life-saving: catches 95% of deteriorating patients.
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Lab Callout Banner -->
+        <div class="bg-gradient-to-r from-amber-500 via-[#F9A03F] to-[#205A70] rounded-2xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 my-8">
+            <div class="text-center sm:text-left">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/20 text-white mb-2">
+                    <span>🧪</span>
+                    <span>Hands-on Interactive Lab</span>
+                </div>
+                <h4 class="text-2xl font-extrabold">Explore Real-World EHR Preprocessing</h4>
+                <p class="text-sm text-amber-50 mt-1 max-w-lg">
+                    Test the live interactive Outlier Scaling Simulator, inspect right-skewed lab distributions (Log/Box-Cox), and analyze dynamic Shock Index vitals.
+                </p>
+            </div>
+            <div class="flex items-center gap-3 shrink-0">
+                <a href="clinical-preprocessing-lab.html" class="px-5 py-3 rounded-xl bg-white text-slate-900 text-sm font-bold shadow-md hover:bg-slate-100 transition-colors flex items-center gap-2">
+                    <span>Launch Preprocessing Lab</span>
+                    <span>🧪 →</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Course Module Navigation Bottom Card -->
+        <div class="bg-gradient-to-r from-[#0B2D48] to-[#205A70] rounded-2xl p-6 sm:p-8 text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div class="text-center sm:text-left">
+                <div class="text-xs font-semibold text-[#56A0A9] uppercase tracking-wider mb-1">Learning Journey</div>
+                <h4 class="text-xl font-bold">Finished Module 02: Data Preprocessing</h4>
+                <p class="text-sm text-slate-300 mt-1">Ready to master Python libraries (NumPy, Pandas, Scikit-Learn)?</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="intro.html" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition-colors border border-white/20">
+                    ← Prev: Module 01
+                </a>
+                <a href="python.html" class="px-5 py-2.5 rounded-xl bg-[#F9A03F] hover:bg-[#f89528] text-slate-900 text-sm font-bold shadow-md transition-colors flex items-center gap-2">
+                    <span>Module 03: Python</span>
+                    <span>→</span>
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200/80 py-10 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="flex items-center justify-center gap-2 mb-3">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#56A0A9]"></span>
+                <span class="font-bold text-[#0B2D48] tracking-tight">ML Notes for Healthcare</span>
+            </div>
+            <p class="text-slate-500 text-sm max-w-lg mx-auto mb-2">
+                Department of Bio-Medical Sciences, The Apollo University, Chittoor.
+            </p>
+            <div class="text-xs text-slate-400">
+                Designed for healthcare professionals, students, and machine learning researchers.
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Chart.js & Interactive Preprocessing Simulators Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // KaTeX Auto-Render Initializer
+            if (typeof renderMathInElement === 'function') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
+            }
+
+            const colorPrimary = '#205A70';
+            const colorSecondary = '#56A0A9';
+            const colorAccent = '#F9A03F';
+            const colorLight = '#C2C2C2';
+            const colorRiskHigh = '#F9A03F';
+            const colorRiskLow = '#205A70';
+
+            const tooltipTitleCallback = (tooltipItems) => {
+                if (!tooltipItems || !tooltipItems.length) return '';
+                const item = tooltipItems[0];
+                const labels = item.chart?.data?.labels;
+                if (labels && labels[item.dataIndex] !== undefined) {
+                    const label = labels[item.dataIndex];
+                    return Array.isArray(label) ? label.join(' ') : label;
+                }
+                return item.dataset?.label || '';
+            };
+
+            const tooltipLabelCallback = (context) => {
+                const raw = context.raw;
+                if (raw && typeof raw === 'object' && 'x' in raw && 'y' in raw) {
+                    return ` (${raw.x}, ${raw.y})`;
+                }
+                return ` ${context.dataset.label || ''}: ${context.formattedValue}`;
+            };
+            
+            const defaultChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { font: { family: 'Inter', size: 12 }, color: '#0B2D48', boxWidth: 12, padding: 12 }
+                    },
+                    tooltip: {
+                        callbacks: { title: tooltipTitleCallback, label: tooltipLabelCallback }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: '#64748B', font: { family: 'Inter' } } },
+                    y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748B', font: { family: 'Inter' } } }
+                }
+            };
+
+            const unscaledData = [
+                {x: 25, y: 1.2}, {x: 45, y: 0.8}, {x: 65, y: 1.5}, {x: 85, y: 0.9},
+                {x: 30, y: 1.1}, {x: 50, y: 1.0}, {x: 70, y: 1.3}, {x: 60, y: 0.7}
+            ];
+
+            const scaledData = [
+                {x: -1.25, y: 0.45}, {x: -0.25, y: -1.14}, {x: 0.75, y: 1.25}, {x: 1.75, y: -0.74},
+                {x: -1.0, y: 0.05}, {x: 0.0, y: -0.34}, {x: 1.0, y: 0.85}, {x: 0.5, y: -1.54}
+            ];
+            
+            // 1. Before Scaling Chart
+            if (document.getElementById('scalingBeforeChart')) {
+                const ctx = document.getElementById('scalingBeforeChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            label: 'Unscaled Cohort Samples',
+                            data: unscaledData,
+                            backgroundColor: colorSecondary,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            x: { title: { display: true, text: 'Patient Age (Range 20–90 Years)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { display: false } },
+                            y: { title: { display: true, text: 'Lab Marker (Range 0.5–2.0 ng/mL)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { color: '#f1f5f9' } }
+                        }
+                    }
+                });
+            }
+
+            // 2. After Scaling Chart
+            if (document.getElementById('scalingAfterChart')) {
+                const ctx = document.getElementById('scalingAfterChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            label: 'StandardScaled Patient Data',
+                            data: scaledData,
+                            backgroundColor: colorPrimary,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            x: { title: { display: true, text: 'Z-Score Age (Mean=0, Std=1)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { display: false } },
+                            y: { title: { display: true, text: 'Z-Score Lab Marker (Mean=0, Std=1)', color: '#0B2D48', font: { family: 'Inter', weight: 600 } }, grid: { color: '#f1f5f9' } }
+                        }
+                    }
+                });
+            }
+
+            // 3. Imbalance Before Chart
+            if (document.getElementById('imbalanceBeforeChart')) {
+                const ctx = document.getElementById('imbalanceBeforeChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Negative (Normal, 95%)', 'Positive (Rare Disease, 5%)'],
+                        datasets: [{
+                            data: [950, 50],
+                            backgroundColor: [colorSecondary, colorAccent],
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 12 }, color: '#0B2D48' } },
+                            tooltip: { callbacks: { title: tooltipTitleCallback } }
+                        }
+                    }
+                });
+            }
+
+            // 4. Imbalance After Chart
+            if (document.getElementById('imbalanceAfterChart')) {
+                const ctx = document.getElementById('imbalanceAfterChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Negative (Normal, 50%)', 'Positive (SMOTE Synthetic, 50%)'],
+                        datasets: [{
+                            data: [950, 950],
+                            backgroundColor: [colorSecondary, colorAccent],
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 12 }, color: '#0B2D48' } },
+                            tooltip: { callbacks: { title: tooltipTitleCallback } }
+                        }
+                    }
+                });
+            }
+
+            // =========================================================
+            // INTERACTIVE DEMO 1: EHR IMPUTATION SIMULATOR
+            // =========================================================
+            const impTableBody = document.getElementById('imp-table-body');
+            const impCohortSize = document.getElementById('imp-cohort-size');
+            const impStatMean = document.getElementById('imp-stat-mean');
+            const impStatRetention = document.getElementById('imp-stat-retention');
+            const impFeedbackCard = document.getElementById('imp-feedback-card');
+
+            const btnImpDrop = document.getElementById('btn-imp-drop');
+            const btnImpMean = document.getElementById('btn-imp-mean');
+            const btnImpMedian = document.getElementById('btn-imp-median');
+            const btnImpKnn = document.getElementById('btn-imp-knn');
+
+            const rawPatients = [
+                { id: 'PT-01', age: 45, hr: 78, creat: 0.9, status: 'Normal' },
+                { id: 'PT-02', age: 52, hr: 84, creat: 1.1, status: 'Normal' },
+                { id: 'PT-03', age: 50, hr: 82, creat: null, status: 'Unknown (Missing)' },
+                { id: 'PT-04', age: 68, hr: 92, creat: 1.8, status: 'Renal Risk' },
+                { id: 'PT-05', age: 74, hr: 104, creat: 7.2, status: 'Severe Dialysis Outlier' },
+            ];
+
+            function renderImputationDemo(strategy) {
+                let displayed = [];
+                let p3Value = null;
+                let meanVal = 0;
+                let retention = '100%';
+
+                // Reset buttons
+                [btnImpDrop, btnImpMean, btnImpMedian, btnImpKnn].forEach(b => {
+                    if (b) b.className = 'px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white/20 hover:bg-white/30 text-white transition-colors';
+                });
+
+                if (strategy === 'drop') {
+                    if (btnImpDrop) btnImpDrop.className = 'px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-sm transition-colors';
+                    displayed = rawPatients.filter(p => p.id !== 'PT-03');
+                    meanVal = (0.9 + 1.1 + 1.8 + 7.2) / 4;
+                    retention = '80% (Lost Patient #03!)';
+                    impFeedbackCard.className = 'p-4 rounded-xl bg-rose-500/20 border border-rose-400/30 text-xs text-rose-100 leading-relaxed';
+                    impFeedbackCard.innerHTML = `<strong>⚠️ Listwise Deletion Flaw:</strong> Dropping Patient #03 discarded valuable vitals (Age 50, HR 82). In hospital analytics, dropping incomplete rows often causes you to lose 40% to 70% of ICU cohorts, introducing severe survivorship bias!`;
+                } else if (strategy === 'mean') {
+                    if (btnImpMean) btnImpMean.className = 'px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-sm transition-colors';
+                    p3Value = (0.9 + 1.1 + 1.8 + 7.2) / 4; // 2.75!
+                    displayed = rawPatients.map(p => p.id === 'PT-03' ? { ...p, creat: p3Value, status: 'Imputed Mean (Distorted!)' } : p);
+                    meanVal = (0.9 + 1.1 + p3Value + 1.8 + 7.2) / 5;
+                    impFeedbackCard.className = 'p-4 rounded-xl bg-amber-500/20 border border-amber-400/30 text-xs text-amber-100 leading-relaxed';
+                    impFeedbackCard.innerHTML = `<strong>⚠️ Outlier Distortion:</strong> Because Patient #05 is on dialysis (Creatinine = 7.2 mg/dL), the statistical mean is pulled to <strong>2.75 mg/dL</strong>. Patient #03 is falsely labeled as having acute kidney injury when their vitals were completely stable!`;
+                } else if (strategy === 'median') {
+                    if (btnImpMedian) btnImpMedian.className = 'px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-sm transition-colors';
+                    p3Value = 1.10; // median of [0.9, 1.1, 1.8, 7.2]
+                    displayed = rawPatients.map(p => p.id === 'PT-03' ? { ...p, creat: p3Value, status: 'Imputed Median (Robust)' } : p);
+                    meanVal = (0.9 + 1.1 + p3Value + 1.8 + 7.2) / 5;
+                    impFeedbackCard.className = 'p-4 rounded-xl bg-teal-500/20 border border-teal-400/30 text-xs text-slate-200 leading-relaxed';
+                    impFeedbackCard.innerHTML = `<strong>✓ Robust Median Selected:</strong> Filled Patient #03 with <strong>1.10 mg/dL</strong> (the robust middle value). This completely neutralizes Patient #05's outlier effect while keeping sample retention at 100%.`;
+                } else if (strategy === 'knn') {
+                    if (btnImpKnn) btnImpKnn.className = 'px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-sm transition-colors';
+                    // Neighbors to Age 50, HR 82 are PT-02 (Age 52, HR 84, creat 1.1) and PT-01 (Age 45, HR 78, creat 0.9)
+                    p3Value = (1.1 + 0.9) / 2; // 1.00 mg/dL
+                    displayed = rawPatients.map(p => p.id === 'PT-03' ? { ...p, creat: p3Value, status: 'KNN Neighbor Imputed (1.00)' } : p);
+                    meanVal = (0.9 + 1.1 + p3Value + 1.8 + 7.2) / 5;
+                    impFeedbackCard.className = 'p-4 rounded-xl bg-emerald-500/20 border border-emerald-400/30 text-xs text-emerald-100 leading-relaxed';
+                    impFeedbackCard.innerHTML = `<strong>✓ KNN Clinical Similarity:</strong> The algorithm matched Patient #03 with the two closest clinical profiles (PT-01 and PT-02, similar age and heart rate) to impute a medically plausible value of <strong>1.00 mg/dL</strong>.`;
+                }
+
+                impCohortSize.textContent = `Cohort Size: ${displayed.length} Patients`;
+                impStatMean.textContent = `${meanVal.toFixed(2)} mg/dL`;
+                impStatRetention.textContent = retention;
+
+                impTableBody.innerHTML = displayed.map(p => {
+                    const isP3 = p.id === 'PT-03';
+                    const highlight = isP3 ? 'bg-amber-50 font-bold border-l-4 border-l-[#F9A03F]' : '';
+                    return `
+                        <tr class="${highlight} hover:bg-slate-50 transition-colors">
+                            <td class="py-2 px-3 font-mono">${p.id}</td>
+                            <td class="py-2 px-3">${p.age}y</td>
+                            <td class="py-2 px-3">${p.hr} bpm</td>
+                            <td class="py-2 px-3 font-mono ${isP3 ? 'text-[#205A70] underline' : ''}">${p.creat !== null ? p.creat.toFixed(2) : '<span class="text-rose-600 font-bold">[MISSING]</span>'}</td>
+                            <td class="py-2 px-3"><span class="text-[11px] ${p.status.includes('Dialysis') ? 'text-rose-700' : 'text-slate-600'}">${p.status}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            if (btnImpDrop) btnImpDrop.addEventListener('click', () => renderImputationDemo('drop'));
+            if (btnImpMean) btnImpMean.addEventListener('click', () => renderImputationDemo('mean'));
+            if (btnImpMedian) btnImpMedian.addEventListener('click', () => renderImputationDemo('median'));
+            if (btnImpKnn) btnImpKnn.addEventListener('click', () => renderImputationDemo('knn'));
+
+            renderImputationDemo('median');
+
+            // =========================================================
+            // INTERACTIVE DEMO 2: CATEGORICAL ENCODING WORKBENCH
+            // =========================================================
+            const encSelectBlood = document.getElementById('enc-select-blood');
+            const encSelectStage = document.getElementById('enc-select-stage');
+            const encMatrixDisplay = document.getElementById('enc-matrix-display');
+            const encModeBadge = document.getElementById('enc-mode-badge');
+            const encExplanationBox = document.getElementById('enc-explanation-box');
+
+            const btnEncOneHot = document.getElementById('btn-enc-onehot');
+            const btnEncOrdinal = document.getElementById('btn-enc-ordinal');
+            const btnEncFlawed = document.getElementById('btn-enc-flawed');
+
+            let currentEncMode = 'onehot';
+
+            function updateCategoricalDemo() {
+                if (!encSelectBlood || !encSelectStage || !encMatrixDisplay) return;
+
+                const blood = encSelectBlood.value;
+                const stage = encSelectStage.value;
+
+                [btnEncOneHot, btnEncOrdinal, btnEncFlawed].forEach(b => {
+                    if (b) b.className = 'px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white/20 hover:bg-white/30 text-white transition-colors';
+                });
+
+                if (currentEncMode === 'onehot') {
+                    if (btnEncOneHot) btnEncOneHot.className = 'px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-sm transition-colors';
+                    encModeBadge.className = 'text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800';
+                    encModeBadge.textContent = 'OneHotEncoder (Nominal)';
+
+                    // Blood Type One-Hot Columns: [is_B, is_AB, is_O] (A is baseline drop_first)
+                    const isB = blood === 'B' ? 1 : 0;
+                    const isAB = blood === 'AB' ? 1 : 0;
+                    const isO = blood === 'O' ? 1 : 0;
+
+                    encMatrixDisplay.innerHTML = `
+                        <div># One-Hot Binary Dummy Representation:</div>
+                        <div>patient_vector = {</div>
+                        <div class="pl-4">"blood_type_B": <span class="text-amber-300">${isB}</span>,</div>
+                        <div class="pl-4">"blood_type_AB": <span class="text-amber-300">${isAB}</span>,</div>
+                        <div class="pl-4">"blood_type_O": <span class="text-amber-300">${isO}</span></div>
+                        <div>}</div>
+                    `;
+                    encExplanationBox.innerHTML = `<strong>Clinical Logic:</strong> Blood type has zero order. Each blood type gets its own independent binary switch, ensuring algorithms do not assume Type O is mathematical addition or multiplication of Type A or B.`;
+                } else if (currentEncMode === 'ordinal') {
+                    if (btnEncOrdinal) btnEncOrdinal.className = 'px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-sm transition-colors';
+                    encModeBadge.className = 'text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800';
+                    encModeBadge.textContent = 'OrdinalEncoder (Rank Preserved)';
+
+                    const stageMap = { 'Stage I': 1, 'Stage II': 2, 'Stage III': 3, 'Stage IV': 4 };
+                    const rank = stageMap[stage];
+
+                    encMatrixDisplay.innerHTML = `
+                        <div># Ordinal Rank Representation:</div>
+                        <div>patient_vector = {</div>
+                        <div class="pl-4">"cancer_acuity_rank": <span class="text-amber-300">${rank}.0</span>  # Preserves: Stage I(1) &lt; II(2) &lt; III(3) &lt; IV(4)</div>
+                        <div>}</div>
+                    `;
+                    encExplanationBox.innerHTML = `<strong>Clinical Logic:</strong> Cancer staging has true biological severity hierarchy. A single column integer preserves the ascending disease progression for linear weights and decision splits.`;
+                } else if (currentEncMode === 'flawed') {
+                    if (btnEncFlawed) btnEncFlawed.className = 'px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white shadow-sm transition-colors';
+                    encModeBadge.className = 'text-xs font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-800';
+                    encModeBadge.textContent = '❌ Flawed LabelEncoder';
+
+                    const flawedMap = { 'A': 0, 'B': 1, 'AB': 2, 'O': 3 };
+                    const flawedVal = flawedMap[blood];
+
+                    encMatrixDisplay.innerHTML = `
+                        <div class="text-rose-400"># DANGEROUS ARITHMETIC FLAW:</div>
+                        <div>patient_vector = {</div>
+                        <div class="pl-4 text-rose-300">"blood_type_code": <span class="text-white font-bold">${flawedVal}</span>  # Model computes: Type O (${flawedVal}) is 3x Type B (${flawedMap['B']})!</div>
+                        <div>}</div>
+                    `;
+                    encExplanationBox.innerHTML = `<strong>❌ Critical Error:</strong> In linear regression, weight $\\beta \\times 3$ treats Type O as three times larger than Type B! Distance-based KNN will treat patient with Type O as radically far from Type A purely due to arbitrary alphabetical ordering.`;
+                }
+            }
+
+            if (btnEncOneHot) btnEncOneHot.addEventListener('click', () => { currentEncMode = 'onehot'; updateCategoricalDemo(); });
+            if (btnEncOrdinal) btnEncOrdinal.addEventListener('click', () => { currentEncMode = 'ordinal'; updateCategoricalDemo(); });
+            if (btnEncFlawed) btnEncFlawed.addEventListener('click', () => { currentEncMode = 'flawed'; updateCategoricalDemo(); });
+
+            if (encSelectBlood) encSelectBlood.addEventListener('change', updateCategoricalDemo);
+            if (encSelectStage) encSelectStage.addEventListener('change', updateCategoricalDemo);
+
+            updateCategoricalDemo();
+
+            // =========================================================
+            // INTERACTIVE DEMO 3: DISTANCE DISTORTION SIMULATOR
+            // =========================================================
+            const distAgeSlider = document.getElementById('dist-age');
+            const distTropSlider = document.getElementById('dist-trop');
+            const distAgeVal = document.getElementById('dist-age-val');
+            const distTropVal = document.getElementById('dist-trop-val');
+
+            const distTotalDisplay = document.getElementById('dist-total-display');
+            const distAgeContrib = document.getElementById('dist-age-contrib');
+            const distTropContrib = document.getElementById('dist-trop-contrib');
+            const distAgeBar = document.getElementById('dist-age-bar');
+            const distTropBar = document.getElementById('dist-trop-bar');
+            const distInsightText = document.getElementById('dist-insight-text');
+
+            const btnScaleRaw = document.getElementById('btn-scale-raw');
+            const btnScaleStandard = document.getElementById('btn-scale-standard');
+
+            let isStandardScaled = false;
+
+            function updateDistanceDemo() {
+                if (!distAgeSlider || !distTropSlider || !distTotalDisplay) return;
+
+                const ageDiff = parseFloat(distAgeSlider.value);
+                const tropDiff = parseFloat(distTropSlider.value);
+
+                distAgeVal.textContent = `${ageDiff} Years`;
+                distTropVal.textContent = `${tropDiff.toFixed(2)} ng/mL`;
+
+                if (!isStandardScaled) {
+                    // Raw Euclidean: dist = sqrt(ageDiff^2 + tropDiff^2)
+                    const ageSq = ageDiff * ageDiff;
+                    const tropSq = tropDiff * tropDiff;
+                    const totalSq = ageSq + tropSq;
+                    const totalDist = Math.sqrt(totalSq);
+
+                    const agePct = totalSq > 0 ? (ageSq / totalSq) * 100 : 50;
+                    const tropPct = 100 - agePct;
+
+                    distTotalDisplay.textContent = totalDist.toFixed(2);
+                    distAgeContrib.textContent = `${agePct.toFixed(1)}%`;
+                    distTropContrib.textContent = `${tropPct.toFixed(1)}%`;
+                    distAgeBar.style.width = `${agePct}%`;
+                    distTropBar.style.width = `${tropPct}%`;
+
+                    distInsightText.innerHTML = `⚠️ <strong>Distortion Alert:</strong> In unscaled Euclidean space, the ${ageDiff}-year age gap represents <strong>${agePct.toFixed(1)}%</strong> of total distance. The algorithm effectively ignores the ${tropDiff.toFixed(2)} ng/mL troponin spike because of disparate units!`;
+                    if (btnScaleRaw) btnScaleRaw.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-sm transition-colors';
+                    if (btnScaleStandard) btnScaleStandard.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white/20 hover:bg-white/30 text-white transition-colors';
+                } else {
+                    // StandardScaled: Age StdDev ~15, Trop StdDev ~0.20
+                    const zAgeDiff = ageDiff / 15.0;
+                    const zTropDiff = tropDiff / 0.20;
+
+                    const ageSq = zAgeDiff * zAgeDiff;
+                    const tropSq = zTropDiff * zTropDiff;
+                    const totalSq = ageSq + tropSq;
+                    const totalDist = Math.sqrt(totalSq);
+
+                    const agePct = totalSq > 0 ? (ageSq / totalSq) * 100 : 50;
+                    const tropPct = 100 - agePct;
+
+                    distTotalDisplay.textContent = totalDist.toFixed(2);
+                    distAgeContrib.textContent = `${agePct.toFixed(1)}%`;
+                    distTropContrib.textContent = `${tropPct.toFixed(1)}%`;
+                    distAgeBar.style.width = `${agePct}%`;
+                    distTropBar.style.width = `${tropPct}%`;
+
+                    distInsightText.innerHTML = `✓ <strong>Balanced Clinical Symmetry:</strong> Under StandardScaler, both metrics are expressed in standard deviation units. The troponin gap now drives <strong>${tropPct.toFixed(1)}%</strong> of clinical similarity, correctly reflecting myocardial risk!`;
+                    if (btnScaleRaw) btnScaleRaw.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white/20 hover:bg-white/30 text-white transition-colors';
+                    if (btnScaleStandard) btnScaleStandard.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-[#F9A03F] text-slate-900 shadow-sm transition-colors';
+                }
+            }
+
+            if (distAgeSlider) distAgeSlider.addEventListener('input', updateDistanceDemo);
+            if (distTropSlider) distTropSlider.addEventListener('input', updateDistanceDemo);
+
+            if (btnScaleRaw) btnScaleRaw.addEventListener('click', () => { isStandardScaled = false; updateDistanceDemo(); });
+            if (btnScaleStandard) btnScaleStandard.addEventListener('click', () => { isStandardScaled = true; updateDistanceDemo(); });
+
+            updateDistanceDemo();
+
+            // =========================================================
+            // INTERACTIVE DEMO 4: ACCURACY PARADOX SIMULATOR
+            // =========================================================
+            const prevSlider = document.getElementById('prev-slider');
+            const prevSliderVal = document.getElementById('prev-slider-val');
+            const prevSickCount = document.getElementById('prev-sick-count');
+            const prevHealthyCount = document.getElementById('prev-healthy-count');
+
+            const naiveAccDisplay = document.getElementById('naive-acc-display');
+            const naiveMissedCount = document.getElementById('naive-missed-count');
+            const smoteAccDisplay = document.getElementById('smote-acc-display');
+            const smoteMissedCount = document.getElementById('smote-missed-count');
+
+            function updatePrevalenceDemo() {
+                if (!prevSlider || !prevSliderVal) return;
+
+                const prev = parseInt(prevSlider.value);
+                prevSliderVal.textContent = `${prev}% (${prev <= 3 ? 'Rare Disease' : prev <= 10 ? 'Moderate' : 'Common'})`;
+
+                const total = 1000;
+                const sick = Math.round(total * (prev / 100));
+                const healthy = total - sick;
+
+                prevSickCount.textContent = `${sick} Patients`;
+                prevHealthyCount.textContent = `${healthy} Patients`;
+
+                // Naive model predicts "Healthy" for all 1000 patients
+                const naiveAcc = (healthy / total) * 100;
+                naiveAccDisplay.textContent = `${naiveAcc.toFixed(1)}%`;
+                naiveMissedCount.textContent = `${sick} Deaths`;
+
+                // SMOTE model catches 95% of sick patients, but has 8% false positives
+                const caughtSick = Math.round(sick * 0.95);
+                const missedSick = sick - caughtSick;
+                const falsePositives = Math.round(healthy * 0.08);
+                const trueHealthy = healthy - falsePositives;
+                const smoteAcc = ((caughtSick + trueHealthy) / total) * 100;
+
+                smoteAccDisplay.textContent = `${smoteAcc.toFixed(1)}%`;
+                smoteMissedCount.textContent = `${missedSick} ${missedSick === 1 ? 'Case' : 'Cases'}`;
+            }
+
+            if (prevSlider) prevSlider.addEventListener('input', updatePrevalenceDemo);
+            updatePrevalenceDemo();
+
+        });
+    </script>
+</body>
+</html>
